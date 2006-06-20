@@ -1,9 +1,153 @@
 <!-- This page defines the form to create or edit an instance of this module -->
-<!-- It is used from /course/mod.php.  The whole instance is available as $form. -->
 
-<FORM name="form" method="post" action="mod.php">
-<CENTER>
+<?php
+
+include("$CFG->dirroot/mod/certificate/lib.php");
+if ($form->mode == "update" and !strstr(get_referer(), "view.php"))  {
+	#redirect("mod.php?update=$cm->id&sesskey=$form->sesskey", get_string("changessaved"));
+}
+/*
+if ($form->mode == "add") {
+if ($defaults = get_record("lesson_default", "course", $form->course)) {
+foreach ($defaults as $name => $value) {
+if (!is_numeric($name)) {
+$form->$name = $value;
+}
+}
+}
+}
+*/
+
+// set the defaults
+if (empty($form->name)) {
+	$form->name = "";
+}
+// More similar blocks go here...
+
+
+//
+// Define all choices here
+//
+
+// get list of certificate types defined in language file
+$i = 0;
+$str = get_string("type$i", 'certificate');
+while(substr_count($str, '[[') == 0) {
+	$typeoptions[$i++] = $str;
+	$str = get_string("type$i", 'certificate');
+	if ($i >10 ) break;
+}
+
+// Color options
+$coloroptions[0] = get_string('border_black', 'certificate');
+$coloroptions[1] = get_string('border_brown', 'certificate');
+$coloroptions[2] = get_string('border_blue', 'certificate');
+$coloroptions[3] = get_string('border_green', 'certificate');
+// Date Format options
+$dateoptions[0] = get_string('no_date', 'certificate');
+$dateoptions[1] = "January 1, 2000";
+$dateoptions[2] = "January 1st, 2000";
+$dateoptions[3] = "1 January 2000";
+$dateoptions[4] = "January 2000";
+// yes no options
+$yesnooptions[0] = get_string('no');
+$yesnooptions[1] = get_string('yes');
+
+$file = array();
+$bordercolors = array();
+// load border files
+$my_path = "$CFG->dirroot/mod/certificate/pix/borders";
+if ($handle = opendir($my_path)) {
+	while (false !== ($file = readdir($handle))) {
+		if ($file != "." && $file != "..") {
+			$i = strpos($file, '-');
+			if($i > 1) {
+				if( ! isset($bordercolors[substr($file, 0, $i)])) { $bordercolors[substr($file, 0, $i)] = array();}
+				$borderstyleoptions[substr($file, 0, $i)] = substr($file, 0, $i);
+				//$bordercolors[substr($file, 0, $i)][substr($file, $i+1, -4)] = substr($file, $i+1, -4);
+//				if(! isset($bordercolors[substr($file, 0, $i)])) { $bordercolors[substr($file, 0, $i)] = array();}
+				$bordercolors[substr($file, 0, $i)][count($bordercolors[substr($file, 0, $i)])] .= substr($file, $i+1, -4);
+			}
+		}
+	}
+	closedir($handle);
+}
+ksort($borderstyleoptions);
+array_unshift($borderstyleoptions, '');
+$borderstyleoptions[0] = get_string('border_lines', 'certificate');
+array_unshift($borderstyleoptions, '');
+$borderstyleoptions[0] = get_string('border_none', 'certificate');
+$bordercolors['1'] = array(get_string('border_black', 'certificate'), get_string('border_brown', 'certificate'), get_string('border_blue', 'certificate'), get_string('border_green', 'certificate'));
+$colorindex = 0;
+
+if(isset($bordercolors[$form->border_style])) {
+	foreach($bordercolors[$form->border_style] as $temp) {
+		if(strcmp($temp, $form->border_color) == 0 ) { break;}
+		$colorindex++;
+	}
+}
+
+// load watermark files
+$my_path = "$CFG->dirroot/mod/certificate/pix/watermarks";
+if ($handle = opendir($my_path)) {
+	while (false !== ($file = readdir($handle))) {
+		if ($file != "." && $file != "..") {
+			$i = strpos($file, '.png');
+			if($i > 1) {
+				$wmarkoptions[$file] = substr($file, 0, $i);
+			}
+		}
+	}
+	closedir($handle);
+}
+ksort($wmarkoptions);
+array_unshift($wmarkoptions, '');
+$wmarkoptions[0] = get_string('no');
+
+// load signature files
+$my_path = "$CFG->dirroot/mod/certificate/pix/signatures";
+if ($handle = opendir($my_path)) {
+	while (false !== ($file = readdir($handle))) {
+		if ($file != "." && $file != "..") {
+			$i = strpos($file, '.png');
+			if($i > 1) {
+				$signatureoptions[$file] = substr($file, 0, $i);
+			}
+		}
+	}
+	closedir($handle);
+}
+ksort($signatureoptions);
+array_unshift($signatureoptions, '');
+$signatureoptions[0] = get_string('sig_line', 'certificate');
+array_unshift($signatureoptions, '');
+$signatureoptions[0] = get_string('no');
+
+// load seal files
+$my_path = "$CFG->dirroot/mod/certificate/pix/seals";
+if ($handle = opendir($my_path)) {
+	while (false !== ($file = readdir($handle))) {
+		if ($file != "." && $file != "..") {
+			$i = strpos($file, '.png');
+			if($i > 1) {
+				$sealoptions[$file] = substr($file, 0, $i);
+			}
+		}
+	}
+	closedir($handle);
+}
+ksort($sealoptions);
+array_unshift($sealoptions, '');
+$sealoptions[0] = get_string('seal_no', 'certificate');
+
+// Find available grades
+$gradeoptions = cert_get_grades($course);
+?>
+
+<FORM name="certform" method="post" action="mod.php">
 <TABLE cellpadding=5>
+<TR><TD valign="top">
+<table cellpadding="5">
 <TR valign=top>
     <TD align=right><P><B><?php  print_string("name") ?>:</B></P></TD>
     <TD>
@@ -12,15 +156,155 @@
 </TR>
 <!-- More rows go in here... -->
 
+<tr valign="top">
+    <td align="right"><b><?php print_string("certificate_type", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($typeoptions, "type", $form->type, "");
+    helpbutton('type', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("border_style", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($borderstyleoptions, 'border_style', $form->border_style, '', 'cert_style(document.certform.border_style.options[document.certform.border_style.selectedIndex].value)');
+    helpbutton('style', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("border_color", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($coloroptions, 'border_color', $form->border_color, '');
+    helpbutton('color', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("print_wmark", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($wmarkoptions, 'print_wmark', $form->print_wmark, '');
+    helpbutton('watermark', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("date_format", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($dateoptions, 'date_fmt', $form->date_fmt, '');
+    helpbutton('date_format', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("print_number", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($yesnooptions, 'print_number', $form->print_number, '');
+    helpbutton('cert', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("print_grade", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($gradeoptions, 'print_grade', $form->print_grade, '');
+    helpbutton('grade', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("print_signature", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($signatureoptions, 'print_signature', $form->print_signature, '');
+    helpbutton('signature', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("print_teacher", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($yesnooptions, 'print_teacher', $form->print_teacher, '');
+    helpbutton('teacher', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+<tr valign="top">
+    <td align="right"><b><?php print_string("print_seal", "certificate") ?>:</b></td>
+    <td>
+    <?php
+    choose_from_menu($sealoptions, 'print_seal', $form->print_seal, '');
+    helpbutton('seal', '', 'certificate', true, true);
+    ?>
+    </td>
+</tr>
+
+<!-- The following line for Moodle 1.5 prints the visibility setting form element -->
+<?php print_visible_setting($form); ?>
+<!-- and if your module uses groups you would also have -->
+<?php print_groupmode_setting($form); ?>
+</table></td>
+
+<td valign="top">
+<?php if(!isset($_GET['add']) && ($CFG->certificate_autopreview == 1)) { 
+	echo '<iframe name="cert_iframe" src="' . $CFG->wwwroot . '/mod/certificate/view.php?id='.$form->coursemodule.'" width="460" height="400" align="right"></iframe>';
+}
+?>
+    </TD>
+</tr>
 </TABLE>
+<center>
 <!-- These hidden variables are always the same -->
-<INPUT type="hidden" name=course        value="<?php  p($form->course) ?>">
-<INPUT type="hidden" name=coursemodule  value="<?php  p($form->coursemodule) ?>">
-<INPUT type="hidden" name=section       value="<?php  p($form->section) ?>">
-<INPUT type="hidden" name=module        value="<?php  p($form->module) ?>">
-<INPUT type="hidden" name=modulename    value="<?php  p($form->modulename) ?>">
-<INPUT type="hidden" name=instance      value="<?php  p($form->instance) ?>">
-<INPUT type="hidden" name=mode          value="<?php  p($form->mode) ?>">
-<INPUT type="submit" value="<?php  print_string("savechanges") ?>">
-</CENTER>
+<input type="hidden" name="redirect"     value="yes" />
+<?php if($form->mode == "update") {
+	echo '<input type="hidden" name="redirecturl"     value="'.$ME.'?update='.$form->coursemodule.'&sesskey='.$form->sesskey.'" />' ;
+}
+?>
+<input type="hidden" name="course"     value="<?php p($form->course) ?>" />
+<input type="hidden" name="sesskey"    value="<?php p($form->sesskey) ?>" />
+<input type="hidden" name="coursemodule"  value="<?php p($form->coursemodule) ?>" />
+<input type="hidden" name="section"    value="<?php p($form->section) ?>" />
+<input type="hidden" name="module"     value="<?php p($form->module) ?>" />
+<input type="hidden" name="modulename" value="<?php p($form->modulename) ?>" />
+<input type="hidden" name="instance"   value="<?php p($form->instance) ?>" />
+<input type="hidden" name="mode"       value="<?php p($form->mode) ?>" />
+<input type="submit" value="<?php print_string("savechanges") ?>" />
+<input type="submit" name="cancel" value="<?php print_string("cancel") ?>" />
+</center>
 </FORM>
+</table>
+<script type="text/javascript" src="<?php p($CFG->wwwroot) ?>/lib/editor/htmlarea.php?id=3"></script>
+<script type="text/javascript" src="<?php p($CFG->wwwroot) ?>/lib/editor/lang/en.php"></script>
+<script type="text/javascript">
+document.certform.border_color.options.length = 0;
+cert_style(<?php echo "\"$form->border_style\""; ?>);
+
+function cert_style(index) {
+	if(document.certform.border_style.value==0) {
+		document.certform.border_color.disabled=true;
+	}else {
+		document.certform.border_color.disabled=false;
+		document.certform.border_color.options.length = 0;
+<?php
+foreach($bordercolors as $key => $val) {
+	echo "if (index == '$key'){\n";
+	foreach($val as $v) {
+		echo "document.certform.border_color.options[document.certform.border_color.length] = new Option('$v', '$v');\n";
+	}
+	echo "}\n";
+}
+echo "document.certform.border_color.selectedIndex = " . $colorindex . ";";
+?>
+	}
+}
+
+</script>
