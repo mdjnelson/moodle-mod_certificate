@@ -1,0 +1,38 @@
+<DBMIGRATION type="mod/certificate" VERSION = "2005120100">
+  <TABLES>
+    <TABLE name="certificate_issues">
+      <FIELD name="studentname" method="PHP_FUNCTION" type="varchar" length="40">
+          <PHP_FUNCTION>
+            migrate2utf_certificate_studentname(RECORDID)
+          </PHP_FUNCTION>
+        </FIELD><FIELDS>
+      <FIELD name="code" method="PHP_FUNCTION" type="varchar" length="40">
+          <PHP_FUNCTION>
+            migrate2utf_certificate_code(RECORDID)
+          </PHP_FUNCTION>
+        </FIELD>
+		<FIELD name="classname" method="PHP_FUNCTION" type="varchar" length="40">
+          <PHP_FUNCTION>
+            migrate2utf_certificate_classname(RECORDID)
+          </PHP_FUNCTION>
+        </FIELD>  
+      </FIELDS>
+    </TABLE>
+    <TABLE name="certificate">
+      <FIELDS>
+        <FIELD name="name" method="PHP_FUNCTION" type="varchar" length="255">
+          <PHP_FUNCTION>
+            migrate2utf_certificate_name(RECORDID)
+          </PHP_FUNCTION>
+        </FIELD>
+        <FIELD name="certificatetype" method="NO_CONV" type="varchar" length="50" />
+        <FIELD name="borderstyle" method="NO_CONV" type="varchar" length="30" />
+		<FIELD name="bordercolor" method="NO_CONV" type="varchar" length="30" />
+        <FIELD name="printwmark" method="NO_CONV" type="varchar" length="30" />
+		<FIELD name="printsignature" method="NO_CONV" type="varchar" length="30" />
+        <FIELD name="printseal" method="NO_CONV" type="varchar" length="30" />
+
+      </FIELDS>
+    </TABLE>
+  </TABLES>
+</DBMIGRATION>
