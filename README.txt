@@ -1,91 +1,57 @@
-Certificate 1.0 for moodle
+Certificate 3.0 for Moodle 1.6
 
-Dave T. Cannonn
-2005-09-15
+Latest version uploaded 11/03/06
 
-
-1. Certificate is meant to be used with activity locking, You may need to uncomment the code
-
-// /// Activity Locking ///
-..code..
-/// End Activity Locking ///
-
-in the view.php file. Since Activity Locking is still evolving, you should insert current locking code in here.
+Instructions:
+Place the certificate folder under your moodle/mod folder. Click on the administration link from your Moodle
+homepage to install.
 
 
-2. The date sometimes displays in 1970
-There are two lines, by commenting them out and uncommenting the line next to it may work for different systems: 
 
-mod/certificate/view.php line 88
+Version 3.1 2006081700
+Increased length of course name record
+General debugging and code fixes
 
-block/certificate/index.php line 71
+Version 3.1 2006080100
+The certificate module has been re-written to better comply with standard Moodle coding and to add
+new features:
 
-I understand this is messy hack, but I have not yet solved the problem for different systems and time.
-
-Certificate Module
-
-Release state: 0.7 Beta
-
-This document will help you modify the certificate module to suite you own needs. Warning: modifiing too many of the files may make it difficult to upgrade later.
-Certificate Types
-
-The certificate types list is defined in the lang/<en>/certificate.php file. There is a string definitrion that will add the certificate type to the pulldown list:
-
-    $string['type0'] = 'Completion (H)';
-
-The '0'(zero) represents the position on the pulldown, zero being the first option. You can modify the value to any name you want for that certificate. You can add a new certificate type by creating a new string definition with the next iteration number '1'(one), ie:
-
-    $string['type1'] = 'My new certificate (V)';
-
-A (V) or (H) is placed in thew string to identify the page layout, horizontal or vertical.
-
-After you create a new certificate type, you may want to add the text for the certificate next. These strings can be named anything you want, but should have the numeric value you set for the new certificate following the name. Our definition now looks like:
-
-    $string['type1'] = 'My new certificate (V)';
-    $string['title1'] = 'CONGRADULATION';
-    $string['intro1'] = 'You passed my course';
+Added backup/restore.
+Added teacher reporting.
+Added student certificate review.
+Added email teachers.
+Added print functions for letter size paper for border and watermark images.  Fixed (hopefully) all certificate alignment.
+Reformatted border images to jpeg to make them smaller.
+Created the type folder.  New types can be added without having to change the core code.
+New/changed certificate options:
+Save: Can choose to save students' certificates in moddata.
+Delivery:  Open in browser, Force download, email (Thanks Marion DeGroot).
+Print Date: Added course end date, more can be added.
+Date Format:  Updated for unicode.
+Print Code: Updated.
+Grade Format: Added three formats
 
 
-Border Style
+To do:
 
-The border files are are in the pix/borders/ directory. Any files you place in the directory will display in the border style pulldown. The files names are as follows:
+Needs a cron function/updated email features.
+Groups not working in report???
+Add more date options?
+Add download report to Excel
 
-<bordername>-<color>.png.
+************************************
+Version 3.0 updated for 1.6 by Chardelle Busch.  
+Added new fpdf security feature so that downloaded certificates can 
+only be printed, not edited.
+Added mod grade name (Thanks Mike Churchward)
 
-    0 Black
-    1 Brown
-    2 Blue
-    3 Green
+************************************
+Prior Versions:
 
-A new border you place in this directory with 2 colors would lookliker:
+Updated by David T. Cannon, July, 2005
+Updated to fpdf class
+Added mod grades.
+Course grade added by Patrick Jeitler
 
-    OrnateBorder-blue.png
-    OrnateBorder-green.png
-
-Border Color
-
-This is a fixed list, but can be modified in mod.html, and updating the language file.
-Print watermark
-
-The watermark is a faded background image for the certificate. These images are in the pix/watermarks/ directory. It is up to you create the faded image and place it here.
-Date Format
-
-This is a fixed list that can be modified in the mod.html file.
-Print Certificate Number
-
-This is an internal algarythm to generate the certificate code.
-Print Grade
-
-This pulldown is generated from a call to a lib.php routine to find activities in the class that have a grade option.
-Print Signature
-
-The signature is a png image that can be placed on the certificate. These images are in the pix/signatures/ directory.
-Print Teacher
-
-This will print up to 3 teacher names from the current group/course teacher list. The code for this
-Print Seal
-
-The seal files are are in the pix/seals/ directory. Any files you place in the directory will display in the seal pulldown. There are sample images here. You may also want to place a logo.
- 
-
-Version 0.7 - David T. Cannon 
+************************************
+Created by Hugo Salgado, July, 2004
