@@ -1,66 +1,95 @@
-<?PHP
+<?PHP // $Id$ 
+      // admin.php - created with Moodle 1.6 development (2005053000)
 
-$string['autopreview'] = 'Allows you to turn on/off preview of certiface while making changes.';
 
 $string['modulename'] = 'Certificate';
 $string['modulenameplural'] = 'Certificates';
 
-$string['certificate_type'] = 'Certificate Type';
+$string['certificatetype'] = 'Certificate Type';
+$string['emailteachers'] = 'Email Teachers';
+$string['savecertificate'] = 'Save Certificates';
+$string['deliver'] = 'Delivery';
+$string['download'] = 'Force download';
+$string['openbrowser'] = 'Open in new window';
+$string['emailcertificate'] = 'Email (Must also choose save!)';
+$string['emailstudenttext'] = 'Attached is your certificate for $a->course.';
+$string['awarded'] = 'Awarded';
+$string['emailteachermail'] = '
+$a->student has received their certificate: \'$a->certificate\'
+for $a->course.
 
-$string['border_style'] = 'Border Style';
-$string['border_none'] = 'No border';
-$string['border_lines'] = 'Lines';
+You can review it here:
 
-$string['border_color'] = 'Border Color';
-$string['border_black'] = 'Black';
-$string['border_brown'] = 'Brown';
-$string['border_blue'] = 'Blue';
-$string['border_green'] = 'Green';
+    $a->url';
+$string['emailteachermailhtml'] = '
+$a->student has received their certificate: \'<i>$a->certificate</i>\'
+for $a->course.
 
-$string['print_wmark'] = 'Print Watermark';
+You can review it here:
 
-$string['date_format'] = 'Date Format';
-$string['no_date'] = 'Dont print date';
+    <a href=\"$a->url\">Certificate Report</a>.';
+$string['border'] = 'Border';
+$string['borderstyle'] = 'Print Border';
+$string['bordernone'] = 'No';
+$string['borderlines'] = 'Lines';
+$string['bordercolor'] = 'Border Color';
+$string['borderblack'] = 'Black';
+$string['borderbrown'] = 'Brown';
+$string['borderblue'] = 'Blue';
+$string['bordergreen'] = 'Green';
+$string['printwmark'] = 'Print Watermark';
 
-$string['print_number'] = 'Print Cert Number';
+$string['datehelp'] = 'Date';
+$string['dateformat'] = 'Date Format';
+$string['receiveddate'] = "Date Received";
+$string['courseenddate'] = 'Course End Date (Must be set!)';
 
-$string['print_grade'] = 'Print Grade';
-$string['dont_print_grade'] = 'Dont print grade';
-$string['course_grade'] = 'Course Grade';
-$string['no_grades'] = 'No grades available';
+$string['printcode'] = 'Print Code';
 
-$string['print_signature'] = 'Print Signature';
-$string['sig_line'] = 'line';
+$string['printgrade'] = 'Print Grade';
+$string['grade'] = 'Grade';
+$string['coursegrade'] = 'Course Grade';
+$string['nogrades'] = 'No grades available';
+$string['gradeformat'] = 'Grade Format';
+$string['gradepercent'] = 'Percentage Grade';
+$string['gradepoints'] = 'Points Grade';
+$string['gradeletter'] = 'Letter Grade';
 
-$string['print_teacher'] = 'Print Teacher';
+$string['printsignature'] = 'Print Signature';
+$string['sigline'] = 'line';
 
-$string['print_seal'] = 'Print Seal';
-$string['seal_no'] = 'No seal';
+$string['printteacher'] = 'Print Teacher';
+$string['printdate'] = 'Print Date';
+$string['printseal'] = 'Print Seal';
 
-// text for each certificate type
-$string['type0'] = 'Completion (H)';
-$string['title0'] = 'CERTIFICATE of COMPLETION';
-$string['intro0'] = 'This is to certify that';
-$string['statement0'] = 'has satisfactorily completed the course';
+$string['code'] = 'Code';
+$string['issued'] = 'Issued';
+$string['notissued'] = 'Not Issued';
+$string['notissuedyet'] = 'Not issued yet';
+$string['notreceived'] = 'You have not received this certificate';
+$string['getcertificate'] = 'Get your certificate';
+$string['report'] = 'Report';
+$string['viewed'] = 'You received this certificate on:';
+$string['viewcertificateviews'] = 'View $a issued certificates';
+$string['reviewcertificate'] = 'Review your certificate';
+$string['openwindow'] = 'Click the button below to open your certificate
+in a new browser window.';
+$string['download'] = 'Download';
+$string['opendownload'] = 'Click the button below to save your certificate
+to your computer.';
+$string['openemail'] = 'Click the button below and your certificate
+will be sent to you as an email attachment.';
+$string['receivedcerts'] = 'Received certificates';
 
-$string['type1'] = 'Recognition (H)';
-$string['title1'] = 'IN RECOGNITON';
-$string['intro1'] = 'This is to certify that';
-$string['statement1'] = 'has completed';
 
-$string['type2'] = 'Achievement (H)';
-$string['title2'] = 'THIS CERTIFICATE of ACHIEVEMENT';
-$string['intro2'] = 'is awarded to';
-$string['statement2'] = 'in recognition of having successfully completed';
+//names of type folders
+$string['typeportrait'] = 'Portrait';
+$string['typeletter_portrait'] = 'Portrait (letter)';
+$string['typelandscape'] = 'Landscape';
+$string['typeletter_landscape'] = 'Landscape (letter)';
+$string['typeunicode_landscape'] = 'Unicode (landscape)';
 
-$string['type3'] = 'Completion (V)';
-$string['title3'] = 'CERTIFICATE of COMPLETION';
-$string['intro3'] = 'This is to certify that';
-$string['hours3'] = 'has studied 10 contact hours';
-$string['statement3'] = 'and completed the advanced course';
-$string['onday3'] = 'on this day';
-
-//strings for verification block
+//strings for verification 
 $string['configcontent'] = 'Config content';
 $string['validate'] = 'Verify';
 $string['certificate'] = 'Verification for certificate code:';
@@ -72,4 +101,23 @@ $string['back'] = 'Back';
 $string['to'] = 'Awarded to';
 $string['course'] = 'For';
 $string['date'] = 'On';
+
+//strings for certificates
+$string['titlelandscape'] = 'CERTIFICATE of ACHIEVEMENT';
+$string['introlandscape'] = 'This is to certify that';
+$string['statementlandscape'] = 'has completed the course';
+
+$string['titleletterlandscape'] = 'CERTIFICATE of ACHIEVEMENT';
+$string['introletterlandscape'] = 'This is to certify that';
+$string['statementletterlandscape'] = 'has completed the course';
+
+$string['titleportrait'] = 'CERTIFICATE of ACHIEVEMENT';
+$string['introportrait'] = 'This is to certify that';
+$string['statementportrait'] = 'has completed the course';
+$string['ondayportrait'] = 'on this day';
+
+$string['titleletterportrait'] = 'CERTIFICATE of ACHIEVEMENT';
+$string['introletterportrait'] = 'This is to certify that';
+$string['statementletterportrait'] = 'has completed the course';
+
 ?>
