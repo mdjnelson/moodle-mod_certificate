@@ -16,11 +16,11 @@ $certdate = $certrecord->certdate;
 }else $certdate = certificate_generate_date($certificate, $course);
 if($certificate->printdate > 0)    {
     if ($certificate->datefmt == 1)    {
-    $certificatedate = str_replace(' 0', '', strftime('%B %d, %Y', $certdate));
+    $certificatedate = str_replace(' 0', ' ', strftime('%B %d, %Y', $certdate));
 }   if ($certificate->datefmt == 2) {
     $certificatedate = date('F jS, Y', $certdate);
 }   if ($certificate->datefmt == 3) {
-    $certificatedate = str_replace(' 0', '', strftime(' %d %B %Y', $certdate));
+    $certificatedate = str_replace(' 0', '', strftime('%d %B %Y', $certdate));
 }   if ($certificate->datefmt == 4) {
     $certificatedate = strftime('%B %Y', $certdate);
     }
@@ -102,23 +102,6 @@ $modinfo = certificate_mod_grade($course, $certificate->printgrade);
 }
 }
 
-//Print the first three ordered teacher's names for the course
-$teachername1 = '';
-$teachername2 = '';
-$teachername3 = '';
-if($certificate->printteacher && $teachers) {
-            foreach ($teachers as $teacher) {
-            if ($teacher->authority == 1) {
-            $teachername1 = fullname($teacher);
-            } 
-            if ($teacher->authority == 2) {
-            $teachername2 = fullname($teacher);
-            } 
-            if ($teacher->authority == 3) {
-            $teachername3 = fullname($teacher);
-            }
-    } 
-}
 // Print the code number
 $code = '';
 if($certificate->printnumber) {
@@ -133,10 +116,14 @@ $studentname = $certrecord->studentname;
 }
 
 //Add pdf page
-    $orientation = "P";
-    $pdf = new FPDF_Protection($orientation, 'pt', 'A4');
+    $pdf = new TCPDF_Protection('P', 'pt', 'A4', true); 
     $pdf->SetProtection(array('print'));
+    $pdf->print_header = false;
+    $pdf->print_footer = false;
+    $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+    $pdf->setLanguageArray($l); //set language items
     $pdf->AddPage();
+    $orientation = "P";
 
 // Add images
     $color = $certificate->bordercolor;
@@ -147,17 +134,24 @@ $studentname = $certrecord->studentname;
     
 // Add text
     $pdf->SetTextColor(0,0,128);
-    cert_printtext(48, 170, 'C', 'Arial', 'B', 26, get_string("titleportrait", "certificate"));
+    cert_printtext(48, 170, 'C', 'vera', 'B', 26, get_string("titleportrait", "certificate"));
     $pdf->SetTextColor(0,0,0);
-    cert_printtext(45, 230, 'C', 'Arial', 'B', 20, get_string("introportrait", "certificate"));
-    cert_printtext(45, 280, 'C', 'Arial', '', 30, utf8_decode($studentname));
-    cert_printtext(45, 330, 'C', 'Arial', '', 20, get_string("statementportrait", "certificate"));
-    cert_printtext(45, 380, 'C', 'Arial', '', 20, utf8_decode($course->fullname));
-    cert_printtext(45, 420, 'C', 'Arial', '', 20, get_string("ondayportrait", "certificate"));
-    cert_printtext(45, 460, 'C', 'Arial', '', 14, $certificatedate);
-    cert_printtext(85, 540, 'L', 'Times', '', 12, utf8_decode($teachername1));
-    cert_printtext(85, 560, 'L', 'Times', '', 12, utf8_decode($teachername2));
-    cert_printtext(85, 580, 'L', 'Times', '', 12, utf8_decode($teachername3));
-    cert_printtext(45, 590, 'C', 'Arial', '', 10, $grade);
-    cert_printtext(45, 640, 'C', 'Helvetica', '', 10, $code);
+    cert_printtext(45, 230, 'C', 'vera', 'B', 20, get_string("introportrait", "certificate"));
+    cert_printtext(45, 280, 'C', 'vera', '', 30, $studentname);
+    cert_printtext(45, 330, 'C', 'vera', '', 20, get_string("statementportrait", "certificate"));
+    cert_printtext(45, 380, 'C', 'vera', '', 20, $course->fullname);
+    cert_printtext(45, 420, 'C', 'vera', '', 20, get_string("ondayportrait", "certificate"));
+    cert_printtext(45, 460, 'C', 'vera', '', 14, $certificatedate);
+    cert_printtext(45, 540, 'C', 'vera', '', 10, $grade);
+    cert_printtext(45, 720, 'C', 'vera', '', 10, $code);
+			    $i = 0 ;
+	if($certificate->printteacher){
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher', '', 'u.lastname ASC', '', '', '', '', true)) {
+		foreach ($teachers as $teacher) {
+			$i++;
+			if($i <5) {
+				$teachernames = fullname($teacher);
+	cert_printtext(85, 590+($i *12) , 'L', 'vera', '', 12, $teachernames);
+}}}}
 ?>

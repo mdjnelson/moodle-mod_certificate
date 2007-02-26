@@ -102,23 +102,6 @@ $modinfo = certificate_mod_grade($course, $certificate->printgrade);
 }
 }
 
-//Print the first three ordered teacher's names for the course
-$teachername1 = '';
-$teachername2 = '';
-$teachername3 = '';
-if($certificate->printteacher && $teachers) {
-            foreach ($teachers as $teacher) {
-            if ($teacher->authority == 1) {
-            $teachername1 = fullname($teacher);
-            } 
-            if ($teacher->authority == 2) {
-            $teachername2 = fullname($teacher);
-            } 
-            if ($teacher->authority == 3) {
-            $teachername3 = fullname($teacher);
-            }
-    } 
-}
 // Print the code number
 $code = '';
 if($certificate->printnumber) {
@@ -131,13 +114,18 @@ $studentname = '';
 if ($certrecord) {
 $studentname = $certrecord->studentname;
 }
-
+//Print the html text
+$customtext = $certificate->customtext;
 //Add pdf page
-    $orientation = "L";
-    $pdf=new FPDF_Protection($orientation, 'pt', 'A4');
+    $pdf = new TCPDF_Protection('L', 'pt', 'A4', true); 
     $pdf->SetProtection(array('print'));
+    $pdf->print_header = false;
+    $pdf->print_footer = false;
+    $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+    $pdf->setLanguageArray($l); //set language items
     $pdf->AddPage();
-    
+    $orientation = "L";
+
 // Add images
     $color = $certificate->bordercolor;
     print_border($certificate->borderstyle, $color, $orientation);
@@ -147,16 +135,26 @@ $studentname = $certrecord->studentname;
 
 // Add text
     $pdf->SetTextColor(0,0,120);
-    cert_printtext(170, 125, 'C', 'Helvetica', 'B', 30, get_string('titlelandscape', 'certificate'));
+    cert_printtext(170, 125, 'C', 'vera', 'B', 30, get_string('titlelandscape', 'certificate'));
     $pdf->SetTextColor(0,0,0);
-    cert_printtext(170, 180, 'C', 'Helvetica', 'B', 20, get_string('introlandscape', 'certificate'));
-    cert_printtext(170, 230, 'C', 'Times', '', 30, $studentname);
-    cert_printtext(170, 280, 'C', 'Helvetica', '', 20, get_string('statementlandscape', 'certificate'));
-    cert_printtext(170, 330, 'C', 'Times', '', 20, $course->fullname);
-    cert_printtext(170, 380, 'C', 'Helvetica', '', 14, $certificatedate);
-    cert_printtext(130, 440, 'L', 'Times', '', 12, $teachername1);
-    cert_printtext(130, 460, 'L', 'Times', '', 12, $teachername2);
-    cert_printtext(130, 480, 'L', 'Times', '', 12, $teachername3);
-    cert_printtext(170, 420, 'C', 'Helvetica', '', 10, $grade);
-    cert_printtext(170, 500, 'C', 'Times', '', 10, $code);
+    cert_printtext(170, 180, 'C', 'vera', 'B', 20, get_string('introlandscape', 'certificate'));
+    cert_printtext(170, 230, 'C', 'vera', '', 30, $studentname);
+    cert_printtext(170, 280, 'C', 'vera', '', 20, get_string('statementlandscape', 'certificate'));
+    cert_printtext(170, 330, 'C', 'vera', '', 20, $course->fullname);
+    cert_printtext(170, 380, 'C', 'vera', '', 14, $certificatedate);
+    cert_printtext(170, 420, 'C', 'vera', '', 10, $grade);
+    cert_printtext(170, 500, 'C', 'vera', '', 10, $code);
+		    $i = 0 ;
+	if($certificate->printteacher){
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher', '', 'u.lastname ASC', '', '', '', '', true)) {
+		foreach ($teachers as $teacher) {
+			$i++;
+			if($i <5) {
+				$teachernames = fullname($teacher);
+	cert_printtext(130, 440+($i *12) , 'L', 'vera', '', 12, $teachernames);
+}}}}
+    cert_printtext(150, 450, '', '', '', '12', '');
+	$pdf->SetLeftMargin(130);
+	$pdf->WriteHTML($customtext);
 ?>

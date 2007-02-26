@@ -48,7 +48,7 @@ if ($course->format == "weeks") {
 }
 
 $currentgroup = get_current_group($course->id);
-    if ($currentgroup and isteacheredit($course->id)) {
+    if ($currentgroup and has_capability('moodle/site:accessallgroups', get_context_instance(CONTEXT_COURSE, $id))) {
         $group = get_record("groups", "id", $currentgroup);
         $groupname = " ($group->name)";
     } else {
@@ -61,12 +61,11 @@ $currentgroup = get_current_group($course->id);
 foreach ($certificates as $certificate) {
     if (!$certificate->visible) {
         //Show dimmed if the mod is hidden
-        $link = "<A class=\"dimmed\" HREF=\"view.php?id=$certificate->coursemodule\">$certificate->name</A>";
+        $link = "<a class=\"dimmed\" href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
     } else {
         //Show normal if the mod is visible
-        $link = "<A HREF=\"view.php?id=$certificate->coursemodule\">$certificate->name</A>";
+        $link = "<a href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
     }
-
 
  $printsection = "";
         if ($certificate->section !== $currentsection) {
@@ -91,7 +90,7 @@ $issued = get_string('notreceived', 'certificate');
         $table->data[] = array ($link, $issued);
     }
 }
-echo "<BR>";
+echo "<br />";
 
 print_table($table);
 

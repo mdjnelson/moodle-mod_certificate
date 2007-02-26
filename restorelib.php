@@ -22,7 +22,7 @@
             $certificate->course = $restore->course_id;
             $certificate->name = backup_todb($info['MOD']['#']['NAME']['0']['#']);
             $certificate->emailteachers = backup_todb($info['MOD']['#']['EMAILTEACHERS']['0']['#']);
-            $certificate->save = backup_todb($info['MOD']['#']['SAVE']['0']['#']);
+            $certificate->savecert = backup_todb($info['MOD']['#']['SAVECERT']['0']['#']);
             $certificate->delivery = backup_todb($info['MOD']['#']['DELIVERY']['0']['#']);
             $certificate->certificatetype = backup_todb($info['MOD']['#']['TYPE']['0']['#']);
             $certificate->borderstyle = backup_todb($info['MOD']['#']['BORDERSTYLE']['0']['#']);

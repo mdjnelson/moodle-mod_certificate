@@ -45,7 +45,7 @@
                 fwrite ($bf,full_tag("MODTYPE",4,false,"certificate"));
                 fwrite ($bf,full_tag("NAME",4,false,$certificate->name));
                 fwrite ($bf,full_tag("EMAILTEACHERS",4,false,$certificate->emailteachers));
-                fwrite ($bf,full_tag("SAVE",4,false,$certificate->save));
+                fwrite ($bf,full_tag("SAVECERT",4,false,$certificate->savecert));
                 fwrite ($bf,full_tag("DELIVERY",4,false,$certificate->delivery));
                 fwrite ($bf,full_tag("TYPE",4,false,$certificate->certificatetype));
                 fwrite ($bf,full_tag("BORDERSTYLE",4,false,$certificate->borderstyle));

@@ -1,16 +1,14 @@
-Certificate 3.0 for Moodle 1.6
-
-Latest version uploaded 11/03/06
-
-Instructions:
-Place the certificate folder under your moodle/mod folder. Click on the administration link from your Moodle
-homepage to install.
+Certificate 3.0 for Moodle
 
 
+
+Version 3.2 20061012
+This version has been updated to work in Moodle 1.7. 
 
 Version 3.1 2006081700
 Increased length of course name record
 General debugging and code fixes
+Fixed symbol printing in course name, mod name and student name
 
 Version 3.1 2006080100
 The certificate module has been re-written to better comply with standard Moodle coding and to add

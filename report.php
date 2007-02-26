@@ -6,24 +6,20 @@
     $id   = optional_param('id', 0, PARAM_INT);          // Course module ID
     $sort = optional_param('sort', '', PARAM_RAW);
 
-    if (! $cm = get_record("course_modules", "id", $id)) {
-        error("Course Module ID was incorrect");
-    }
+    if (! $cm = get_coursemodule_from_id('certificate', $id)) {
+            error("Course Module ID was incorrect");
+        }
 
     if (! $course = get_record("course", "id", $cm->course)) {
         error("Course is misconfigured");
     }
-
-    require_login($course->id, false);
-
-    if (!isteacher($course->id)) {
-        error("Sorry, only teachers can see this.");
-    }
-
     if (! $certificate = get_record("certificate", "id", $cm->instance)) {
         error("Certificate ID was incorrect");
     }
-
+	
+    require_login($course->id, false);
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    require_capability('mod/certificate:manage', $context);
 
 $strcertificates = get_string('modulenameplural', 'certificate');
 $strcertificate  = get_string('modulename', 'certificate');
@@ -39,7 +35,7 @@ add_to_log($course->id, "certificate", "view", "report.php?id=$cm->id", "$certif
                  "<a href=\"index.php?id=$course->id\">$strcertificates</a> ->
                   <a href=\"view.php?id=$cm->id\">".format_string($certificate->name,true)."</a> -> $strreport",
                   "", "", true);
-/*this isn't working
+/*this isn't working--and needs updating for permissions
 // Check to see if groups are being used 
         if ($groupmode = groupmode($course, $cm)) {   // Groups are being used
             $currentgroup = setup_and_print_groups($course, $groupmode, 'report.php?id='.$cm->id);
@@ -58,8 +54,7 @@ add_to_log($course->id, "certificate", "view", "report.php?id=$cm->id", "$certif
         $sqlsort = "s.studentname ASC";
 //or sort by date:
       // $sqlsort = "s.certdate ASC";  
-
-if (!$users = certificate_get_issues($certificate->id, $USER, $sqlsort)) {
+if (!$users = certificate_get_issues($certificate->id, $USER, $sqlsort)) { 
     notice("There are no issued certificates", "../../course/view.php?id=$course->id");
     die;
 }
@@ -71,13 +66,11 @@ foreach ($users as $user) {
 $name = print_user_picture($user->id, $course->id, $user->picture, false, true).$user->studentname;
 $date = userdate($user->timecreated).certificate_print_user_files($user->id);
 $code = $user->code;
-
-
 $table->data[] = array ($name, $date, $code);
 }
 
 
-echo "<BR>";
+echo "<br />";
 
 print_table($table);
 

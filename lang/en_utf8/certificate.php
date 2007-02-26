@@ -4,11 +4,14 @@
 
 $string['modulename'] = 'Certificate';
 $string['modulenameplural'] = 'Certificates';
-
+$string['certificatename'] = 'Certificate Name';
+$string['textoptions'] = 'Text Options';
+$string['designoptions'] = 'Design Options';
 $string['certificatetype'] = 'Certificate Type';
 $string['emailteachers'] = 'Email Teachers';
 $string['savecertificate'] = 'Save Certificates';
 $string['deliver'] = 'Delivery';
+$string['issueoptions'] = 'Issue Options';
 $string['download'] = 'Force download';
 $string['openbrowser'] = 'Open in new window';
 $string['emailcertificate'] = 'Email (Must also choose save!)';
@@ -29,8 +32,8 @@ You can review it here:
 
     <a href=\"$a->url\">Certificate Report</a>.';
 $string['border'] = 'Border';
-$string['borderstyle'] = 'Print Border';
-$string['bordernone'] = 'No';
+$string['borderstyle'] = 'Border Style';
+$string['bordernone'] = 'No border';
 $string['borderlines'] = 'Lines';
 $string['bordercolor'] = 'Border Color';
 $string['borderblack'] = 'Black';
@@ -58,7 +61,7 @@ $string['gradeletter'] = 'Letter Grade';
 $string['printsignature'] = 'Print Signature';
 $string['sigline'] = 'line';
 
-$string['printteacher'] = 'Print Teacher';
+$string['printteacher'] = 'Print Teacher Name(s)';
 $string['printdate'] = 'Print Date';
 $string['printseal'] = 'Print Seal';
 
@@ -80,8 +83,10 @@ to your computer.';
 $string['openemail'] = 'Click the button below and your certificate
 will be sent to you as an email attachment.';
 $string['receivedcerts'] = 'Received certificates';
-
-
+$string['certificate:view'] = 'View Certificate';
+$string['certificate:manage'] = 'Manage Certificate';
+$string['certificate:teacher'] = 'Print Teacher';
+$string['certificate:student'] = 'Get Certificate';
 //names of type folders
 $string['typeportrait'] = 'Portrait';
 $string['typeletter_portrait'] = 'Portrait (letter)';

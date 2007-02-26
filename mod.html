@@ -7,8 +7,8 @@
     if (empty($form->emailteachers)) {
         $form->emailteachers = 0;
     }
-    if (empty($form->save)) {
-        $form->save = 0;
+    if (empty($form->savecert)) {
+        $form->savecert = 0;
     }
     if (empty($form->delivery)) {
         $form->delivery = 0;
@@ -223,7 +223,7 @@ $gradeformatoptions[3] = get_string('gradeletter', 'certificate');
     <td>
     <?php 
         $options[0] = get_string("no"); $options[1] = get_string("yes");
-        choose_from_menu($options, "save", $form->save, "");
+        choose_from_menu($options, "savecert", $form->savecert, "");
         helpbutton('save', get_string('savecertificate', 'certificate'), "certificate");
     ?>
     </td>

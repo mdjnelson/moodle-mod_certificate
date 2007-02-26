@@ -162,7 +162,8 @@ function view_header($course, $certificate, $cm) {
     print_header_simple(format_string($certificate->name), "",
                  "$navigation ".format_string($certificate->name), "", "", true, update_module_button($cm->id, $course->id, $strcertificate), navmenu($course, $cm));
 
-    if (isteacher($course->id)) {
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    if (has_capability('mod/certificate:manage', $context)) {
         $numusers = certificate_count_issues($certificate);
         echo "<div class=\"reportlink\"><a href=\"report.php?id=$cm->id\">".
               get_string('viewcertificateviews', 'certificate', $numusers)."</a></div>";
@@ -226,7 +227,7 @@ function certificate_email_teachers($certificate) {
     if ($certificate->emailteachers == 0) {          // No need to do anything
             return;
         }
-       $certrecord = certificate_get_issue($course, $USER, $certificateid);
+       $certrecord = certificate_get_issue($course, $USER, $certificate->id);
        $student = $certrecord->studentname;
        $cm = get_coursemodule_from_instance("certificate", $certificate->id, $course->id);
         if (groupmode($course, $cm) == SEPARATEGROUPS) {   // Separate groups are being used
@@ -281,7 +282,8 @@ function certificate_email_teachers_text($info) {
  ************************************************************************/    
 function certificate_email_teachers_html($info) {
     global $CFG;
-        $posthtml = '<font face="sans-serif">';
+
+        $posthtml  = '<font face="sans-serif">';
         $posthtml .= '<p>'.get_string('emailteachermailhtml', 'certificate', $info).'</p>';
         $posthtml .= '</font>';
         return $posthtml;
@@ -331,16 +333,23 @@ function certificate_count_issues($certificate, $groupid=0) {
                                       AND g.groupid = '$groupid' 
                                       AND a.userid = g.userid ");
     } else {
-        $select = "s.course = '$certificate->course' AND";
-        if ($certificate->course == SITEID) {
-            $select = '';
+        $cm = get_coursemodule_from_instance('certificate', $certificate->id);
+        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+	 if ($users = get_users_by_capability($context, 'mod/certificate:view')) {
+            foreach ($users as $user) {
+                $array[] = $user->id;
+            }
+
+            $userlists = '('.implode(',',$array).')';
+
+            return count_records_sql("SELECT COUNT(*)
+                                      FROM {$CFG->prefix}certificate_issues
+                                     WHERE certificateid = '$certificate->id' 
+                                       AND timecreated > 0
+                                       AND userid IN $userlists ");
+        } else {
+            return 0; // no users enroled in course
         }
-        return count_records_sql("SELECT COUNT(*)
-                                  FROM {$CFG->prefix}certificate_issues a, 
-                                       {$CFG->prefix}user_students s      
-                                 WHERE a.certificateid = '$certificate->id' 
-                                   AND a.timecreated > 0
-                                   AND $select a.userid = s.userid ");
     }
 }
 
@@ -501,7 +510,8 @@ function certificate_mod_grade($course, $moduleid) {
         $gradefunction = $module->name."_grades";
         if ($modgrades = $gradefunction($cm->instance)) {
     $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
-    if(isteacher($course->id)) {
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    if (has_capability('mod/certificate:manage', $context)) {
         $modgrades->grades[$USER->id] = '';
 }
     $modinfo->percentage = round(($modgrades->grades[$USER->id]*100/$modgrades->maxgrade),2);
@@ -531,7 +541,7 @@ function get_course_grade($id){
     $grades = array();      // Collect all grades in this array
     $maxgrades = array();   // Collect all max grades in this array
     $totalgrade = 0;
-    $totalmaxgrade = 0;
+    $totalmaxgrade = .000001;
 
 /// Collect modules data
 $test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
@@ -559,12 +569,13 @@ $test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused
                                         $grades[]  = $modgrades->grades[$USER->id];
                                         $totalgrade += (float)$modgrades->grades[$USER->id];
                                     }
-                                    if (empty($modgrades->maxgrade)) {
+                                    if (empty($modgrades->maxgrade) || empty($modgrades)) {
                                         $maxgrades[] = "";
                                     } else {
                                         $maxgrades[]    = $modgrades->maxgrade;
                                         $totalmaxgrade += $modgrades->maxgrade;
                                     }
+    
                                 }
                             }
                         }
@@ -572,9 +583,9 @@ $test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused
                 }
             }
         }
-    }    $coursegrade->percentage = round(($totalgrade*100/$totalmaxgrade),2);
-    $coursegrade->points = $totalgrade;
-  
+    }
+	$coursegrade->percentage = round(($totalgrade*100/$totalmaxgrade),2);
+    $coursegrade->points = $totalgrade;  
 	return $coursegrade;
 }
 
@@ -722,8 +733,8 @@ function print_border($border, $color, $orientation) {
         }
         break;
             case 'P':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border-$color.png")) {
-            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border-$color.png", 10, 10, 580, 820);
+        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg")) {
+            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg", 10, 10, 580, 820);
             }
             break;
         }
@@ -908,11 +919,14 @@ function certificate_generate_code() {
  ************************************************************************/
 function certificate_prepare_issue($course, $user) {
     global $certificate;
+	
+    if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
+    return get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
+} else 
     $timecreated = time();
     $certdate = certificate_generate_date($certificate, $course);
     $code = certificate_generate_code();
     $studentname = certificate_generate_studentname($course, $user);
-
     insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname, "certdate" => $certdate), false);
     certificate_email_teachers($certificate);
 }
