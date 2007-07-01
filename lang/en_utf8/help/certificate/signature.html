@@ -1,2 +1,8 @@
-<p align="center"><b>Print Signature</b></p>
-<p>If you choose to print a signature, you can print a graphic representation of a signature, or print a line for a written signature. A signature image is included as an example.</p>
+<p align="center"><b>Signature Image </b></p>
+<p>This option allows you to  print a signature image from the certificate/pix/signatures folder.  You can print a graphic representation of a signature, or print a line for a written signature. A sample signature image and a line image are included.</p>
+<p>By default, this image is placed in the lower left of the certificate. You can change this placement in your certificate/type/&quot;type name&quot;/certificate.php file. </p>
+<p>In that file, find the line of code similar to this one toward the bottom:</p>
+<p>print_signature($certificate-&gt;printsignature, $orientation, 110, 450, '', '');</p>
+<p>The two numbers reflect the X placement (over from the left) and Y placement (down from the top) values for the image. You can change these if you would like. </p>
+<p>Keep in mind that adding images to the certificate will increase the size of the pdf file. You can add your own images to the certificate/pix/signatures folder and they will also appear here in the dropdown.  The images must be in the JPEG (.jpg) or PNG 8 (.png) format. </p>
+<p>&nbsp;</p>

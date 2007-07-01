@@ -7,9 +7,10 @@ $strreviewcertificate = get_string('reviewcertificate', 'certificate');
 $strgetcertificate = get_string('getcertificate', 'certificate');
 $strgrade = get_string('grade', 'certificate');
 $strcoursegrade = get_string('coursegrade', 'certificate');
-
+$strcredithours = get_string('credithours', 'certificate');
 // Date formatting - can be customized if necessary
-setlocale (LC_TIME, '');
+//setlocale (LC_TIME, '');
+//setlocale (LC_ALL, $currentlocale);
 $certificatedate = '';
 if ($certrecord) {
 $certdate = $certrecord->certdate;
@@ -29,13 +30,13 @@ if($certificate->printdate > 0)    {
 //Grade formatting - can be customized if necessary
 $grade = '';
 //Print the course grade
-$coursegrade = get_course_grade($course->id);    
+$coursegrade = certificate_get_course_grade($course->id);    
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
     $grade = $strcoursegrade.':  '.$coursegrade->percentage.'%';
 }   if($certificate->gradefmt == 2) {
-    $grade = 'Course Grade:  '.$coursegrade->points;
+    $grade = $strcoursegrade.':  '.$coursegrade->points;
 }   if($certificate->gradefmt == 3) {
     $clg = $coursegrade->percentage;
     if ($clg <= 100.99){
@@ -114,47 +115,52 @@ $studentname = '';
 if ($certrecord) {
 $studentname = $certrecord->studentname;
 }
+//Print the credit hours
+if($certificate->printhours) {
+$credithours =  $strcredithours.': '.$certificate->printhours;
+} else $credithours = '';
+
 //Print the html text
 $customtext = $certificate->customtext;
-//Add pdf page
-    $pdf = new TCPDF_Protection('L', 'pt', 'A4', true); 
-    $pdf->SetProtection(array('print'));
-    $pdf->print_header = false;
-    $pdf->print_footer = false;
-    $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-    $pdf->setLanguageArray($l); //set language items
-    $pdf->AddPage();
-    $orientation = "L";
 
-// Add images
-    $color = $certificate->bordercolor;
-    print_border($certificate->borderstyle, $color, $orientation);
+//Add pdf page
+    $orientation = "L";
+    $pdf=new PDF($orientation, 'pt', 'A4');
+    $pdf->SetProtection(array('print'));
+    $pdf->AddPage();
+    	if(ini_get('magic_quotes_gpc')=='1')
+		$customtext=stripslashes($customtext);
+
+// Add images and lines
+    print_border($certificate->borderstyle, $orientation);
+	draw_frame($certificate->bordercolor, $orientation);
     print_watermark($certificate->printwmark, $orientation);
-    print_seal($certificate->printseal, $orientation, 590, 425, 80, 80);
-    print_signature($certificate->printsignature, $orientation, 130, 430, '', '');
+    print_seal($certificate->printseal, $orientation, 590, 425, '', '');
+    print_signature($certificate->printsignature, $orientation, 130, 440, '', '');
 
 // Add text
     $pdf->SetTextColor(0,0,120);
-    cert_printtext(170, 125, 'C', 'vera', 'B', 30, get_string('titlelandscape', 'certificate'));
+    cert_printtext(170, 125, 'C', 'Helvetica', 'B', 30, utf8_decode(get_string('titlelandscape', 'certificate')));
     $pdf->SetTextColor(0,0,0);
-    cert_printtext(170, 180, 'C', 'vera', 'B', 20, get_string('introlandscape', 'certificate'));
-    cert_printtext(170, 230, 'C', 'vera', '', 30, $studentname);
-    cert_printtext(170, 280, 'C', 'vera', '', 20, get_string('statementlandscape', 'certificate'));
-    cert_printtext(170, 330, 'C', 'vera', '', 20, $course->fullname);
-    cert_printtext(170, 380, 'C', 'vera', '', 14, $certificatedate);
-    cert_printtext(170, 420, 'C', 'vera', '', 10, $grade);
-    cert_printtext(170, 500, 'C', 'vera', '', 10, $code);
-		    $i = 0 ;
+    cert_printtext(170, 180, 'C', 'Times', 'B', 20, utf8_decode(get_string('introlandscape', 'certificate')));
+    cert_printtext(170, 230, 'C', 'Helvetica', '', 30, utf8_decode($studentname));
+    cert_printtext(170, 280, 'C', 'Helvetica', '', 20, utf8_decode(get_string('statementlandscape', 'certificate')));
+    cert_printtext(170, 330, 'C', 'Helvetica', '', 20, utf8_decode($course->fullname));
+    cert_printtext(170, 380, 'C', 'Helvetica', '', 14, utf8_decode($certificatedate));
+    cert_printtext(170, 420, 'C', 'Times', '', 10, utf8_decode($grade));
+    cert_printtext(170, 432, 'C', 'Times', '', 10, utf8_decode($credithours));
+    cert_printtext(170, 500, 'C', 'Times', '', 10, utf8_decode($code));
+    $i = 0 ;
 	if($certificate->printteacher){
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher', '', 'u.lastname ASC', '', '', '', '', true)) {
+    if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort='u.lastname ASC')) {
 		foreach ($teachers as $teacher) {
 			$i++;
-			if($i <5) {
-				$teachernames = fullname($teacher);
-	cert_printtext(130, 440+($i *12) , 'L', 'vera', '', 12, $teachernames);
-}}}}
-    cert_printtext(150, 450, '', '', '', '12', '');
+	cert_printtext(130, 440+($i *12) , 'L', 'Times', '', 12, fullname($teacher));
+}}}
+
+
+    cert_printtext(150, 450, '', '', '', '', '');
 	$pdf->SetLeftMargin(130);
 	$pdf->WriteHTML($customtext);
 ?>

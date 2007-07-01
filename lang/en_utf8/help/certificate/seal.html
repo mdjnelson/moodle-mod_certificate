@@ -1,2 +1,8 @@
-<p align="center"><b>Print Seal</b></p>
-<p>This allows you to select a seal or logo to print on the certificate. Four seal images and an example  logo image are included.</p>
+<p align="center"><b>Seal or Logo Image </b></p>
+<p>This option allows you to select a seal or logo to print on the certificate from the certificate/pix/seals folder. Four seal images and an example  logo image are included. By default, this image is placed in the lower right corner of the certificate. You can change this placement in your certificate/type/&quot;type name&quot;/certificate.php file. </p>
+<p>In that file, find the line of code similar to this one toward the bottom:</p>
+<p> print_seal($certificate-&gt;printseal, $orientation, 590, 425, '', ''); </p>
+<p>The two numbers reflect the X placement (over from the left) and Y placement (down from the top) values for the image. You can change these if you would like. </p>
+<p>Keep in mind that adding images to the certificate will increase the size of the pdf file. 
+You can add your own  images to the certificate/pix/seals folder and they will also appear here in 
+the dropdown.  The  images must be in the JPEG (.jpg) or PNG 8 (.png) format. </p>
