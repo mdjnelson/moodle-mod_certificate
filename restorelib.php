@@ -22,7 +22,8 @@
             $certificate->course = $restore->course_id;
             $certificate->name = backup_todb($info['MOD']['#']['NAME']['0']['#']);
             $certificate->emailteachers = backup_todb($info['MOD']['#']['EMAILTEACHERS']['0']['#']);
-            $certificate->savecert = backup_todb($info['MOD']['#']['SAVECERT']['0']['#']);
+            $certificate->emailothers = backup_todb($info['MOD']['#']['EMAILOTHERS']['0']['#']);
+            $certificate->save = backup_todb($info['MOD']['#']['SAVE']['0']['#']);
             $certificate->delivery = backup_todb($info['MOD']['#']['DELIVERY']['0']['#']);
             $certificate->certificatetype = backup_todb($info['MOD']['#']['TYPE']['0']['#']);
             $certificate->borderstyle = backup_todb($info['MOD']['#']['BORDERSTYLE']['0']['#']);
@@ -30,12 +31,20 @@
             $certificate->printwmark = backup_todb($info['MOD']['#']['PRINTWMARK']['0']['#']);
             $certificate->printdate = backup_todb($info['MOD']['#']['PRINTDATE']['0']['#']);
             $certificate->datefmt = backup_todb($info['MOD']['#']['DATEFMT']['0']['#']);
+            $certificate->printhours = backup_todb($info['MOD']['#']['PRINTHOURS']['0']['#']);
             $certificate->printnumber = backup_todb($info['MOD']['#']['PRINTNUMBER']['0']['#']);
             $certificate->printgrade = backup_todb($info['MOD']['#']['PRINTGRADE']['0']['#']);
+            $certificate->gradefmt = backup_todb($info['MOD']['#']['GRADEFMT']['0']['#']);
+            $certificate->lockgrade = backup_todb($info['MOD']['#']['LOCKGRADE']['0']['#']);
+            $certificate->requiredgrade = backup_todb($info['MOD']['#']['REQUIREDGRADE']['0']['#']);
+            $certificate->printteacher = backup_todb($info['MOD']['#']['PRINTTEACHER']['0']['#']);
+            $certificate->customtext = backup_todb($info['MOD']['#']['CUSTOMTEXT']['0']['#']);
+            $certificate->printsignature = backup_todb($info['MOD']['#']['PRINTSIGNATURE']['0']['#']);
+            $certificate->printseal = backup_todb($info['MOD']['#']['PRINTSEAL']['0']['#']);
             $certificate->printteacher = backup_todb($info['MOD']['#']['PRINTTEACHER']['0']['#']);
             $certificate->printsignature = backup_todb($info['MOD']['#']['PRINTSIGNATURE']['0']['#']);
             $certificate->printseal = backup_todb($info['MOD']['#']['PRINTSEAL']['0']['#']);
-              $certificate->timemodified = backup_todb($info['MOD']['#']['TIMEMODIFIED']['0']['#']);
+            $certificate->timemodified = backup_todb($info['MOD']['#']['TIMEMODIFIED']['0']['#']);
 
               //The structure is equal to the db, so insert the assignment
             $newid = insert_record ("certificate",$certificate);
@@ -96,7 +105,7 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
             $issue->code = backup_todb($iss_info['#']['CODE']['0']['#']);
             $issue->classname = backup_todb($iss_info['#']['CLASSNAME']['0']['#']);
             $issue->certdate = backup_todb($iss_info['#']['CERTDATE']['0']['#']);
-            $issue->received = backup_todb($iss_info['#']['MAILED']['0']['#']);
+            $issue->mailed = backup_todb($iss_info['#']['MAILED']['0']['#']);
 
  //We have to recode the userid field
             $user = backup_getid($restore->backup_unique_code,"user",$issue->userid);

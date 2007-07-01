@@ -70,7 +70,7 @@ $table->data[] = array ($name, $date, $code);
 }
 
 
-echo "<br />";
+echo "<BR>";
 
 print_table($table);
 

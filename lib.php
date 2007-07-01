@@ -1,4 +1,4 @@
-<?PHP //$Id: version.php,v 3.1.0
+<?PHP //$Id: version.php,v 3.1.8
 require_once($CFG->dirroot.'/course/lib.php');
 
 // STANDARD FUNCTIONS ////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ function certificate_delete_instance($certificate) {
 /************************************************************************
  * Deletes any files associated with this field                          *
  ************************************************************************/
-    function delete_certificate_files($certificate='') {
+function delete_certificate_files($certificate='') {
         global $CFG;
 
         require_once($CFG->libdir.'/filelib.php');
@@ -98,7 +98,7 @@ function certificate_delete_instance($certificate) {
  * Returns information about received certificate.                      * 
  * Used for user activity reports.                                      *
  ************************************************************************/
- function certificate_user_outline($course, $user, $mod, $certificate) {
+function certificate_user_outline($course, $user, $mod, $certificate) {
     if ($issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
         $result->info = get_string('issued', 'certificate');
         $result->time = $issue->timecreated;
@@ -266,6 +266,50 @@ function certificate_email_teachers($certificate) {
 }                
 
 /************************************************************************
+ * Alerts others by email of received certificates. First checks        *
+ * whether the option to email others is set for this certificate.      *
+ * Uses the email_teachers info.                                        *
+ * Code suggested by Eloy Lafuente                                      *
+ ************************************************************************/    
+function certificate_email_others ($certificate) {	
+    global $course, $USER, $CFG;
+
+	    if ($certificate->emailothers) {          
+
+       $certrecord = certificate_get_issue($course, $USER, $certificate->id);
+       $student = $certrecord->studentname;
+       $cm = get_coursemodule_from_instance("certificate", $certificate->id, $course->id);
+
+       $others = explode(',', $certificate->email_others);
+        if ($others) {
+            $strcertificates = get_string('modulenameplural', 'certificate');
+            $strcertificate  = get_string('modulename', 'certificate');
+            $strawarded  = get_string('awarded', 'certificate');
+            foreach ($others as $other) {
+                $other = trim($other);
+                if (validate_email($other)) {
+                    $destination->email = $other;
+			    unset($info);
+                $info->student = $student;
+                $info->course = format_string($course->fullname,true);     
+                $info->certificate = format_string($certificate->name,true);
+                $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
+                $from = $student;
+                $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
+                $posttext = certificate_email_teachers_text($info);
+                $posthtml = certificate_email_teachers_html($info);
+                $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
+
+                @email_to_user($destination, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
+                set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
+
+                }
+            }
+        }
+    }
+}
+
+/************************************************************************
  * Creates the text content for emails to teachers -- needs to be finished with cron
  * @param $info object The info used by the 'emailteachermail' language string
  * @return string                                                       *
@@ -296,7 +340,7 @@ function certificate_email_teachers_html($info) {
 function certificate_email_students($USER) {
    global $course, $certificate, $CFG; 
    $certrecord = certificate_get_issue($course, $USER);
-   if ($certrecord->sent > 0)    {
+   if ($certrecord->mailed > 0)    {
     return;
      }
     $teacher = get_teacher($course->id);
@@ -314,7 +358,7 @@ function certificate_email_students($USER) {
     $user->mailformat = 0;  // Always send HTML version as well
     $attachment= $course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/certificate.pdf';
     $attachname= "certificate.pdf";
-    set_field("certificate_issues","sent","1","certificateid", $certificate->id, "userid", $USER->id);
+    set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
     return email_to_user($USER, $from, $subject, $message, $messagehtml, $attachment, $attachname);
 }
 
@@ -432,7 +476,23 @@ function certificate_types() {
     asort($types);
     return $types;
 }
-
+/*
+function certificate_print_teachers($teachers, $cm) {
+	global $certificate, $course;
+	$i = 0 ;
+	$context = get_context_instance(CONTEXT_MODULE, $cm->id);
+	if($certificate->printteacher){
+	
+	if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher')) {
+		foreach ($teachers as $teacher) {
+			$i++;
+			if($i <5) {
+				$fullname = fullname($teacher, isteacher($course->id));
+            /// Fixed formating
+				    cert_printtext(150, 440+($i *12) , 'L', 'Times', '', 12, $fullname);
+}}		}
+	}
+}*/
 /************************************************************************
  * Search through all the modules, pulling out grade data               *
  * David Cannon                                                         *
@@ -489,7 +549,7 @@ function certificate_get_mod_grades() {
     }
     if(isset($printgrade)) {
         $gradeoptions['0'] = get_string('no');
-        $gradeoptions['1'] = get_string('coursegrade', 'certificate');
+        $gradeoptions['1'] = get_string('coursegradeoption', 'certificate');
         foreach($printgrade as $key => $value) {
             $gradeoptions[$key] = $value;
         }
@@ -508,26 +568,24 @@ function certificate_mod_grade($course, $moduleid) {
     if (file_exists($libfile)) {
         require_once($libfile);
         $gradefunction = $module->name."_grades";
+		if (function_exists($gradefunction)) {   
         if ($modgrades = $gradefunction($cm->instance)) {
     $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    if (has_capability('mod/certificate:manage', $context)) {
-        $modgrades->grades[$USER->id] = '';
-}
     $modinfo->percentage = round(($modgrades->grades[$USER->id]*100/$modgrades->maxgrade),2);
     $modinfo->points = $modgrades->grades[$USER->id];
-
     return $modinfo;
         }
     }
 }
-
+	return false;
+}
 /************************************************************************
  * Search through all the modules, pulling out grade data               *
  * and prepare to print the course grade.                               * 
    Patrick Jeitler                                                      *
  ************************************************************************/
-function get_course_grade($id){
+
+function certificate_get_course_grade($id){
     global $course, $CFG, $USER;
     $course = get_record("course", "id", $id);
     $strgrades = get_string("grades");
@@ -609,132 +667,239 @@ function cert_printtext( $x, $y, $align, $font, $style, $size, $text) {
 }
 
 /************************************************************************
- * Colors for line border.                                              *
- ************************************************************************/
-function set_color($color) {
-    global $pdf;
-
-    switch($color) {
-        case get_string('borderblack', 'certificate'):
-        $pdf->SetFillColor( 0, 0, 0);
-        break;
-        case get_string('borderbrown', 'certificate'):
-        $pdf->SetFillColor(153, 102, 51 );
-        break;
-        case get_string('borderblue', 'certificate'):
-        $pdf->SetFillColor( 0, 51, 204);
-        break;
-        case get_string('bordergreen', 'certificate'):
-        $pdf->SetFillColor( 0, 180, 0);
-        break;
-    }
-}
-
-/************************************************************************
  * Creates rectangles for line border.                                  *
  ************************************************************************/
-function draw_frame($color, $orientation) {
-    global $pdf;
+function draw_frame($certificate, $orientation) {
+    global $pdf, $certificate;
+
+if($certificate->bordercolor == 0)    {
+} else                               //do nothing
+if($certificate->bordercolor > 0)    {
 
     switch ($orientation) {
         case 'L':
-        // create box border
-        set_color($color);
-        $pdf->Rect( 26, 30, 790, 530, 'F'); //outer rectangle in selected color
+		
+// create outer line border in selected color
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0); //black
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51); //brown
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204); //blue
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0); //green
+    }
+        $pdf->Rect( 26, 30, 790, 530, 'F');
+		 //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 32, 36, 778, 518, 'F'); //white rectangle
-        set_color($color);                  //middle rectangles
+        $pdf->Rect( 32, 36, 778, 518, 'F');
+		 
+// create middle line border in selected color
+		if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0);
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51);
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204);
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0);
+    }
         $pdf->Rect( 41, 45, 760, 500, 'F');
+		 //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 42, 46, 758, 498, 'F');
-        set_color($color);                  //inside rectangles
+		
+// create inner line border in selected color
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0);
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51);
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204);
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0);
+    }
         $pdf->Rect( 52, 56, 738, 478, 'F');
+		 //white rectangle
         $pdf->SetFillColor( 255, 255, 255);  
         $pdf->Rect( 56, 60, 730, 470, 'F');
-        $pdf->SetFillColor( 0, 0, 0);  
         break;
+		
         case 'P':
-        // create box border
-        set_color($color);
+// create outer line border in selected color
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0); //black
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51); //brown
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204); //blue
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0); //green
+    }
         $pdf->Rect( 20, 20, 560, 800, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 26, 26, 548, 788, 'F');
-        set_color($color);
+        
+// create middle line border in selected color
+		if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0);
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51);
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204);
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0);
+    }
         $pdf->Rect( 35, 35, 530, 770, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 36, 36, 528, 768, 'F');
-        set_color($color);
+		
+// create inner line border in selected color
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0);
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51);
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204);
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0);
+    }
         $pdf->Rect( 46, 46, 508, 748, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 50, 50, 500, 740, 'F');
-        $pdf->SetFillColor( 0, 0, 0);
         break;
     }
 }
-
+}
 /************************************************************************
  * Creates rectangles for line border for letter size paper.            *
  ************************************************************************/
-function draw_frame_letter($color, $orientation) {
-    global $pdf;
+function draw_frame_letter($certificate, $orientation) {
+    global $pdf, $certificate;
+
+if($certificate->bordercolor == 0)    {
+} else                               //do nothing
+if($certificate->bordercolor > 0)    {
     
     switch ($orientation) {
         case 'L':
-        // create box border
-        set_color($color);
-        $pdf->Rect( 26, 25, 741, 555, 'F'); //outer rectangle in selected color
+// create outer line border in selected color
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0); //black
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51); //brown
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204); //blue
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0); //green
+    }
+        $pdf->Rect( 26, 25, 741, 555, 'F'); 
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255); 
-        $pdf->Rect( 32, 31, 729, 542, 'F'); //white rectangle
-        set_color($color);                  //middle rectangles  
+        $pdf->Rect( 32, 31, 729, 542, 'F');
+		 
+// create middle line border in selected color
+		if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0);
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51);
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204);
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0);
+    }
         $pdf->Rect( 41, 40, 711, 525, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 42, 41, 709, 523, 'F');
-        set_color($color);                  // inside rectangles
+		
+// create inner line border in selected color
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0);
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51);
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204);
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0);
+    }
         $pdf->Rect( 52, 51, 689, 503, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);  
         $pdf->Rect( 56, 55, 681, 495, 'F');
-        $pdf->SetFillColor( 0, 0, 0);
         break;
+		
         case 'P':
         set_color($color);
         $pdf->Rect( 25, 20, 561, 751, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 31, 26, 549, 739, 'F');
+		
         set_color($color);
         $pdf->Rect( 40, 35, 531, 721, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 41, 36, 529, 719, 'F');
+		
         set_color($color);
         $pdf->Rect( 51, 46, 509, 699, 'F');
+        //white rectangle
         $pdf->SetFillColor( 255, 255, 255);  
         $pdf->Rect( 55, 50, 501, 691, 'F');
-        $pdf->SetFillColor( 0, 0, 0);
         break;
     }
 }
-
+}
 /************************************************************************
- * Prints line borders or border images.                                *
+ * Prints border images from the borders folder in PNG or JPG.          *
  ************************************************************************/
-function print_border($border, $color, $orientation) {
+function print_border($border, $orientation) {
     global $CFG, $pdf;
 
     switch($border) {
         case '0':
         break;
-        case '1':
-        draw_frame($color, $orientation);
-        break;
         default:
         switch ($orientation) {
             case 'L':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg")) {
-            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg", 10, 10, 820, 580);
+        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
+            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border", 10, 10, 820, 580);
         }
         break;
             case 'P':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg")) {
-            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg", 10, 10, 580, 820);
+        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
+            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border", 10, 10, 580, 820);
             }
             break;
         }
@@ -743,27 +908,24 @@ function print_border($border, $color, $orientation) {
 }
 
 /************************************************************************
- * Prints line borders or border images for letter size paper.          *
+ * Prints border images for letter size paper.                          *
  ************************************************************************/
-function print_border_letter($border, $color, $orientation) {
+function print_border_letter($border, $orientation) {
     global $CFG, $pdf;
 
     switch($border) {
         case '0':
         break;
-        case '1':
-        draw_frame_letter($color, $orientation);
-        break;
         default:
         switch ($orientation) {
             case 'L':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg")) {
-            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg", 12, 10, 771, 594);
+        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
+            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border", 12, 10, 771, 594);
         }
         break;
             case 'P':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg")) {
-            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border-$color.jpg", 10, 10, 594, 771);
+        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
+            $pdf->Image( "$CFG->dirroot/mod/certificate/pix/borders/$border", 10, 10, 594, 771);
             }
             break;
         }
@@ -784,7 +946,7 @@ function print_watermark($wmark, $orientation) {
         switch ($orientation) {
             case 'L':
             if(file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark")) {
-                $pdf->Image( "$CFG->dirroot/mod/certificate/pix/watermarks/$wmark", 100, 100, 600, 420);
+                $pdf->Image( "$CFG->dirroot/mod/certificate/pix/watermarks/$wmark", 122, 90, 600, 420);
             }
             break;
             case 'P':
@@ -918,7 +1080,7 @@ function certificate_generate_code() {
  * Inserts user data when a certificate is created.                     *
  ************************************************************************/
 function certificate_prepare_issue($course, $user) {
-    global $certificate;
+    global $USER, $certificate;
 	
     if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
     return get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
@@ -929,6 +1091,7 @@ function certificate_prepare_issue($course, $user) {
     $studentname = certificate_generate_studentname($course, $user);
     insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname, "certdate" => $certdate), false);
     certificate_email_teachers($certificate);
+    certificate_email_others($certificate);
 }
 
 /************************************************************************
@@ -940,5 +1103,117 @@ function certificate_get_view_actions() {
 function certificate_get_post_actions() {
     return array('received');
 }
+
+
+/************************************************************************
+ * Get border images.                                                   *
+ ************************************************************************/
+function certificate_get_borders () {
+    global $CFG;
+/// load border files
+    $my_path = "$CFG->dirroot/mod/certificate/pix/borders";
+    $borderstyleoptions = array();
+	if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.'); 
+                if($i > 1) {
+                /// Set the style name
+                    $borderstyleoptions[$file] = substr($file, 0, $i);
+               
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+/// Sort borders
+    ksort($borderstyleoptions);
+
+/// Add default borders
+    $borderstyleoptions[0] = get_string('no');	
+	return $borderstyleoptions;
+	}
+
+/************************************************************************
+ * Get seal images.                                                     *
+ ************************************************************************/
+function certificate_get_seals () {
+    global $CFG;
+
+    $my_path = "$CFG->dirroot/mod/certificate/pix/seals";
+        $sealoptions = array();
+        if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.');
+                if($i > 1) {
+                    $sealoptions[$file] = substr($file, 0, $i);
+                }
+            }
+        }
+        closedir($handle);
+    }
+	    ksort($sealoptions);
+
+    $sealoptions[0] = get_string('no');
+	return $sealoptions;
+	}
+/************************************************************************
+ * Get watermark images.                                                *
+ ************************************************************************/
+function certificate_get_watermarks () {
+    global $CFG;
+/// load watermark files
+    $my_path = "$CFG->dirroot/mod/certificate/pix/watermarks";
+    $wmarkoptions = array();
+    if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+            $i = strpos($file, '.');
+                if($i > 1) {
+                    $wmarkoptions[$file] = substr($file, 0, $i);
+
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+/// Order watermarks
+    ksort($wmarkoptions);
+
+    $wmarkoptions[0] = get_string('no');
+	return $wmarkoptions;
+	
+	}
+
+/************************************************************************
+ * Get signature images.                                                *
+ ************************************************************************/
+function certificate_get_signatures () {
+    global $CFG;
+
+/// load signature files
+    $my_path = "$CFG->dirroot/mod/certificate/pix/signatures";
+	    $signatureoptions = array();
+           if ($handle = opendir($my_path)) {
+            while (false !== ($file = readdir($handle))) {
+            if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.');
+            if($i > 1) {
+                    $signatureoptions[$file] = substr($file, 0, $i);
+                }
+            }
+	}
+        closedir($handle);
+}
+    ksort($signatureoptions);
+
+    $signatureoptions[0] = get_string('no');
+	return $signatureoptions;
+	}
+
+
 
 ?>

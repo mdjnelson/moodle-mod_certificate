@@ -61,10 +61,10 @@ $currentgroup = get_current_group($course->id);
 foreach ($certificates as $certificate) {
     if (!$certificate->visible) {
         //Show dimmed if the mod is hidden
-        $link = "<a class=\"dimmed\" href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
+        $link = "<A class=\"dimmed\" HREF=\"view.php?id=$certificate->coursemodule\">$certificate->name</A>";
     } else {
         //Show normal if the mod is visible
-        $link = "<a href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
+        $link = "<A HREF=\"view.php?id=$certificate->coursemodule\">$certificate->name</A>";
     }
 
  $printsection = "";
@@ -90,7 +90,7 @@ $issued = get_string('notreceived', 'certificate');
         $table->data[] = array ($link, $issued);
     }
 }
-echo "<br />";
+echo "<BR>";
 
 print_table($table);
 

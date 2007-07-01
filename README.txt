@@ -1,16 +1,21 @@
-Certificate 3.0 for Moodle
+Certificate 3.0 for Moodle 
 
+Version 3.1.8 20070613
+This version has been updated to work in Moodle 1.8. 
+Added options: email to entered addresses, lock a certificate based on a grade, print credit hours, save/download pdf name is now certificate name
+Updated the mod.html to mod_form.php
 
-
-Version 3.2 20061012
+Version 3.1.7 20061012
 This version has been updated to work in Moodle 1.7. 
+Added custom html text option
+Added unicode types using lib/tcpdf
 
-Version 3.1 2006081700
+Version 3.1.6.1 2006081700
 Increased length of course name record
 General debugging and code fixes
-Fixed symbol printing in course name, mod name and student name
+Fixed symbol printing in course name, mod name and student name for non-unicode pdfs
 
-Version 3.1 2006080100
+Version 3.1.6 2006080100
 The certificate module has been re-written to better comply with standard Moodle coding and to add
 new features:
 

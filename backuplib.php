@@ -45,7 +45,8 @@
                 fwrite ($bf,full_tag("MODTYPE",4,false,"certificate"));
                 fwrite ($bf,full_tag("NAME",4,false,$certificate->name));
                 fwrite ($bf,full_tag("EMAILTEACHERS",4,false,$certificate->emailteachers));
-                fwrite ($bf,full_tag("SAVECERT",4,false,$certificate->savecert));
+                fwrite ($bf,full_tag("EMAILOTHERS",4,false,$certificate->emailothers));
+                fwrite ($bf,full_tag("SAVE",4,false,$certificate->save));
                 fwrite ($bf,full_tag("DELIVERY",4,false,$certificate->delivery));
                 fwrite ($bf,full_tag("TYPE",4,false,$certificate->certificatetype));
                 fwrite ($bf,full_tag("BORDERSTYLE",4,false,$certificate->borderstyle));
@@ -55,7 +56,12 @@
                 fwrite ($bf,full_tag("DATEFMT",4,false,$certificate->datefmt));
                 fwrite ($bf,full_tag("PRINTNUMBER",4,false,$certificate->printnumber));
                 fwrite ($bf,full_tag("PRINTGRADE",4,false,$certificate->printgrade));
+                fwrite ($bf,full_tag("GRADEFMT",4,false,$certificate->gradefmt));
+                fwrite ($bf,full_tag("PRINTHOURS",4,false,$certificate->printhours));
+                fwrite ($bf,full_tag("LOCKGRADE",4,false,$certificate->lockgrade));
+                fwrite ($bf,full_tag("REQUIREDGRADE",4,false,$certificate->requiredgrade));
                 fwrite ($bf,full_tag("PRINTTEACHER",4,false,$certificate->printteacher));
+                fwrite ($bf,full_tag("CUSTOMTEXT",4,false,$certificate->customtext));
                 fwrite ($bf,full_tag("PRINTSIGNATURE",4,false,$certificate->printsignature));
                 fwrite ($bf,full_tag("PRINTSEAL",4,false,$certificate->printseal));
                 fwrite ($bf,full_tag("TIMEMODIFIED",4,false,$certificate->timemodified));
