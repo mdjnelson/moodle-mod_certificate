@@ -25,19 +25,35 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     if ($result && $oldversion < 2007061300) {
 
-    /// Adding fields to certificate
         $table = new XMLDBTable('certificate');
+
+    /// Add new fields
         $field = new XMLDBField('emailothers');
         $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'emailteachers');
         $field = new XMLDBField('printhours');
-        $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'printhours');
+        $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'gradefmt');
         $field = new XMLDBField('lockgrade');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'printhours');
         $field = new XMLDBField('requiredgrade');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'lockgrade');
 
     /// Launch change of precision for new fields
-        $result = $result && change_field_precision($table, $field);
+        $result = $result && add_field($table, $field);
+
+    /// Rename field save to savecert
+        $field = new XMLDBField('save');
+        if (field_exists($table, $field)) {
+            $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'emailothers');
+
+        /// Launch rename field savecert
+            $result = $result && rename_field($table, $field, 'savecert');
+        } else {
+            $field = new XMLDBField('savecert');
+            $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'emailothers');
+            
+            $result = $result && add_field($table, $field);
+        }
+
     }
 
     return $result;
