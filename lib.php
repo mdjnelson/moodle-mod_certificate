@@ -280,7 +280,7 @@ function certificate_email_others ($certificate) {
        $student = $certrecord->studentname;
        $cm = get_coursemodule_from_instance("certificate", $certificate->id, $course->id);
 
-       $others = explode(',', $certificate->email_others);
+       $others = explode(',', $certificate->emailothers);
         if ($others) {
             $strcertificates = get_string('modulenameplural', 'certificate');
             $strcertificate  = get_string('modulename', 'certificate');

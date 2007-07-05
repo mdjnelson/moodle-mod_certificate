@@ -90,7 +90,7 @@ $issued = get_string('notreceived', 'certificate');
         $table->data[] = array ($link, $issued);
     }
 }
-echo "<BR>";
+echo "<br />";
 
 print_table($table);
 

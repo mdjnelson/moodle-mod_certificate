@@ -91,11 +91,11 @@ if($certrecord) {
  if (!isset($_GET['certificate'])) {    
 view_header($course, $certificate, $cm);
 
-    echo "<p align=\"center\">".get_string('viewed', 'certificate')."<br> ".userdate($certrecord->timecreated)."</p>";
+    echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->timecreated).'</p>';
     echo '<center>';
     echo '<form action="" method="get" name="form1" target="certframe">';
-    echo '<input type="hidden" name="id" value='.$cm->id.'>';
-    echo '<input type="hidden" name="certificate" value='.$certificate->id.' >';
+    echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
     echo '<input type="submit" name="Submit" value="'.$strreviewcertificate.'" />';
     echo '</form>';
     echo '<iframe name="certframe" id="certframe" frameborder="NO" border="0" style="width:90%;height:500px;border:0px;"></iframe>';
@@ -110,18 +110,18 @@ if(!$certrecord) {
 if(!isset($_GET['certificate'])) {    
 view_header($course, $certificate, $cm);
     if ($certificate->delivery == 0)    {
-    echo "<p align=\"center\">".get_string('openwindow', 'certificate')."<br> </p>";
+    echo '<p align="center">'.get_string('openwindow', 'certificate').'</p>';
 }   if ($certificate->delivery == 1)    {
-    echo "<p align=\"center\">".get_string('opendownload', 'certificate')."<br> </p>";
+    echo '<p align="center">'.get_string('opendownload', 'certificate').'</p>';
 }   if ($certificate->delivery == 2)    {
-    echo "<p align=\"center\">".get_string('openemail', 'certificate')."<br> </p>";
+    echo '<p align="center">'.get_string('openemail', 'certificate').'</p>';
 }
 
     echo '<center>';
     echo '<form action="'.certificate_prepare_issue($course, $USER).'" method="get" name="form1" target="_blank">';
-    echo '<input type="hidden" name="id" value='.$cm->id.'>';
-    echo '<input type="hidden" name="certificate" value='.$certificate->id.' >';
-    echo '<input type="submit" name="Submit" value="'.$strgetcertificate.'">';
+    echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
+    echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
+    echo '<input type="submit" name="Submit" value="'.$strgetcertificate.'" />';
     echo '</form>';
     echo '</center>';
 	add_to_log($course->id, "certificate", "received", "view.php?id=$cm->id", $certificate->id, $cm->id);
