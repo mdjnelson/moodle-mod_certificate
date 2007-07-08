@@ -24,20 +24,26 @@ function xmldb_certificate_upgrade($oldversion=0) {
     $result = true;
 
     if ($result && $oldversion < 2007061300) {
+    /// Add new fields to certificate table
 
         $table = new XMLDBTable('certificate');
-
-    /// Add new fields
         $field = new XMLDBField('emailothers');
         $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'emailteachers');
+        $result = $result && add_field($table, $field);
+
+        $table = new XMLDBTable('certificate');
         $field = new XMLDBField('printhours');
         $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'gradefmt');
+        $result = $result && add_field($table, $field);
+
+        $table = new XMLDBTable('certificate');
         $field = new XMLDBField('lockgrade');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'printhours');
+        $result = $result && add_field($table, $field);
+
+        $table = new XMLDBTable('certificate');
         $field = new XMLDBField('requiredgrade');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'lockgrade');
-
-    /// Launch change of precision for new fields
         $result = $result && add_field($table, $field);
 
     /// Rename field save to savecert
