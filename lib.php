@@ -356,8 +356,8 @@ function certificate_email_students($USER) {
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
     $user->mailformat = 0;  // Always send HTML version as well
-    $attachment= $course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/certificate.pdf';
-    $attachname= "certificate.pdf";
+    $attachment= $course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/'.$certificate->name.'.pdf';
+    $attachname= $certificate->name.'.pdf';
     set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
     return email_to_user($USER, $from, $subject, $message, $messagehtml, $attachment, $attachname);
 }
@@ -860,19 +860,52 @@ if($certificate->bordercolor > 0)    {
         break;
 		
         case 'P':
-        set_color($color);
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0); //black
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51); //brown
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204); //blue
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0); //green
+    }
         $pdf->Rect( 25, 20, 561, 751, 'F');
         //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 31, 26, 549, 739, 'F');
 		
-        set_color($color);
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0); //black
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51); //brown
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204); //blue
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0); //green
+    }
         $pdf->Rect( 40, 35, 531, 721, 'F');
         //white rectangle
         $pdf->SetFillColor( 255, 255, 255);
         $pdf->Rect( 41, 36, 529, 719, 'F');
 		
-        set_color($color);
+    if ($certificate->bordercolor == 1)    {
+        $pdf->SetFillColor( 0, 0, 0); //black
+    } 
+	    if ($certificate->bordercolor == 2)    {
+        $pdf->SetFillColor(153, 102, 51); //brown
+    } 
+	    if ($certificate->bordercolor == 3)    {
+        $pdf->SetFillColor( 0, 51, 204); //blue
+    } 
+	    if ($certificate->bordercolor == 4)    {
+        $pdf->SetFillColor( 0, 180, 0); //green
+    }
         $pdf->Rect( 51, 46, 509, 699, 'F');
         //white rectangle
         $pdf->SetFillColor( 255, 255, 255);  
@@ -1213,7 +1246,4 @@ function certificate_get_signatures () {
     $signatureoptions[0] = get_string('no');
 	return $signatureoptions;
 	}
-
-
-
 ?>
