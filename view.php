@@ -132,8 +132,8 @@ include_once('html2pdf.php');
         $pdf->Output(''.$certificate->name.'.pdf', 'D'); // force download
     }
     if ($certificate->delivery == 2){
+        certificate_email_students($USER);
         $pdf->Output(''.$certificate->name.'.pdf', 'I');// open in browser
         $pdf->Output('', 'S');// send
-        certificate_email_students($USER);
     }
 ?>

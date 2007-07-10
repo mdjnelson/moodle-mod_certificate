@@ -411,29 +411,31 @@ function certificate_email_teachers_html($info) {
  * Sends the student their issued certificate from moddata as an email  *
  * attachment.                                                          *
  ************************************************************************/   
-function certificate_email_students($USER) {
-   global $course, $certificate, $CFG; 
-   $certrecord = certificate_get_issue($course, $USER);
-   if ($certrecord->mailed > 0)    {
-    return;
-     }
+function certificate_email_students($user) {
+    global $course, $certificate, $CFG; 
+
+    $certrecord = certificate_get_issue($course, $user);
+    if ($certrecord->mailed > 0)    {
+        return;
+    }
+
     $teacher = get_teacher($course->id);
     $strawarded = get_string('awarded', 'certificate');
-	$stremailstudenttext = get_string('emailstudenttext', 'certificate');
     $info->username = fullname($user);
     $info->certificate = format_string($certificate->name,true);
     $info->course = format_string($course->fullname,true);         
     $from = fullname($teacher);
     $subject = $info->course.': '.$info->certificate;
     $message = get_string('emailstudenttext', 'certificate', $info)."\n";
-   
+
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
     $user->mailformat = 0;  // Always send HTML version as well
-    $attachment= $course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/'.$certificate->name.'.pdf';
+    $attachment= $course->id.'/moddata/certificate/'.$certificate->id.'/'.$user->id.'/'.$certificate->name.'.pdf';
     $attachname= $certificate->name.'.pdf';
-    set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
-    return email_to_user($USER, $from, $subject, $message, $messagehtml, $attachment, $attachname);
+
+    set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $user->id);
+    return email_to_user($user, $from, $subject, $message, $messagehtml, $attachment, $attachname);
 }
 
 /************************************************************************
