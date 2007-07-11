@@ -80,6 +80,13 @@ function xmldb_certificate_upgrade($oldversion=0) {
         }
     }
 
+    if ($result && $oldversion < 2007061302) {
+        $table  = new XMLDBTable('certificate_linked_modules');
+        $field = new XMLDBField('linkid');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'certificate_id');
+        $result = change_field_unsigned($table, $field);
+    }
+
     return $result;
 }
 

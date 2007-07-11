@@ -70,7 +70,7 @@ $string['date'] = 'On';
 $string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.
                                'activities. Please return to the course to complete your coursework.';
 $string['activitylocklabel'] = 'Linked Activity / Minimum Grade %';
-$string['coursetimedependency'] = 'Minimum required time in course';
+$string['coursetimedependency'] = 'Minimum required minutes in course';
 $string['activitydependencies'] = 'Dependent activities';
 $string['issued'] = 'Issued';
 $string['notissued'] = 'Not Issued';
