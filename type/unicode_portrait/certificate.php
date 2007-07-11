@@ -1,7 +1,7 @@
 <?php
-include '../../tcpdf/tcpdfprotection.php';
-require_once('../../tcpdf/config/lang/eng.php');
-include '../../tcpdf/tcpdf.php';
+include '../../lib/tcpdf/tcpdfprotection.php';
+require_once('../../lib/tcpdf/config/lang/eng.php');
+include '../../lib/tcpdf/tcpdf.php';
 
 // Load certificate info
 $certificateid = $certificate->id;
