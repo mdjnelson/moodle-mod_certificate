@@ -13,6 +13,7 @@ $string['certificate:student'] = 'Get Certificate';
 $string['issueoptions'] = 'Issue Options';
 $string['textoptions'] = 'Text Options';
 $string['designoptions'] = 'Design Options';
+$string['lockingoptions'] = 'Locking Options';
 $string['certificatetype'] = 'Certificate Type';
 $string['emailteachers'] = 'Email Teachers';
 $string['emailothers'] = 'Email Others';
@@ -51,7 +52,12 @@ $string['printdate'] = 'Print Date';
 $string['printseal'] = 'Seal or Logo Image';
 $string['lockgrade'] = 'Lock by grade';
 $string['requiredgrade'] = 'Required course grade';
-$string['locksurvey'] = 'Lock by survey';
+$string['coursetime'] = 'Required course time';
+$string['linkedactivity'] = 'Linked Activity';
+$string['minimumgrade'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Required Grade';
+$string['activitylocklabel'] = 'Linked Activity/Minimum Grade %';
+$string['coursetimedependency'] = 'Minimum required minutes in course';
+$string['activitydependencies'] = 'Dependent activities';
 
 //Strings for verification block 
 $string['configcontent'] = 'Config content';
@@ -69,9 +75,6 @@ $string['date'] = 'On';
 //Certificate view, index, report strings
 $string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.
                                'activities. Please return to the course to complete your coursework.';
-$string['activitylocklabel'] = 'Linked Activity / Minimum Grade %';
-$string['coursetimedependency'] = 'Minimum required minutes in course';
-$string['activitydependencies'] = 'Dependent activities';
 $string['issued'] = 'Issued';
 $string['notissued'] = 'Not Issued';
 $string['notissuedyet'] = 'Not issued yet';
