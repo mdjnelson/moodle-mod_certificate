@@ -190,20 +190,21 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
  * Used for user activity reports.                                      *
  ************************************************************************/
 function certificate_user_complete($course, $user, $mod, $certificate) {
+
     if ($issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
 
-            print_simple_box_start();
-            echo get_string('issued', 'certificate').": ";
-            echo userdate($issue->timecreated);
-    
-            certificate_print_user_files($user->id);
-    
-            echo '<br />';
-    
-           } else {
-           print_string('notissuedyet', 'certificate');
+        print_simple_box_start();
+        echo get_string('issued', 'certificate').": ";
+        echo userdate($issue->timecreated);
+        
+        certificate_print_user_files($user->id);
+        
+        echo '<br />';
+        
+    } else {
+       print_string('notissuedyet', 'certificate');
     }           
-            print_simple_box_end();
+    print_simple_box_end();
 }
 
 /************************************************************************
@@ -299,45 +300,45 @@ function certificate_email_teachers($certificate) {
     global $course, $USER, $CFG;
 
     if ($certificate->emailteachers == 0) {          // No need to do anything
-            return;
+        return;
+    }
+    $certrecord = certificate_get_issue($course, $USER, $certificate->id);
+    $student = $certrecord->studentname;
+    $cm = get_coursemodule_from_instance("certificate", $certificate->id, $course->id);
+    if (groupmode($course, $cm) == SEPARATEGROUPS) {   // Separate groups are being used
+        if (!$group = user_group($course->id, $user->id)) {             // Try to find a group
+            $group->id = 0;                                             // Not in a group, never mind
         }
-       $certrecord = certificate_get_issue($course, $USER, $certificate->id);
-       $student = $certrecord->studentname;
-       $cm = get_coursemodule_from_instance("certificate", $certificate->id, $course->id);
-        if (groupmode($course, $cm) == SEPARATEGROUPS) {   // Separate groups are being used
-            if (!$group = user_group($course->id, $user->id)) {             // Try to find a group
-                $group->id = 0;                                             // Not in a group, never mind
-            }
-            $teachers = get_group_teachers($course->id, $group->id);        // Works even if not in group
-        } else {
-            $teachers = get_course_teachers($course->id);
-        }
+        $teachers = get_group_teachers($course->id, $group->id);        // Works even if not in group
+    } else {
+        $teachers = get_course_teachers($course->id);
+    }
 
-        if ($teachers) {
+    if ($teachers) {
 
-            $strcertificates = get_string('modulenameplural', 'certificate');
-            $strcertificate  = get_string('modulename', 'certificate');
-            $strawarded  = get_string('awarded', 'certificate');
+        $strcertificates = get_string('modulenameplural', 'certificate');
+        $strcertificate  = get_string('modulename', 'certificate');
+        $strawarded  = get_string('awarded', 'certificate');
 
-            foreach ($teachers as $teacher) {
-                unset($info);
+        foreach ($teachers as $teacher) {
+            unset($info);
 
-                $info->student = $student;
-                $info->course = format_string($course->fullname,true);     
-                $info->certificate = format_string($certificate->name,true);
-                $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
-                $from = $student;
-                $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
-                $posttext = certificate_email_teachers_text($info);
-                $posthtml = certificate_email_teachers_html($info);
-                $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
+            $info->student = $student;
+            $info->course = format_string($course->fullname,true);     
+            $info->certificate = format_string($certificate->name,true);
+            $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
+            $from = $student;
+            $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
+            $posttext = certificate_email_teachers_text($info);
+            $posthtml = certificate_email_teachers_html($info);
+            $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
 
-                @email_to_user($teacher, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
-                set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
+            @email_to_user($teacher, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
+            set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
 
         }
     }
-}                
+}
 
 /************************************************************************
  * Alerts others by email of received certificates. First checks        *
@@ -345,10 +346,10 @@ function certificate_email_teachers($certificate) {
  * Uses the email_teachers info.                                        *
  * Code suggested by Eloy Lafuente                                      *
  ************************************************************************/    
-function certificate_email_others ($certificate) {	
+function certificate_email_others ($certificate) {    
     global $course, $USER, $CFG;
 
-	    if ($certificate->emailothers) {          
+    if ($certificate->emailothers) {          
 
        $certrecord = certificate_get_issue($course, $USER, $certificate->id);
        $student = $certrecord->studentname;
@@ -363,19 +364,18 @@ function certificate_email_others ($certificate) {
                 $other = trim($other);
                 if (validate_email($other)) {
                     $destination->email = $other;
-			    unset($info);
-                $info->student = $student;
-                $info->course = format_string($course->fullname,true);     
-                $info->certificate = format_string($certificate->name,true);
-                $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
-                $from = $student;
-                $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
-                $posttext = certificate_email_teachers_text($info);
-                $posthtml = certificate_email_teachers_html($info);
-
-                @email_to_user($destination, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
-                set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
-
+                    unset($info);
+                    $info->student = $student;
+                    $info->course = format_string($course->fullname,true);     
+                    $info->certificate = format_string($certificate->name,true);
+                    $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
+                    $from = $student;
+                    $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
+                    $posttext = certificate_email_teachers_text($info);
+                    $posthtml = certificate_email_teachers_html($info);
+    
+                    @email_to_user($destination, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
+                    set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
                 }
             }
         }
@@ -388,8 +388,8 @@ function certificate_email_others ($certificate) {
  * @return string                                                       *
  ************************************************************************/    
 function certificate_email_teachers_text($info) {
-        $posttext = get_string('emailteachermail', 'certificate', $info)."\n";
-        return $posttext;
+    $posttext = get_string('emailteachermail', 'certificate', $info)."\n";
+    return $posttext;
 }
 
 /************************************************************************
@@ -400,10 +400,10 @@ function certificate_email_teachers_text($info) {
 function certificate_email_teachers_html($info) {
     global $CFG;
 
-        $posthtml  = '<font face="sans-serif">';
-        $posthtml .= '<p>'.get_string('emailteachermailhtml', 'certificate', $info).'</p>';
-        $posthtml .= '</font>';
-        return $posthtml;
+    $posthtml  = '<font face="sans-serif">';
+    $posthtml .= '<p>'.get_string('emailteachermailhtml', 'certificate', $info).'</p>';
+    $posthtml .= '</font>';
+    return $posthtml;
 }
 
 /************************************************************************
@@ -454,7 +454,7 @@ function certificate_count_issues($certificate, $groupid=0) {
     } else {
         $cm = get_coursemodule_from_instance('certificate', $certificate->id);
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-	 if ($users = get_users_by_capability($context, 'mod/certificate:view')) {
+        if ($users = get_users_by_capability($context, 'mod/certificate:view')) {
             foreach ($users as $user) {
                 $array[] = $user->id;
             }
@@ -481,32 +481,32 @@ function certificate_count_issues($certificate, $groupid=0) {
 function certificate_print_user_files($userid=0) {
     global $CFG, $USER;
     
-        $filearea = certificate_file_area_name($userid);
+    $filearea = certificate_file_area_name($userid);
 
-        $output = '';
-    
-        if ($basedir = certificate_file_area($userid)) {
-            if ($files = get_directory_list($basedir)) {
-                require_once($CFG->libdir.'/filelib.php');
-                foreach ($files as $file) {
-                    
-                    $icon = mimeinfo('icon', $file);
-                    
-                    if ($CFG->slasharguments) {
-                        $ffurl = "$CFG->wwwroot/file.php/$filearea/$file";
-                    } else {
-                        $ffurl = "$CFG->wwwroot/file.php?file=/$filearea/$file";
-                    }
+    $output = '';
+
+    if ($basedir = certificate_file_area($userid)) {
+        if ($files = get_directory_list($basedir)) {
+            require_once($CFG->libdir.'/filelib.php');
+            foreach ($files as $file) {
                 
-                    $output .= '<img align="middle" src="'.$CFG->pixpath.'/f/'.$icon.'" height="16" width="16" alt="'.$icon.'" />'.
-                            '<a href="'.$ffurl.'" target="_blank">'.$file.'</a><br />';
+                $icon = mimeinfo('icon', $file);
+                
+                if ($CFG->slasharguments) {
+                    $ffurl = "$CFG->wwwroot/file.php/$filearea/$file";
+                } else {
+                    $ffurl = "$CFG->wwwroot/file.php?file=/$filearea/$file";
                 }
+            
+                $output .= '<img align="middle" src="'.$CFG->pixpath.'/f/'.$icon.'" height="16" width="16" alt="'.$icon.'" />'.
+                        '<a href="'.$ffurl.'" target="_blank">'.$file.'</a><br />';
             }
         }
+    }
 
-        $output = '<div class="files">'.$output.'</div>';
+    $output = '<div class="files">'.$output.'</div>';
 
-        return $output;
+    return $output;
 }
 
 /************************************************************************
@@ -515,8 +515,8 @@ function certificate_print_user_files($userid=0) {
 function certificate_get_issue($course, $user) {
     global $certificate;
     if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
-    $issue = get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
- }
+        $issue = get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
+    }
     return get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
 }
 
@@ -553,20 +553,20 @@ function certificate_types() {
 }
 /*
 function certificate_print_teachers($teachers, $cm) {
-	global $certificate, $course;
-	$i = 0 ;
-	$context = get_context_instance(CONTEXT_MODULE, $cm->id);
-	if($certificate->printteacher){
-	
-	if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher')) {
-		foreach ($teachers as $teacher) {
-			$i++;
-			if($i <5) {
-				$fullname = fullname($teacher, isteacher($course->id));
+    global $certificate, $course;
+    $i = 0 ;
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    if($certificate->printteacher){
+    
+    if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher')) {
+        foreach ($teachers as $teacher) {
+            $i++;
+            if($i <5) {
+                $fullname = fullname($teacher, isteacher($course->id));
             /// Fixed formating
-				    cert_printtext(150, 440+($i *12) , 'L', 'Times', '', 12, $fullname);
-}}		}
-	}
+                    cert_printtext(150, 440+($i *12) , 'L', 'Times', '', 12, $fullname);
+}}        }
+    }
 }*/
 /************************************************************************
  * Search through all the modules, pulling out grade data               *
@@ -643,16 +643,16 @@ function certificate_mod_grade($course, $moduleid) {
     if (file_exists($libfile)) {
         require_once($libfile);
         $gradefunction = $module->name."_grades";
-		if (function_exists($gradefunction)) {   
-        if ($modgrades = $gradefunction($cm->instance)) {
-    $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
-    $modinfo->percentage = round(($modgrades->grades[$USER->id]*100/$modgrades->maxgrade),2);
-    $modinfo->points = $modgrades->grades[$USER->id];
-    return $modinfo;
+        if (function_exists($gradefunction)) {   
+            if ($modgrades = $gradefunction($cm->instance)) {
+                $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
+                $modinfo->percentage = round(($modgrades->grades[$USER->id]*100/$modgrades->maxgrade),2);
+                $modinfo->points = $modgrades->grades[$USER->id];
+                return $modinfo;
+            }
         }
     }
-}
-	return false;
+    return false;
 }
 /************************************************************************
  * Search through all the modules, pulling out grade data               *
@@ -677,7 +677,7 @@ function certificate_get_course_grade($id){
     $totalmaxgrade = .000001;
 
 /// Collect modules data
-$test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
+    $test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
 
 /// Search through all the modules, pulling out grade data
     $sections = get_all_sections($course->id); // Sort everything the same as the course
@@ -717,9 +717,9 @@ $test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused
             }
         }
     }
-	$coursegrade->percentage = round(($totalgrade*100/$totalmaxgrade),2);
+    $coursegrade->percentage = round(($totalgrade*100/$totalmaxgrade),2);
     $coursegrade->points = $totalgrade;  
-	return $coursegrade;
+    return $coursegrade;
 }
 
 /************************************************************************
@@ -747,125 +747,124 @@ function cert_printtext( $x, $y, $align, $font, $style, $size, $text) {
 function draw_frame($certificate, $orientation) {
     global $pdf, $certificate;
 
-if($certificate->bordercolor == 0)    {
-} else                               //do nothing
-if($certificate->bordercolor > 0)    {
+    if($certificate->bordercolor == 0)    {
+    } else if($certificate->bordercolor > 0)    { //do nothing
 
-    switch ($orientation) {
-        case 'L':
-		
-// create outer line border in selected color
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0); //black
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51); //brown
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204); //blue
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0); //green
+        switch ($orientation) {
+            case 'L':
+            
+    // create outer line border in selected color
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0); //black
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51); //brown
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204); //blue
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0); //green
+        }
+            $pdf->Rect( 26, 30, 790, 530, 'F');
+             //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 32, 36, 778, 518, 'F');
+             
+    // create middle line border in selected color
+            if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0);
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51);
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204);
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0);
+        }
+            $pdf->Rect( 41, 45, 760, 500, 'F');
+             //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 42, 46, 758, 498, 'F');
+            
+    // create inner line border in selected color
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0);
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51);
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204);
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0);
+        }
+            $pdf->Rect( 52, 56, 738, 478, 'F');
+             //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);  
+            $pdf->Rect( 56, 60, 730, 470, 'F');
+            break;
+            
+            case 'P':
+    // create outer line border in selected color
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0); //black
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51); //brown
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204); //blue
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0); //green
+        }
+            $pdf->Rect( 20, 20, 560, 800, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 26, 26, 548, 788, 'F');
+            
+    // create middle line border in selected color
+            if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0);
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51);
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204);
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0);
+        }
+            $pdf->Rect( 35, 35, 530, 770, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 36, 36, 528, 768, 'F');
+            
+    // create inner line border in selected color
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0);
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51);
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204);
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0);
+        }
+            $pdf->Rect( 46, 46, 508, 748, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 50, 50, 500, 740, 'F');
+            break;
+        }
     }
-        $pdf->Rect( 26, 30, 790, 530, 'F');
-		 //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 32, 36, 778, 518, 'F');
-		 
-// create middle line border in selected color
-		if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0);
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51);
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204);
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0);
-    }
-        $pdf->Rect( 41, 45, 760, 500, 'F');
-		 //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 42, 46, 758, 498, 'F');
-		
-// create inner line border in selected color
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0);
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51);
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204);
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0);
-    }
-        $pdf->Rect( 52, 56, 738, 478, 'F');
-		 //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);  
-        $pdf->Rect( 56, 60, 730, 470, 'F');
-        break;
-		
-        case 'P':
-// create outer line border in selected color
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0); //black
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51); //brown
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204); //blue
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0); //green
-    }
-        $pdf->Rect( 20, 20, 560, 800, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 26, 26, 548, 788, 'F');
-        
-// create middle line border in selected color
-		if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0);
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51);
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204);
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0);
-    }
-        $pdf->Rect( 35, 35, 530, 770, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 36, 36, 528, 768, 'F');
-		
-// create inner line border in selected color
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0);
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51);
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204);
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0);
-    }
-        $pdf->Rect( 46, 46, 508, 748, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 50, 50, 500, 740, 'F');
-        break;
-    }
-}
 }
 /************************************************************************
  * Creates rectangles for line border for letter size paper.            *
@@ -873,121 +872,120 @@ if($certificate->bordercolor > 0)    {
 function draw_frame_letter($certificate, $orientation) {
     global $pdf, $certificate;
 
-if($certificate->bordercolor == 0)    {
-} else                               //do nothing
-if($certificate->bordercolor > 0)    {
+    if($certificate->bordercolor == 0)    {
+    } elseif($certificate->bordercolor > 0) { //do nothing
     
-    switch ($orientation) {
-        case 'L':
-// create outer line border in selected color
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0); //black
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51); //brown
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204); //blue
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0); //green
+        switch ($orientation) {
+            case 'L':
+    // create outer line border in selected color
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0); //black
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51); //brown
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204); //blue
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0); //green
+        }
+            $pdf->Rect( 26, 25, 741, 555, 'F'); 
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255); 
+            $pdf->Rect( 32, 31, 729, 542, 'F');
+             
+    // create middle line border in selected color
+            if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0);
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51);
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204);
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0);
+        }
+            $pdf->Rect( 41, 40, 711, 525, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 42, 41, 709, 523, 'F');
+            
+    // create inner line border in selected color
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0);
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51);
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204);
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0);
+        }
+            $pdf->Rect( 52, 51, 689, 503, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);  
+            $pdf->Rect( 56, 55, 681, 495, 'F');
+            break;
+            
+            case 'P':
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0); //black
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51); //brown
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204); //blue
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0); //green
+        }
+            $pdf->Rect( 25, 20, 561, 751, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 31, 26, 549, 739, 'F');
+            
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0); //black
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51); //brown
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204); //blue
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0); //green
+        }
+            $pdf->Rect( 40, 35, 531, 721, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);
+            $pdf->Rect( 41, 36, 529, 719, 'F');
+            
+        if ($certificate->bordercolor == 1)    {
+            $pdf->SetFillColor( 0, 0, 0); //black
+        } 
+            if ($certificate->bordercolor == 2)    {
+            $pdf->SetFillColor(153, 102, 51); //brown
+        } 
+            if ($certificate->bordercolor == 3)    {
+            $pdf->SetFillColor( 0, 51, 204); //blue
+        } 
+            if ($certificate->bordercolor == 4)    {
+            $pdf->SetFillColor( 0, 180, 0); //green
+        }
+            $pdf->Rect( 51, 46, 509, 699, 'F');
+            //white rectangle
+            $pdf->SetFillColor( 255, 255, 255);  
+            $pdf->Rect( 55, 50, 501, 691, 'F');
+            break;
+        }
     }
-        $pdf->Rect( 26, 25, 741, 555, 'F'); 
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255); 
-        $pdf->Rect( 32, 31, 729, 542, 'F');
-		 
-// create middle line border in selected color
-		if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0);
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51);
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204);
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0);
-    }
-        $pdf->Rect( 41, 40, 711, 525, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 42, 41, 709, 523, 'F');
-		
-// create inner line border in selected color
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0);
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51);
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204);
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0);
-    }
-        $pdf->Rect( 52, 51, 689, 503, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);  
-        $pdf->Rect( 56, 55, 681, 495, 'F');
-        break;
-		
-        case 'P':
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0); //black
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51); //brown
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204); //blue
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0); //green
-    }
-        $pdf->Rect( 25, 20, 561, 751, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 31, 26, 549, 739, 'F');
-		
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0); //black
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51); //brown
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204); //blue
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0); //green
-    }
-        $pdf->Rect( 40, 35, 531, 721, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);
-        $pdf->Rect( 41, 36, 529, 719, 'F');
-		
-    if ($certificate->bordercolor == 1)    {
-        $pdf->SetFillColor( 0, 0, 0); //black
-    } 
-	    if ($certificate->bordercolor == 2)    {
-        $pdf->SetFillColor(153, 102, 51); //brown
-    } 
-	    if ($certificate->bordercolor == 3)    {
-        $pdf->SetFillColor( 0, 51, 204); //blue
-    } 
-	    if ($certificate->bordercolor == 4)    {
-        $pdf->SetFillColor( 0, 180, 0); //green
-    }
-        $pdf->Rect( 51, 46, 509, 699, 'F');
-        //white rectangle
-        $pdf->SetFillColor( 255, 255, 255);  
-        $pdf->Rect( 55, 50, 501, 691, 'F');
-        break;
-    }
-}
 }
 /************************************************************************
  * Prints border images from the borders folder in PNG or JPG.          *
@@ -1156,17 +1154,16 @@ function print_seal($seal, $orientation, $x, $y, $w, $h) {
  ************************************************************************/
 function certificate_generate_date($certificate, $course) {
     $timecreated = time();
-if($certificate->printdate == 0)    {
-} else                               //do nothing
-if($certificate->printdate > 0)    {
-    if ($certificate->printdate == 1)    {
-    $certdate = $timecreated;
+    if($certificate->printdate == 0)    {
+    } else if($certificate->printdate > 0) { //do nothing
+        if ($certificate->printdate == 1) {
+            $certdate = $timecreated;
+        }
+        if ($certificate->printdate == 2) {
+            $certdate = $course->enrolenddate;
+        }
+        return $certdate;
     }
-    if ($certificate->printdate == 2) {
-    $certdate = $course->enrolenddate;
-    }
-   return $certdate;
- }
 }
 
 /************************************************************************
@@ -1189,17 +1186,18 @@ function certificate_generate_code() {
  ************************************************************************/
 function certificate_prepare_issue($course, $user) {
     global $USER, $certificate;
-	
+    
     if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
-    return get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
-} else 
-    $timecreated = time();
-    $certdate = certificate_generate_date($certificate, $course);
-    $code = certificate_generate_code();
-    $studentname = certificate_generate_studentname($course, $user);
-    insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname, "certdate" => $certdate), false);
-    certificate_email_teachers($certificate);
-    certificate_email_others($certificate);
+        return get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
+    } else {
+        $timecreated = time();
+        $certdate = certificate_generate_date($certificate, $course);
+        $code = certificate_generate_code();
+        $studentname = certificate_generate_studentname($course, $user);
+        insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname, "certdate" => $certdate), false);
+        certificate_email_teachers($certificate);
+        certificate_email_others($certificate);
+    }
 }
 
 /************************************************************************
@@ -1221,7 +1219,7 @@ function certificate_get_borders () {
 /// load border files
     $my_path = "$CFG->dirroot/mod/certificate/pix/borders";
     $borderstyleoptions = array();
-	if ($handle = opendir($my_path)) {
+    if ($handle = opendir($my_path)) {
         while (false !== ($file = readdir($handle))) {
         if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
                 $i = strpos($file, '.'); 
@@ -1239,9 +1237,9 @@ function certificate_get_borders () {
     ksort($borderstyleoptions);
 
 /// Add default borders
-    $borderstyleoptions[0] = get_string('no');	
-	return $borderstyleoptions;
-	}
+    $borderstyleoptions[0] = get_string('no');    
+    return $borderstyleoptions;
+    }
 
 /************************************************************************
  * Get seal images.                                                     *
@@ -1262,11 +1260,11 @@ function certificate_get_seals () {
         }
         closedir($handle);
     }
-	    ksort($sealoptions);
+        ksort($sealoptions);
 
     $sealoptions[0] = get_string('no');
-	return $sealoptions;
-	}
+    return $sealoptions;
+    }
 /************************************************************************
  * Get watermark images.                                                *
  ************************************************************************/
@@ -1292,9 +1290,9 @@ function certificate_get_watermarks () {
     ksort($wmarkoptions);
 
     $wmarkoptions[0] = get_string('no');
-	return $wmarkoptions;
-	
-	}
+    return $wmarkoptions;
+    
+    }
 
 /************************************************************************
  * Get signature images.                                                *
@@ -1304,7 +1302,7 @@ function certificate_get_signatures () {
 
 /// load signature files
     $my_path = "$CFG->dirroot/mod/certificate/pix/signatures";
-	$signatureoptions = array();
+    $signatureoptions = array();
     if ($handle = opendir($my_path)) {
         while (false !== ($file = readdir($handle))) {
             if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
@@ -1354,73 +1352,81 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
     global $CFG;
 
     $lacts[0] = '-- none --';
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'quiz a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'quiz\' AND cm.module = m.id AND a.course = '.$course->id; 
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Quiz: '.$name;
+    if (record_exists('modules', 'name', 'quiz')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'quiz a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'quiz\' AND cm.module = m.id AND a.course = '.$course->id; 
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Quiz: '.$name;
+            }
         }
     }
 
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'assignment a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'assignment\' AND cm.module = m.id AND a.course = '.$course->id; 
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Assignment: '.$name;
+    if (record_exists('modules', 'name', 'assignment')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'assignment a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'assignment\' AND cm.module = m.id AND a.course = '.$course->id; 
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Assignment: '.$name;
+            }
         }
     }
 
-if (!$CFG->prefix.'questionnaire'){
-}else{
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'questionnaire a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'questionnaire\' AND cm.module = m.id AND a.course = '.$course->id; 
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Questionnaire: '.$name;
-        }
-    }
-}
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'lesson a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'lesson\' AND cm.module = m.id AND a.course = '.$course->id; 
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Lesson: '.$name;
+    if (record_exists('modules', 'name', 'questionnaire')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'questionnaire a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'questionnaire\' AND cm.module = m.id AND a.course = '.$course->id; 
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Questionnaire: '.$name;
+            }
         }
     }
 
-if (!$CFG->prefix.'feedback'){
-}else{
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'feedback a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'feedback\' AND cm.module = m.id AND a.course = '.$course->id; 
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Feedback: '.$name;
+    if (record_exists('modules', 'name', 'lesson')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'lesson a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'lesson\' AND cm.module = m.id AND a.course = '.$course->id; 
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Lesson: '.$name;
+            }
         }
     }
-}
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'survey a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'survey\' AND cm.module = m.id AND a.course = '.$course->id; 
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Survey: '.$name;
+
+    if (record_exists('modules', 'name', 'feedback')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'feedback a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'feedback\' AND cm.module = m.id AND a.course = '.$course->id; 
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Feedback: '.$name;
+            }
+        }
+    }
+
+    if (record_exists('modules', 'name', 'survey')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'survey a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'survey\' AND cm.module = m.id AND a.course = '.$course->id; 
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Survey: '.$name;
+            }
         }
     }
 
@@ -1446,7 +1452,7 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         $questid = get_field('modules', 'id', 'name', 'questionnaire');
         $assid = get_field('modules', 'id', 'name', 'assignment');
         $lessid = get_field('modules', 'id', 'name', 'lesson');
-		$feedid = get_field('modules', 'id', 'name', 'feedback');
+        $feedid = get_field('modules', 'id', 'name', 'feedback');
         $survid = get_field('modules', 'id', 'name', 'survey');
     }
 
@@ -1474,7 +1480,7 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
 
     } else if ($cm->module == $questid) {
         return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
-		
+        
     } else if ($cm->module == $feedid) {
         return (get_record('feedback_completed', 'id', $cm->instance, 'userid', $userid) !== false);
 
