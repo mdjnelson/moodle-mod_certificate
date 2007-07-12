@@ -33,6 +33,8 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addElement('select', 'delivery', get_string('deliver', 'certificate'), $deliveryoptions);
         $mform->setDefault('delivery', 0);
 	    $mform->setHelpButton('delivery', array('delivery', get_string('deliver', 'certificate'), 'certificate'));
+//-------------------------------------------------------------------------------
+        $mform->addElement('header', 'lockingoptions', get_string('lockingoptions', 'certificate'));
 
 //        $gradeoptions = certificate_get_mod_grades($COURSE);
 //        $mform->addElement('select', 'lockgrade', get_string('lockgrade', 'certificate'), $gradeoptions);
@@ -148,18 +150,15 @@ class mod_certificate_mod_form extends moodleform_mod {
         $linkedacts = certificate_get_linked_activities($form->instance);
         $mform->addElement('text', 'coursetime', get_string('coursetimedependency', 'certificate'), array('size'=>'3'));
         $mform->setDefault('coursetime', isset($linkedacts[CERTCOURSETIMEID]) ? $linkedacts[CERTCOURSETIMEID]->linkgrade : 0);
-
+	    $mform->setHelpButton('coursetime', array('coursetime', get_string('coursetime', 'certificate'), 'certificate'));
         $formgroup = array();
 //        $formgroup[] =& $mform->createElement('static', 'actlabel', get_string('activitydependencies', 'certificate'));
-        $formgroup[] =& $mform->createElement('static', 'linkedactlabel', 'Linked Activity', 'Linked Activity');
-        $formgroup[] =& $mform->createElement('static', 'linkedactgrade', 'Minimum Grade %', 'Minimum Grade %');
+        $formgroup[] =& $mform->createElement('static', 'linkedactlabel', 'Linked Activity', get_string('linkedactivity', 'certificate'));
+        $formgroup[] =& $mform->createElement('static', 'linkedactgrade', 'Minimum Grade %', get_string('minimumgrade', 'certificate'));
         $mform->addGroup($formgroup, 'actlabel', get_string('activitydependencies', 'certificate'), array(' '), false);
         if (is_array($linkedacts)) {
             reset($linkedacts);
             unset($linkedacts[CERTCOURSETIMEID]);
-        }
-        for ($i=0; $i<=100; $i++) {
-            $mingrades[$i] = $i;
         }
         for ($i=0; $i<5; $i++) {
             $formgroup = array();
@@ -174,9 +173,11 @@ class mod_certificate_mod_form extends moodleform_mod {
             }
             $formgroup[] =& $mform->createElement('select', 'linkid['.$i.']', '', $activities);
             $mform->setDefault('linkid['.$i.']', $selected);
-            $formgroup[] =& $mform->createElement('select', 'linkgrade['.$i.']', '', $mingrades);
+            $formgroup[] =& $mform->createElement('select', 'linkgrade['.$i.']', '', $restrictoptions);
             $mform->setDefault('linkgrade['.$i.']', $act->linkgrade);
             $mform->addGroup($formgroup, 'actlab'.$i, ($i+1), array(' '), false);
+            $mform->setHelpButton('actlabel', array('lockedmod', get_string('activitydependencies', 'certificate'), 'certificate'));
+
             if ($selected) {
                 $mform->addElement('hidden', 'linkentry['.$i.']', $act->id);
             }

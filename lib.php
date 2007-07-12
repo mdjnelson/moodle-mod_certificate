@@ -372,7 +372,6 @@ function certificate_email_others ($certificate) {
                 $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
                 $posttext = certificate_email_teachers_text($info);
                 $posthtml = certificate_email_teachers_html($info);
-                $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
 
                 @email_to_user($destination, $from, $postsubject, $posttext, $posthtml);  // If it fails, oh well, too bad.
                 set_field("certificate_issues","mailed","1","certificateid", $certificate->id, "userid", $USER->id);
@@ -1378,7 +1377,7 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
            'm.name = \'assignment\' AND cm.module = m.id AND a.course = '.$course->id; 
     if ($mods = get_records_sql_menu($sql)) {
         foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Asmnt.: '.$name;
+            $lacts[$key] = 'Assignment: '.$name;
         }
     }
 
@@ -1389,7 +1388,7 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
            'm.name = \'questionnaire\' AND cm.module = m.id AND a.course = '.$course->id; 
     if ($mods = get_records_sql_menu($sql)) {
         foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Quest.: '.$name;
+            $lacts[$key] = 'Questionnaire: '.$name;
         }
     }
 
@@ -1404,6 +1403,28 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
         }
     }
 
+$sql = 'SELECT DISTINCT cm.id,a.name ' .
+           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'feedback a,'.
+           $CFG->prefix.'modules m '.
+           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+           'm.name = \'feedback\' AND cm.module = m.id AND a.course = '.$course->id; 
+    if ($mods = get_records_sql_menu($sql)) {
+        foreach ($mods as $key => $name) {
+            $lacts[$key] = 'Feedback: '.$name;
+        }
+    }
+
+$sql = 'SELECT DISTINCT cm.id,a.name ' .
+           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'survey a,'.
+           $CFG->prefix.'modules m '.
+           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+           'm.name = \'survey\' AND cm.module = m.id AND a.course = '.$course->id; 
+    if ($mods = get_records_sql_menu($sql)) {
+        foreach ($mods as $key => $name) {
+            $lacts[$key] = 'Survey: '.$name;
+        }
+    }
+
     return $lacts;
 }
 
@@ -1415,7 +1436,7 @@ function certificate_get_linked_activities($certid) {
 
 function certificate_activity_completed(&$activity, &$cm, $userid=0) {
     global $CFG, $USER;
-    static $quizid, $questid, $assid, $lessid;
+    static $quizid, $questid, $assid, $lessid, $feedid, $survid;
 
     if (!$userid) {
         $userid = $USER->id;
@@ -1426,6 +1447,8 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         $questid = get_field('modules', 'id', 'name', 'questionnaire');
         $assid = get_field('modules', 'id', 'name', 'assignment');
         $lessid = get_field('modules', 'id', 'name', 'lesson');
+		$feedid = get_field('modules', 'id', 'name', 'feedback');
+        $survid = get_field('modules', 'id', 'name', 'survey');
     }
 
     if ($cm->module == $quizid) {
@@ -1452,6 +1475,13 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
 
     } else if ($cm->module == $questid) {
         return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
+		
+    } else if ($cm->module == $feedid) {
+        return (get_record('feedback_completed', 'qid', $cm->instance, 'userid', $userid) !== false);
+
+    } else if ($cm->module == $survid) {
+        return (get_record('survey_answers', 'qid', $cm->instance, 'userid', $userid) !== false);
+
 
     } else if ($cm->module == $lessid) {
         require_once($CFG->dirroot.'/mod/lesson/locallib.php');
