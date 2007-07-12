@@ -1332,8 +1332,11 @@ function certificate_grade_condition() {
 
     $restrict_errors = '';
 
-    if (!certificate_is_available($certificate->id, $course->id)) {
-        $restrict_errors[] = get_string('incompletemessage', 'certificate');
+    if (!certificate_is_available_time($certificate->id, $course->id)) {
+        $restrict_errors[] = get_string('errorlocktime', 'certificate');
+    }
+    if (!certificate_is_available_mod($certificate->id, $course->id)) {
+        $restrict_errors[] = get_string('errorlockmod', 'certificate');
     }
     if ($certificate->lockgrade == 1) {
         $coursegrade = certificate_get_course_grade($course->id);
@@ -1342,14 +1345,6 @@ function certificate_grade_condition() {
             $a->needed = $certificate->requiredgrade;
             $restrict_errors[] = get_string('errorlockgradecourse', 'certificate', $a);
          }
-    } else if ($certificate->lockgrade > 1) {
-        $modinfo = certificate_mod_grade($course, $certificate->printgrade);
-        if ($certificate->requiredgrade > $modinfo->percentage) {
-            $a->mod = $modinfo->name;
-            $a->current = $modinfo->percentage;
-            $a->needed = $certificate->requiredgrade;
-            $restrict_errors[] = get_string('errorlockgrade', 'certificate', $a);
-        }
     }
 
     return $restrict_errors;
@@ -1381,6 +1376,8 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
         }
     }
 
+if (!$CFG->prefix.'questionnaire'){
+}else{
     $sql = 'SELECT DISTINCT cm.id,a.name ' .
            'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'questionnaire a,'.
            $CFG->prefix.'modules m '.
@@ -1391,7 +1388,7 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
             $lacts[$key] = 'Questionnaire: '.$name;
         }
     }
-
+}
     $sql = 'SELECT DISTINCT cm.id,a.name ' .
            'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'lesson a,'.
            $CFG->prefix.'modules m '.
@@ -1403,6 +1400,8 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
         }
     }
 
+if (!$CFG->prefix.'feedback'){
+}else{
     $sql = 'SELECT DISTINCT cm.id,a.name ' .
            'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'feedback a,'.
            $CFG->prefix.'modules m '.
@@ -1413,7 +1412,7 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
             $lacts[$key] = 'Feedback: '.$name;
         }
     }
-
+}
     $sql = 'SELECT DISTINCT cm.id,a.name ' .
            'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'survey a,'.
            $CFG->prefix.'modules m '.
@@ -1498,7 +1497,7 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
     }
 }
 
-function certificate_is_available($certid, $courseid, $userid=0) {
+function certificate_is_available_time($certid, $courseid, $userid=0) {
     global $USER;
 
     if (!$userid) {
@@ -1514,14 +1513,27 @@ function certificate_is_available($certid, $courseid, $userid=0) {
                     ((tl_get_course_time($courseid, $userid)/60) < $activity->linkgrade)) {
                     return false;
                 }
-            } else {
+            }
+        }
+    }
+    return true;
+}
+function certificate_is_available_mod($certid, $courseid, $userid=0) {
+    global $USER;
+
+    if (!$userid) {
+        $userid = $USER->id;
+    }
+
+    if ($linked_acts = certificate_get_linked_activities($certid)) {
+        $message = '';
+        foreach ($linked_acts as $key => $activity) {
                 $cm = get_record('course_modules', 'id', $activity->linkid);
                 if (!certificate_activity_completed($activity, $cm, $userid)) {
                     return false;
                 }
             }
         }
-    }
     return true;
 }
 

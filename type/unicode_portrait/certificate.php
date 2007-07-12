@@ -32,7 +32,7 @@ if($certificate->printdate > 0)    {
 //Grade formatting - can be customized if necessary
 $grade = '';
 //Print the course grade
-$coursegrade = get_course_grade($course->id);    
+$coursegrade = certificate_get_course_grade($course->id);    
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
@@ -167,7 +167,7 @@ $customtext = $certificate->customtext;
 			$i++;
 			if($i <5) {
 				$teachernames = fullname($teacher);
-	cert_printtext(85, 590+($i *12) , 'L', 'Times', '', 12, $teachernames);
+	cert_printtext(85, 590+($i *12) , 'L', 'FreeSerif', '', 12, $teachernames);
 }}}}
     cert_printtext(58, 600, '', '', '', '12', '');
 	$pdf->SetLeftMargin(85);

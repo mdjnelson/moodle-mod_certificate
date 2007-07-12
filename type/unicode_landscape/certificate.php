@@ -32,7 +32,7 @@ if($certificate->printdate > 0)    {
 //Grade formatting - can be customized if necessary
 $grade = '';
 //Print the course grade
-$coursegrade = get_course_grade($course->id);    
+$coursegrade = certificate_get_course_grade($course->id);    
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
@@ -155,9 +155,6 @@ $customtext = $certificate->customtext;
 	cert_printtext(170, 280, 'C', 'FreeSerif', '', 20, get_string('statementlandscape', 'certificate'));
     cert_printtext(170, 330, 'C', 'FreeSerif', '', 20, $course->fullname);
     cert_printtext(170, 380, 'C', 'FreeSerif', '', 14, $certificatedate);
-    cert_printtext(130, 440, 'L', 'FreeSerif', '', 12, $teachername1);
-    cert_printtext(130, 460, 'L', 'FreeSerif', '', 12, $teachername2);
-    cert_printtext(130, 480, 'L', 'FreeSerif', '', 12, $teachername3);
     cert_printtext(170, 420, 'C', 'FreeSerif', '', 10, $grade);
     cert_printtext(170, 432, 'C', 'FreeSerif', '', 10, $credithours);
     cert_printtext(170, 500, 'C', 'FreeSerif', '', 10, $code);
@@ -167,7 +164,7 @@ $customtext = $certificate->customtext;
     if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort='u.lastname ASC')) {
 		foreach ($teachers as $teacher) {
 			$i++;
-	cert_printtext(130, 440+($i *12) , 'L', 'Times', '', 12, fullname($teacher));
+	cert_printtext(130, 440+($i *12) , 'L', 'FreeSerif', '', 12, fullname($teacher));
 }}}
 
 

@@ -10,8 +10,8 @@ $string['certificate:printteacher'] = 'Print Teacher';
 $string['certificate:student'] = 'Get Certificate';
 
 //Adding an instance
-$string['addlinklabel'] = '+';
-$string['addlinktitle'] = 'Add another linked activity option';
+$string['addlinklabel'] = 'Add another linked activity option';
+$string['addlinktitle'] = 'Click to add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
 $string['textoptions'] = 'Text Options';
 $string['designoptions'] = 'Design Options';
@@ -97,6 +97,8 @@ $string['receivedcerts'] = 'Received certificates';
 $string['errorlockgrade'] = 'Your current grade on $a->mod ($a->current%%) is below the grade required ($a->needed%%) to receive the certificate.';
 $string['errorlocksurvey'] = 'You need to complete all course surveys before receving your certificate.';
 $string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
+$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
+$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
 
 //Email text
 $string['emailstudenttext'] = 'Attached is your certificate for $a->course.';
