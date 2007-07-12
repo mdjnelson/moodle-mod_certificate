@@ -41,147 +41,31 @@ class mod_certificate_mod_form extends moodleform_mod {
 //        $mform->setDefault('lockgrade', 0);
 //        $mform->setHelpButton('lockgrade', array('lockgrade', get_string('lockgrade', 'certificate'), 'certificate'));
 
-        $restrictoptions = array();
-        $restrictoptions[0]  = get_string('no');
-        $restrictoptions[100] = '100%';
-        $restrictoptions[99] = '99%';
-        $restrictoptions[98] = '98%';
-        $restrictoptions[97] = '97%';
-        $restrictoptions[96] = '96%';
-        $restrictoptions[95] = '95%';
-        $restrictoptions[94] = '94%';
-        $restrictoptions[93] = '93%';
-        $restrictoptions[92] = '92%';
-        $restrictoptions[91] = '91%';
-        $restrictoptions[90] = '90%';
-        $restrictoptions[89] = '89%';
-        $restrictoptions[88] = '88%';
-        $restrictoptions[87] = '87%';
-        $restrictoptions[86] = '86%';
-        $restrictoptions[85] = '85%';
-        $restrictoptions[84] = '84%';
-        $restrictoptions[83] = '83%';
-        $restrictoptions[82] = '82%';
-        $restrictoptions[81] = '81%';
-        $restrictoptions[80] = '80%';
-        $restrictoptions[79] = '79%';
-        $restrictoptions[78] = '78%';
-        $restrictoptions[77] = '77%';
-        $restrictoptions[76] = '76%';
-        $restrictoptions[75] = '75%';
-        $restrictoptions[74] = '74%';
-        $restrictoptions[73] = '73%';
-        $restrictoptions[72] = '72%';
-        $restrictoptions[71] = '71%';
-        $restrictoptions[70] = '70%';
-        $restrictoptions[69] = '69%';
-        $restrictoptions[68] = '68%';
-        $restrictoptions[67] = '67%';
-        $restrictoptions[66] = '66%';
-        $restrictoptions[65] = '65%';
-        $restrictoptions[64] = '64%';
-        $restrictoptions[63] = '63%';
-        $restrictoptions[62] = '62%';
-        $restrictoptions[61] = '61%';
-        $restrictoptions[60] = '60%';
-        $restrictoptions[59] = '59%';
-        $restrictoptions[58] = '58%';
-        $restrictoptions[57] = '57%';
-        $restrictoptions[56] = '56%';
-        $restrictoptions[55] = '55%';
-        $restrictoptions[54] = '54%';
-        $restrictoptions[53] = '53%';
-        $restrictoptions[52] = '52%';
-        $restrictoptions[51] = '51%';
-		$restrictoptions[50] = '50%';
-        $restrictoptions[49] = '49%';
-        $restrictoptions[48] = '48%';
-        $restrictoptions[47] = '47%';
-        $restrictoptions[46] = '46%';
-        $restrictoptions[45] = '45%';
-        $restrictoptions[44] = '44%';
-        $restrictoptions[43] = '43%';
-        $restrictoptions[42] = '42%';
-        $restrictoptions[41] = '41%';
-        $restrictoptions[40] = '40%';
-        $restrictoptions[39] = '39%';
-        $restrictoptions[38] = '38%';
-        $restrictoptions[37] = '37%';
-        $restrictoptions[36] = '36%';
-        $restrictoptions[35] = '35%';
-        $restrictoptions[34] = '34%';
-        $restrictoptions[33] = '33%';
-        $restrictoptions[32] = '32%';
-		$restrictoptions[31] = '31%';
-        $restrictoptions[30] = '30%';
-        $restrictoptions[29] = '29%';
-        $restrictoptions[28] = '28%';
-        $restrictoptions[27] = '27%';
-        $restrictoptions[26] = '26%';
-        $restrictoptions[25] = '25%';
-        $restrictoptions[24] = '24%';
-        $restrictoptions[23] = '23%';
-        $restrictoptions[22] = '22%';
-		$restrictoptions[21] = '21%';
-		$restrictoptions[20] = '20%';
-        $restrictoptions[19] = '19%';
-        $restrictoptions[18] = '18%';
-        $restrictoptions[17] = '17%';
-        $restrictoptions[16] = '16%';
-        $restrictoptions[15] = '15%';
-        $restrictoptions[14] = '14%';
-        $restrictoptions[13] = '13%';
-        $restrictoptions[12] = '12%';
-		$restrictoptions[11] = '11%';
-        $restrictoptions[10]= '10%';
-        $restrictoptions[9] = '9%';
-        $restrictoptions[8] = '8%';
-        $restrictoptions[7] = '7%';
-        $restrictoptions[6] = '6%';
-        $restrictoptions[5] = '5%';
-        $restrictoptions[4] = '4%';
-        $restrictoptions[3] = '3%';
-        $restrictoptions[2] = '2%';
-        $restrictoptions[1] = '1%';
-		$mform->addElement('select', 'requiredgrade', get_string('requiredgrade', 'certificate'), $restrictoptions);
+        $this->restrictoptions = array();
+        $this->restrictoptions[0]  = get_string('no');
+        for ($i = 100; $i > 0; $i--) {
+            $this->restrictoptions[$i] = $i.'%';
+        }
+		$mform->addElement('select', 'requiredgrade', get_string('requiredgrade', 'certificate'), $this->restrictoptions);
         $mform->setHelpButton('requiredgrade', array('requiredgrade', get_string('requiredgrade', 'certificate'), 'certificate'));
 
-        $activities = certificate_get_possible_linked_activities($COURSE, $form->instance);
-        $linkedacts = certificate_get_linked_activities($form->instance);
+        $this->activities = certificate_get_possible_linked_activities($COURSE, $form->instance);
+
         $mform->addElement('text', 'coursetime', get_string('coursetimedependency', 'certificate'), array('size'=>'3'));
         $mform->setDefault('coursetime', isset($linkedacts[CERTCOURSETIMEID]) ? $linkedacts[CERTCOURSETIMEID]->linkgrade : 0);
 	    $mform->setHelpButton('coursetime', array('coursetime', get_string('coursetime', 'certificate'), 'certificate'));
         $formgroup = array();
-//        $formgroup[] =& $mform->createElement('static', 'actlabel', get_string('activitydependencies', 'certificate'));
         $formgroup[] =& $mform->createElement('static', 'linkedactlabel', 'Linked Activity', get_string('linkedactivity', 'certificate'));
         $formgroup[] =& $mform->createElement('static', 'linkedactgrade', 'Minimum Grade %', get_string('minimumgrade', 'certificate'));
         $mform->addGroup($formgroup, 'actlabel', get_string('activitydependencies', 'certificate'), array(' '), false);
-        if (is_array($linkedacts)) {
-            reset($linkedacts);
-            unset($linkedacts[CERTCOURSETIMEID]);
-        }
-        for ($i=0; $i<5; $i++) {
-            $formgroup = array();
-            if (is_array($linkedacts) && (($act = current($linkedacts)) !== false)) {
-                next($linkedacts);
-                $selected = $act->linkid;
-            } else {
-                $act = new Object();
-                $act->id = 0;
-                $act->linkgrade = '';
-                $selected = 0;
-            }
-            $formgroup[] =& $mform->createElement('select', 'linkid['.$i.']', '', $activities);
-            $mform->setDefault('linkid['.$i.']', $selected);
-            $formgroup[] =& $mform->createElement('select', 'linkgrade['.$i.']', '', $restrictoptions);
-            $mform->setDefault('linkgrade['.$i.']', $act->linkgrade);
-            $mform->addGroup($formgroup, 'actlab'.$i, ($i+1), array(' '), false);
-            $mform->setHelpButton('actlabel', array('lockedmod', get_string('activitydependencies', 'certificate'), 'certificate'));
+        $mform->setHelpButton('actlabel', array('lockedmod', get_string('activitydependencies', 'certificate'), 'certificate'));
 
-            if ($selected) {
-                $mform->addElement('hidden', 'linkentry['.$i.']', $act->id);
-            }
-        }
+/// The linked activities portion goes here, but is forced in in the 'definition_after_data' function so
+/// that we can get any elements added in the form and not overwrite them with what's in the database.
+
+        $mform->addElement('submit', 'addlink', get_string('addlinklabel', 'certificate'),
+                           array('title' => get_string('addlinktitle', 'certificate')));
+        $mform->registerNoSubmitButton('addlink');
 
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));		
@@ -262,7 +146,72 @@ class mod_certificate_mod_form extends moodleform_mod {
 
 	}
 
+/**
+ * Add the linked activities portion only after the entire form has been created. That way, we can act
+ * on previous added values that haven't been committed to the database.
+ * Check for an 'addlink' button. If the linked activities fields are all full, add an empty one.
+ */
+    function definition_after_data() {
+        global $form;
 
+        /// This gets called more than once, and there's no way to tell which time this is, so set a 
+        /// variable to matk it as called so we only do this processing once.
+        if (!empty($this->def_after_data_done)) {
+            return;
+        }
+        $this->def_after_data_done = true;
 
+        $mform    =& $this->_form;
+        $fdata = $mform->getSubmitValues();
+
+    /// Get the existing linked activities from the database, unless this form has resubmitted itself, in
+    /// which case they will be in the form already.
+        $linkids = array();
+        $linkgrade = array();
+        $linkentry = array();
+
+        if (empty($fdata)) {
+            if ($linkedacts = certificate_get_linked_activities($form->instance)) {
+                foreach ($linkedacts as $idx => $linkedact) {
+                    if ($idx != CERTCOURSETIMEID) {
+                        $linkids[] = $linkedact->linkid;
+                        $linkgrades[] = $linkedact->linkgrade;
+                        $linkentry[] = $linkedact->id;
+                    }
+                }
+            }
+        } else {
+            foreach ($fdata['linkid'] as $idx => $linkid) {
+                $linkids[$idx] = $linkid;
+                $linkgrades[$idx] = $fdata['linkgrade'][$idx];
+                if (!empty($fdata['linkentry'][$idx])) {
+                    $linkentry[$idx] = $fdata['linkentry'][$idx];
+                }
+            }
+        }
+
+        foreach ($linkids as $idx => $linkid) {
+            $formgroup = array();
+            $formgroup[] =& $mform->createElement('select', 'linkid['.$idx.']', '', $this->activities);
+            $mform->setDefault('linkid['.$idx.']', $linkid);
+            $formgroup[] =& $mform->createElement('select', 'linkgrade['.$idx.']', '', $this->restrictoptions);
+            $mform->setDefault('linkgrade['.$idx.']', $linkgrades[$idx]);
+            $group =& $mform->createElement('group', 'actlab'.$idx, ($idx+1), $formgroup, array(' '), false);
+            $mform->insertElementBefore($group, 'addlink');
+            if (!empty($linkentry[$idx])) {
+                $mform->addElement('hidden', 'linkentry['.$idx.']', $linkentry[$idx]);
+            }
+        }
+
+        $numlacts = count($linkids);
+        $formgroup = array();
+        $formgroup[] =& $mform->createElement('select', 'linkid['.$numlacts.']', '', $this->activities);
+        $mform->setDefault('linkid['.$numlacts.']', 0);
+        $formgroup[] =& $mform->createElement('select', 'linkgrade['.$numlacts.']', '', $this->restrictoptions);
+        $mform->setDefault('linkgrade['.$numlacts.']', '');
+        $group =& $mform->createElement('group', 'actlab'.$numlacts, ($numlacts+1), $formgroup, array(' '), false);
+        $mform->insertElementBefore($group, 'addlink');
+
+    }
 }
 ?>

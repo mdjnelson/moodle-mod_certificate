@@ -1403,7 +1403,7 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
         }
     }
 
-$sql = 'SELECT DISTINCT cm.id,a.name ' .
+    $sql = 'SELECT DISTINCT cm.id,a.name ' .
            'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'feedback a,'.
            $CFG->prefix.'modules m '.
            'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
@@ -1414,7 +1414,7 @@ $sql = 'SELECT DISTINCT cm.id,a.name ' .
         }
     }
 
-$sql = 'SELECT DISTINCT cm.id,a.name ' .
+    $sql = 'SELECT DISTINCT cm.id,a.name ' .
            'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'survey a,'.
            $CFG->prefix.'modules m '.
            'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.

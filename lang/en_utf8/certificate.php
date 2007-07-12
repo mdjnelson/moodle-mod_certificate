@@ -10,6 +10,8 @@ $string['certificate:printteacher'] = 'Print Teacher';
 $string['certificate:student'] = 'Get Certificate';
 
 //Adding an instance
+$string['addlinklabel'] = '+';
+$string['addlinktitle'] = 'Add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
 $string['textoptions'] = 'Text Options';
 $string['designoptions'] = 'Design Options';
