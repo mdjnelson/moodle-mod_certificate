@@ -87,6 +87,14 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $result = change_field_unsigned($table, $field);
     }
 
+    if ($result && $oldversion < 2007061303) {
+    /// Add new field to certificate_issues table
+
+        $table = new XMLDBTable('certificate_issues');
+        $field = new XMLDBField('issued');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'certdate');
+        $result = $result && add_field($table, $field);
+}
     return $result;
 }
 
