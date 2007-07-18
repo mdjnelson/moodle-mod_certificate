@@ -175,7 +175,7 @@ function delete_certificate_files($certificate='') {
 function certificate_user_outline($course, $user, $mod, $certificate) {
     if ($issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
         $result->info = get_string('issued', 'certificate');
-        $result->time = $issue->timecreated;
+        $result->time = $issue->certdate;
      } 
         if (!$issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
         $result->info = get_string('notissued', 'certificate');
@@ -190,21 +190,20 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
  * Used for user activity reports.                                      *
  ************************************************************************/
 function certificate_user_complete($course, $user, $mod, $certificate) {
-
     if ($issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
 
-        print_simple_box_start();
-        echo get_string('issued', 'certificate').": ";
-        echo userdate($issue->timecreated);
-        
-        certificate_print_user_files($user->id);
-        
-        echo '<br />';
-        
-    } else {
-       print_string('notissuedyet', 'certificate');
+            print_simple_box_start();
+            echo get_string('issued', 'certificate').": ";
+            echo userdate($issue->certdate);
+    
+            certificate_print_user_files($user->id);
+    
+            echo '<br />';
+    
+           } else {
+           print_string('notissuedyet', 'certificate');
     }           
-    print_simple_box_end();
+            print_simple_box_end();
 }
 
 /************************************************************************
@@ -448,7 +447,7 @@ function certificate_count_issues($certificate, $groupid=0) {
                                      FROM {$CFG->prefix}certificate_issues a,
                                           {$CFG->prefix}groups_members g
                                     WHERE a.certificateid = $cerificate->id 
-                                      AND a.timecreated > 0
+                                      AND a.certdate > 0
                                       AND g.groupid = '$groupid' 
                                       AND a.userid = g.userid ");
     } else {
@@ -464,7 +463,7 @@ function certificate_count_issues($certificate, $groupid=0) {
             return count_records_sql("SELECT COUNT(*)
                                       FROM {$CFG->prefix}certificate_issues
                                      WHERE certificateid = '$certificate->id' 
-                                       AND timecreated > 0
+                                       AND certdate > 0
                                        AND userid IN $userlists ");
         } else {
             return 0; // no users enroled in course
@@ -530,7 +529,8 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC") 
                               FROM {$CFG->prefix}certificate_issues s, 
                                    {$CFG->prefix}user u
                              WHERE s.certificateid = '$certificate' 
-                               AND s.userid = u.id 
+                               AND s.userid = u.id
+                               AND s.certdate > 0
                              ORDER BY $sort");
 }
 
@@ -1154,8 +1154,8 @@ function print_seal($seal, $orientation, $x, $y, $w, $h) {
  ************************************************************************/
 function certificate_generate_date($certificate, $course) {
     $timecreated = time();
-    if($certificate->printdate == 0)    {
-    } else if($certificate->printdate > 0) { //do nothing
+    if($certificate->printdate == 0)    {//do nothing
+    } else if($certificate->printdate > 0) { 
         if ($certificate->printdate == 1) {
             $certdate = $timecreated;
         }
@@ -1186,18 +1186,24 @@ function certificate_generate_code() {
  ************************************************************************/
 function certificate_prepare_issue($course, $user) {
     global $USER, $certificate;
-    
     if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
-        return get_record("certificate_issues", "certificateid", $certificate->id, "userid", $user->id);
-    } else {
-        $timecreated = time();
-        $certdate = certificate_generate_date($certificate, $course);
-        $code = certificate_generate_code();
-        $studentname = certificate_generate_studentname($course, $user);
-        insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname, "certdate" => $certdate), false);
-        certificate_email_teachers($certificate);
-        certificate_email_others($certificate);
-    }
+    return;
+} else 
+    $timecreated = time();
+    $code = certificate_generate_code();
+    $studentname = certificate_generate_studentname($course, $user);
+    insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname), false);
+}
+/************************************************************************
+ * Inserts user data when a certificate is created.                     *
+ ************************************************************************/
+function certificate_issue($course, $user) {
+    global $USER, $certificate;
+    $certrecord = certificate_get_issue($course, $USER, $certificate->id);
+    $certrecord->certdate = time();
+    update_record("certificate_issues", $certrecord);
+    certificate_email_teachers($certificate);
+    certificate_email_others($certificate);
 }
 
 /************************************************************************
@@ -1322,7 +1328,8 @@ function certificate_get_signatures () {
 
 
 /************************************************************************
- * Grade/Lock functions - functions for conditionally locking certificate.
+ * Grade/Lock functions-functions for conditionally locking certificate.*
+ * Mike Churchward                                                      *
  ************************************************************************/
 
 function certificate_grade_condition() {
@@ -1429,6 +1436,16 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
             }
         }
     }
+    $sql = 'SELECT DISTINCT cm.id,a.name ' .
+           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'scorm a,'.
+           $CFG->prefix.'modules m '.
+           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+           'm.name = \'scorm\' AND cm.module = m.id AND a.course = '.$course->id; 
+    if ($mods = get_records_sql_menu($sql)) {
+        foreach ($mods as $key => $name) {
+            $lacts[$key] = 'Scorm: '.$name;
+        }
+    }
 
     return $lacts;
 }
@@ -1441,7 +1458,7 @@ function certificate_get_linked_activities($certid) {
 
 function certificate_activity_completed(&$activity, &$cm, $userid=0) {
     global $CFG, $USER;
-    static $quizid, $questid, $assid, $lessid, $feedid, $survid;
+    static $quizid, $questid, $assid, $lessid, $feedid, $survid, $scormid;
 
     if (!$userid) {
         $userid = $USER->id;
@@ -1454,6 +1471,7 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         $lessid = get_field('modules', 'id', 'name', 'lesson');
         $feedid = get_field('modules', 'id', 'name', 'feedback');
         $survid = get_field('modules', 'id', 'name', 'survey');
+        $scormid = get_field('modules', 'id', 'name', 'scorm');
     }
 
     if ($cm->module == $quizid) {
@@ -1487,6 +1505,19 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
     } else if ($cm->module == $survid) {
         return (get_record('survey_answers', 'id', $cm->instance, 'userid', $userid) !== false);
 
+    } else if ($cm->module == $scormid) {
+        require_once($CFG->dirroot.'/mod/scorm/locallib.php');
+        $scorm = get_record('scorm', 'id', $cm->instance);
+        $score = scorm_grade_user($scorm, $userid);
+    if (($scorm->grademethod % 10) == 0) { // GRADESCOES
+        if (!$scorm->maxgrade = count_records_select('scorm_scoes',"scorm='$scormid' AND launch<>''")) {
+            return NULL;
+        }
+    } else {
+        $return->maxgrade = $scorm->maxgrade;
+        $grade = (int)(((float)$score / (float)$scorm->maxgrade) * 100.0);
+        return ($grade >= (int)$activity->linkgrade);
+    }
 
     } else if ($cm->module == $lessid) {
         require_once($CFG->dirroot.'/mod/lesson/locallib.php');
@@ -1496,8 +1527,8 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
             $ntries = count_records("lesson_grades", "lessonid", $lesson->id, "userid", $userid) - 1;
             $gradeinfo = lesson_grade($lesson, $ntries);
             return ($gradeinfo->grade >= (int)$activity->linkgrade);
-        }
 
+}
     } else {
         return true;
     }
@@ -1578,5 +1609,4 @@ function certificate_upgrade_grading_info() {
     }
     return $status;
 }
-
 ?>
