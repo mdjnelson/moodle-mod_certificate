@@ -36,11 +36,6 @@ class mod_certificate_mod_form extends moodleform_mod {
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'lockingoptions', get_string('lockingoptions', 'certificate'));
 
-//        $gradeoptions = certificate_get_mod_grades($COURSE);
-//        $mform->addElement('select', 'lockgrade', get_string('lockgrade', 'certificate'), $gradeoptions);
-//        $mform->setDefault('lockgrade', 0);
-//        $mform->setHelpButton('lockgrade', array('lockgrade', get_string('lockgrade', 'certificate'), 'certificate'));
-
         $this->restrictoptions = array();
         $this->restrictoptions[0]  = get_string('no');
         for ($i = 100; $i > 0; $i--) {
@@ -60,8 +55,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addGroup($formgroup, 'actlabel', get_string('activitydependencies', 'certificate'), array(' '), false);
         $mform->setHelpButton('actlabel', array('lockedmod', get_string('activitydependencies', 'certificate'), 'certificate'));
 
-/// The linked activities portion goes here, but is forced in in the 'definition_after_data' function so
-/// that we can get any elements added in the form and not overwrite them with what's in the database.
+/// The linked activities portion goes here, but is forced in in the 'definition_after_data' function so that we can get any elements added in the form and not overwrite them with what's in the database.
 
         $mform->addElement('submit', 'addlink', get_string('addlinklabel', 'certificate'),
                            array('title' => get_string('addlinktitle', 'certificate')));
@@ -147,8 +141,8 @@ class mod_certificate_mod_form extends moodleform_mod {
 	}
 
 /**
- * Add the linked activities portion only after the entire form has been created. That way, we can act
- * on previous added values that haven't been committed to the database.
+ * Add the linked activities portion only after the entire form has been created. That way, 
+ * we can act on previous added values that haven't been committed to the database.
  * Check for an 'addlink' button. If the linked activities fields are all full, add an empty one.
  */
     function definition_after_data() {

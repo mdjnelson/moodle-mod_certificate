@@ -12,9 +12,12 @@ $string['certificate:printteacher'] = 'Imprimir professor';
 $string['certificate:student'] = 'Obter certificado';
 
 //Adding an instance
+$string['addlinklabel'] = 'Add another linked activity option';
+$string['addlinktitle'] = 'Click to add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
 $string['textoptions'] = 'Text Options';
 $string['designoptions'] = 'Design Options';
+$string['lockingoptions'] = 'Locking Options';
 $string['certificatetype'] = 'Tipo de certificado';
 $string['emailteachers'] = 'Enviar e-mail aos professores';
 $string['emailothers'] = 'Email Others';
@@ -25,7 +28,6 @@ $string['openbrowser'] = 'Abrir em uma nova janela';
 $string['emailcertificate'] = 'Enviar por E-mail (requer que salvar esteja ativado!)';
 $string['border'] = 'Moldura';
 $string['borderstyle'] = 'Border Image';
-$string['bordernone'] = 'Sem moldura';
 $string['borderlines'] = 'Linhas';
 $string['bordercolor'] = 'Border Linhas';
 $string['borderblack'] = 'Preto';
@@ -54,6 +56,12 @@ $string['printdate'] = 'Imprimir data';
 $string['printseal'] = 'Imprimir selo';
 $string['lockgrade'] = 'Lock by grade';
 $string['requiredgrade'] = 'Required grade';
+$string['coursetime'] = 'Required course time';
+$string['linkedactivity'] = 'Linked Activity';
+$string['minimumgrade'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Required Grade';
+$string['activitylocklabel'] = 'Linked Activity/Minimum Grade %';
+$string['coursetimedependency'] = 'Minimum required minutes in course';
+$string['activitydependencies'] = 'Dependent activities';
 
 //strings for verification 
 $string['configcontent'] = 'Configurar conteúdo';
@@ -69,6 +77,8 @@ $string['course'] = 'Para';
 $string['date'] = 'Emitido em';
 
 //Certificate view, index, report strings
+$string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.
+                               'activities. Please return to the course to complete your coursework.';
 $string['issued'] = 'Emitido';
 $string['notissued'] = 'Não emitido';
 $string['notissuedyet'] = 'Ainda não emitido';
@@ -86,6 +96,8 @@ $string['receivedcerts'] = 'Certificados recebidos';
 $string['errorlockgrade'] = 'Your current grade on $a->mod ($a->current%%) is below the grade required ($a->needed%%) to receive the certificate.';
 $string['errorlocksurvey'] = 'You need to complete all course surveys before receving your certificate.';
 $string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
+$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
+$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
 
 //Email text
 $string['emailstudenttext'] = 'Encontra-se anexado a este e-mail o seu certificado para o curso de $a->course.';

@@ -64,7 +64,7 @@ $table->align = array ("LEFT", "LEFT", "LEFT");
 
 foreach ($users as $user) {
 $name = print_user_picture($user->id, $course->id, $user->picture, false, true).$user->studentname;
-$date = userdate($user->timecreated).certificate_print_user_files($user->id);
+$date = userdate($user->certdate).certificate_print_user_files($user->id);
 $code = $user->code;
 $table->data[] = array ($name, $date, $code);
 }

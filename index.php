@@ -80,10 +80,11 @@ foreach ($certificates as $certificate) {
 
 $certrecord = certificate_get_issue($course, $USER);
 if($certrecord) {
-$issued = userdate($certrecord->timecreated);
+if($certrecord->certdate > 0) {
+$issued = userdate($certrecord->certdate);
 } else 
 $issued = get_string('notreceived', 'certificate');
-
+}
     if ($course->format == "weeks" or $course->format == "topics") {
         $table->data[] = array ($certificate->section, $link, $issued);
     } else {

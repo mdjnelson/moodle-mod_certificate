@@ -2,8 +2,11 @@ Certificate 3.0 for Moodle
 
 Version 3.1.8 20070613
 This version has been updated to work in Moodle 1.8. 
-Added options: email to entered addresses, lock a certificate based on a grade, print credit hours, save/download pdf name is now certificate name
-Updated the mod.html to mod_form.php
+Added options: email to entered addresses; lock a certificate based on a course grade, activity grades, taking a survey, questionnaire or feedback or any combination; print credit hours; save/download pdf name is now certificate name
+Updated mod.html to mod_form.php
+Updated help files
+All images can be either JPEG or PNG 8
+Fixed so will not show certificate as issued until button is clicked
 
 Version 3.1.7 20061012
 This version has been updated to work in Moodle 1.7. 

@@ -1,5 +1,7 @@
 <?PHP
 
+
+
 //General functions
 $string['modulename'] = 'Certificato';
 $string['modulenameplural'] = 'Certificati';
@@ -10,9 +12,12 @@ $string['certificate:printteacher'] = 'Stampa i decenti';
 $string['certificate:student'] = 'Get Certificate';
 
 //Adding an instance
+$string['addlinklabel'] = 'Add another linked activity option';
+$string['addlinktitle'] = 'Click to add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
 $string['textoptions'] = 'Text Options';
 $string['designoptions'] = 'Design Options';
+$string['lockingoptions'] = 'Locking Options';
 $string['certificatetype'] = 'Tipo di certificate';
 $string['emailteachers'] = 'Email Teachers';
 $string['emailothers'] = 'Altre email';
@@ -51,6 +56,12 @@ $string['printdate'] = 'Print Date';
 $string['printseal'] = 'Stampa un logo';
 $string['lockgrade'] = 'Vincola alla valutazione';
 $string['requiredgrade'] = 'Required grade';
+$string['coursetime'] = 'Required course time';
+$string['linkedactivity'] = 'Linked Activity';
+$string['minimumgrade'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Required Grade';
+$string['activitylocklabel'] = 'Linked Activity/Minimum Grade %';
+$string['coursetimedependency'] = 'Minimum required minutes in course';
+$string['activitydependencies'] = 'Dependent activities';
 
 //Strings for verification block 
 $string['configcontent'] = 'Config content';
@@ -66,6 +77,8 @@ $string['course'] = 'For';
 $string['date'] = 'On';
 
 //Certificate view, index, report strings
+$string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.
+                               'activities. Please return to the course to complete your coursework.';
 $string['issued'] = 'Issued';
 $string['notissued'] = 'Not Issued';
 $string['notissuedyet'] = 'Not issued yet';
@@ -86,6 +99,8 @@ $string['receivedcerts'] = 'Received certificates';
 $string['errorlockgrade'] = 'La percentuale della tua valutazione ($a->current %%) &egrave; inferiore a quella minima necessaria ($a->needed %%).';
 $string['errorlocksurvey'] = 'You need to complete all course surveys before receving your certificate.';
 $string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
+$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
+$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
 
 //Email text
 $string['emailstudenttext'] = 'Attached is your certificate for $a->course.';

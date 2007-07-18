@@ -14,12 +14,12 @@ $strcredithours = get_string('credithours', 'certificate');
 
 // Date formatting - can be customized if necessary
 $certificatedate = '';
-if ($certrecord) {
+if ($certrecord->certdate > 0) {
 $certdate = $certrecord->certdate;
 }else $certdate = certificate_generate_date($certificate, $course);
 if($certificate->printdate > 0)    {
     if ($certificate->datefmt == 1)    {
-    $certificatedate = str_replace(' 0', '', strftime('%B  %d, %Y', $certdate));
+    $certificatedate = str_replace(' 0', '', strftime('%B %d, %Y', $certdate));
 }   if ($certificate->datefmt == 2) {
     $certificatedate = date('F jS, Y', $certdate);
 }   if ($certificate->datefmt == 3) {
@@ -108,16 +108,12 @@ $modinfo = certificate_mod_grade($course, $certificate->printgrade);
 // Print the code number
 $code = '';
 if($certificate->printnumber) {
-if ($certrecord) {
 $code = $certrecord->code;
-}
 }
 
 //Print the student name
 $studentname = '';
-if ($certrecord) {
 $studentname = $certrecord->studentname;
-}
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;

@@ -12,7 +12,7 @@ $strcredithours = get_string('credithours', 'certificate');
 //setlocale (LC_TIME, '');
 //setlocale (LC_ALL, $currentlocale);
 $certificatedate = '';
-if ($certrecord) {
+if ($certrecord->certdate > 0) {
 $certdate = $certrecord->certdate;
 }else $certdate = certificate_generate_date($certificate, $course);
 if($certificate->printdate > 0)    {
@@ -106,15 +106,13 @@ $modinfo = certificate_mod_grade($course, $certificate->printgrade);
 // Print the code number
 $code = '';
 if($certificate->printnumber) {
-if ($certrecord) {
 $code = $certrecord->code;
-}
 }
 //Print the student name
 $studentname = '';
-if ($certrecord) {
 $studentname = $certrecord->studentname;
-}
+$classname = '';
+$classname = $certrecord->classname;
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;
@@ -145,7 +143,7 @@ $customtext = $certificate->customtext;
     cert_printtext(170, 180, 'C', 'Times', 'B', 20, utf8_decode(get_string('introlandscape', 'certificate')));
     cert_printtext(170, 230, 'C', 'Helvetica', '', 30, utf8_decode($studentname));
     cert_printtext(170, 280, 'C', 'Helvetica', '', 20, utf8_decode(get_string('statementlandscape', 'certificate')));
-    cert_printtext(170, 330, 'C', 'Helvetica', '', 20, utf8_decode($course->fullname));
+    cert_printtext(170, 330, 'C', 'Helvetica', '', 20, utf8_decode($classname));
     cert_printtext(170, 380, 'C', 'Helvetica', '', 14, utf8_decode($certificatedate));
     cert_printtext(170, 420, 'C', 'Times', '', 10, utf8_decode($grade));
     cert_printtext(170, 432, 'C', 'Times', '', 10, utf8_decode($credithours));
@@ -156,9 +154,8 @@ $customtext = $certificate->customtext;
     if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort='u.lastname ASC')) {
 		foreach ($teachers as $teacher) {
 			$i++;
-	cert_printtext(130, 440+($i *12) , 'L', 'Times', '', 12, fullname($teacher));
+	cert_printtext(130, 440+($i *12) , 'L', 'Times', '', 12, utf8_decode(fullname($teacher)));
 }}}
-
 
     cert_printtext(150, 450, '', '', '', '', '');
 	$pdf->SetLeftMargin(130);

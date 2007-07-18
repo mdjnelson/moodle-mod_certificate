@@ -49,6 +49,9 @@ include_once('html2pdf.php');
         $teachers = get_course_teachers($course->id);
     }
 
+/// Create certrecord
+    certificate_prepare_issue($course, $USER);
+
 /// Check locked grades
     $restrict_errors = certificate_grade_condition();
 
@@ -72,11 +75,11 @@ include_once('html2pdf.php');
     $certrecord = certificate_get_issue($course, $USER, $certificateid);
 
 //Review certificate
-    if($certrecord) {
+    if($certrecord->certdate > 0) {
         if (!isset($_GET['certificate'])) {    
             view_header($course, $certificate, $cm);
     
-            echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->timecreated).'</p>';
+            echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
             echo '<center>';
             echo '<form action="" method="get" name="form1" target="certframe">';
             echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
@@ -90,8 +93,9 @@ include_once('html2pdf.php');
             exit;
         }
     }
+
 //Create certificate 
-    if(!$certrecord) {
+    if($certrecord->certdate == 0) {
         if(!isset($_GET['certificate'])) {    
             view_header($course, $certificate, $cm);
             if ($certificate->delivery == 0)    {
@@ -105,18 +109,18 @@ include_once('html2pdf.php');
             }
 
             echo '<center>';
-            echo '<form action="'.certificate_prepare_issue($course, $USER).'" method="get" name="form1" target="_blank">';
+            echo '<form action="" method="get" name="form1" target="_blank">';
             echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
             echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
             echo '<input type="submit" name="Submit" value="'.$strgetcertificate.'" />';
             echo '</form>';
             echo '</center>';
-        	add_to_log($course->id, "certificate", "received", "view.php?id=$cm->id", $certificate->id, $cm->id);
+add_to_log($course->id, "certificate", "received", "view.php?id=$cm->id", $certificate->id, $cm->id);
             print_footer(NULL, $course);
             exit;
         }
+certificate_issue($course, $USER); // update certrecord as issued
     }
-
 // Output to pdf
     $userid = $USER->id;
     certificate_file_area($userid);
@@ -128,8 +132,11 @@ include_once('html2pdf.php');
     if ($certificate->delivery == 0){
         $pdf->Output(''.$certificate->name.'.pdf', 'I');// open in browser
     }
-    if ($certificate->delivery == 1){
-        $pdf->Output(''.$certificate->name.'.pdf', 'D'); // force download
+    if ($certificate->delivery == 1 && $certrecord->certdate == 0){
+        $pdf->Output(''.$certificate->name.'.pdf', 'D'); // force download when create
+    }
+	if ($certificate->delivery == 1 && $certrecord->certdate > 0){
+        $pdf->Output(''.$certificate->name.'.pdf', 'I');// open in frame when review
     }
     if ($certificate->delivery == 2){
         certificate_email_students($USER);

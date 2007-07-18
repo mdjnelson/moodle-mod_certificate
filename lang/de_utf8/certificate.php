@@ -12,10 +12,12 @@ $string['certificate:printteacher'] = 'Print Teacher';
 $string['certificate:student'] = 'Get Certificate';
 
 //Adding an instance
-
+$string['addlinklabel'] = 'Add another linked activity option';
+$string['addlinktitle'] = 'Click to add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
 $string['textoptions'] = 'Text Options';
 $string['designoptions'] = 'Design Options';
+$string['lockingoptions'] = 'Locking Options';
 $string['certificatetype'] = 'Zertifikatsformat';
 $string['emailteachers'] = 'E-Mail an Trainer/innen';
 $string['emailothers'] = 'E-Mail others';
@@ -54,6 +56,12 @@ $string['printhours'] = 'Print Credit Hours';
 $string['customtext'] = 'Custom Text';
 $string['lockgrade'] = 'Lock by grade';
 $string['requiredgrade'] = 'Required grade';
+$string['coursetime'] = 'Required course time';
+$string['linkedactivity'] = 'Linked Activity';
+$string['minimumgrade'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Required Grade';
+$string['activitylocklabel'] = 'Linked Activity/Minimum Grade %';
+$string['coursetimedependency'] = 'Minimum required minutes in course';
+$string['activitydependencies'] = 'Dependent activities';
 
 //Strings for verification block 
 $string['configcontent'] = 'Config content';
@@ -70,6 +78,8 @@ $string['date'] = 'On';
 
 
 //Certificate view, index, report strings
+$string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.
+                               'activities. Please return to the course to complete your coursework.';
 $string['issued'] = 'ausgestellt';
 $string['notissued'] = 'Nicht ausgestellt';
 $string['notissuedyet'] = 'Bisher noch nicht ausgestellt';
@@ -85,6 +95,8 @@ $string['openemail'] = 'Klicken Sie den Button. Das Zertifikat wird Ihnen per E-
 $string['receivedcerts'] = 'Erstellte Zertifikate';
 $string['errorlockgrade'] = 'Your current grade on $a->mod ($a->current%%) is below the grade required ($a->needed%%) to receive the certificate.';
 $string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
+$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
+$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
 
 //Email text
 $string['awarded'] = 'Zertifikat erstellt';

@@ -12,7 +12,7 @@ $strcredithours = get_string('credithours', 'certificate');
 // Date formatting - can be customized if necessary
 setlocale (LC_TIME, '');
 $certificatedate = '';
-if ($certrecord) {
+if ($certrecord->certdate > 0) {
 $certdate = $certrecord->certdate;
 }else $certdate = certificate_generate_date($certificate, $course);
 if($certificate->printdate > 0)    {
@@ -106,15 +106,11 @@ $modinfo = certificate_mod_grade($course, $certificate->printgrade);
 // Print the code number
 $code = '';
 if($certificate->printnumber) {
-if ($certrecord) {
 $code = $certrecord->code;
-}
 }
 //Print the student name
 $studentname = '';
-if ($certrecord) {
 $studentname = $certrecord->studentname;
-}
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;
@@ -156,10 +152,8 @@ $customtext = $certificate->customtext;
     if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher')) {
 		foreach ($teachers as $teacher) {
 			$i++;
-			if($i <5) {
-				$teachernames = fullname($teacher);
-	cert_printtext(110, 460+($i *12) , 'L', 'Times', '', 12, $teachernames);
-}}}}
+	cert_printtext(110, 460+($i *12) , 'L', 'Times', '', 12, utf8_decode(fullname($teacher)));
+}}}
     cert_printtext(120, 470, '', '', '', '12', '');
 	$pdf->SetLeftMargin(110);
 	$pdf->WriteHTML($customtext);
