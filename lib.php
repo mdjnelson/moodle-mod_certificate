@@ -97,7 +97,7 @@ function certificate_update_instance($certificate) {
                 }
             }
         }
-        if (!empty($certificate->coursetime)) {
+        if (isset($certificate->coursetime)) {
             $clm->certificate_id = $certificate->id;
             $clm->linkid = CERTCOURSETIMEID;
             $clm->linkgrade = $certificate->coursetime;
@@ -1192,7 +1192,15 @@ function certificate_prepare_issue($course, $user) {
     $timecreated = time();
     $code = certificate_generate_code();
     $studentname = certificate_generate_studentname($course, $user);
-    insert_record("certificate_issues", array("certificateid" => $certificate->id, "userid" => $user->id, "timecreated" => $timecreated, "studentname" => $studentname, "code" => $code, "classname" => $course->fullname), false);
+    $newrec = new Object();
+    $newrec->certificateid = $certificate->id;
+    $newrec->userid = $user->id;
+    $newrec->timecreated = $timecreated;
+    $newrec->studentname = addslashes($studentname);
+    $newrec->code = addslashes($code);
+    $newrec->classname = addslashes($course->fullname);
+    
+    insert_record("certificate_issues", $newrec, false);
 }
 /************************************************************************
  * Inserts user data when a certificate is created.                     *
@@ -1201,6 +1209,7 @@ function certificate_issue($course, $user) {
     global $USER, $certificate;
     $certrecord = certificate_get_issue($course, $USER, $certificate->id);
     $certrecord->certdate = time();
+    $certrecord = addslashes_object($certrecord);
     update_record("certificate_issues", $certrecord);
     certificate_email_teachers($certificate);
     certificate_email_others($certificate);
@@ -1474,61 +1483,66 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         $scormid = get_field('modules', 'id', 'name', 'scorm');
     }
 
-    if ($cm->module == $quizid) {
-        require_once($CFG->dirroot.'/mod/quiz/locallib.php');
-        $quiz = get_record('quiz', 'id', $cm->instance);
-        $score = quiz_get_best_grade($quiz, $userid);
-        $grade = (int)(((float)$score / (float)$quiz->grade) * 100.0);
-        return ($grade >= (int)$activity->linkgrade);
-
-    } else if ($cm->module == $assid) {
-        require_once($CFG->dirroot.'/mod/assignment/lib.php');
-        $assignment = get_record('assignment', 'id', $cm->instance);
-        require ("$CFG->dirroot/mod/assignment/type/$assignment->assignmenttype/assignment.class.php");
-        $assignmentclass = "assignment_$assignment->assignmenttype";
-        $assignmentinstance = new $assignmentclass($cm->id, $assignment, $cm);
-        if (!($submission = $assignmentinstance->get_submission($userid))) {
-            return false;
-        } else if ($assignmentinstance->assignment->grade <= 0) {
-            return true;
-        } else { 
-            $grade = (int)(((float)$submission->grade / (float)$assignmentinstance->assignment->grade) * 100.0);
+    if (!empty($cm)) {
+        if ($cm->module == $quizid) {
+            require_once($CFG->dirroot.'/mod/quiz/locallib.php');
+            $quiz = get_record('quiz', 'id', $cm->instance);
+            $score = quiz_get_best_grade($quiz, $userid);
+            $grade = (int)(((float)$score / (float)$quiz->grade) * 100.0);
             return ($grade >= (int)$activity->linkgrade);
-        }
+    
+        } else if ($cm->module == $assid) {
+            require_once($CFG->dirroot.'/mod/assignment/lib.php');
+            $assignment = get_record('assignment', 'id', $cm->instance);
+            require ("$CFG->dirroot/mod/assignment/type/$assignment->assignmenttype/assignment.class.php");
+            $assignmentclass = "assignment_$assignment->assignmenttype";
+            $assignmentinstance = new $assignmentclass($cm->id, $assignment, $cm);
+            if (!($submission = $assignmentinstance->get_submission($userid))) {
+                return false;
+            } else if ($assignmentinstance->assignment->grade <= 0) {
+                return true;
+            } else { 
+                $grade = (int)(((float)$submission->grade / (float)$assignmentinstance->assignment->grade) * 100.0);
+                return ($grade >= (int)$activity->linkgrade);
+            }
+    
+        } else if ($cm->module == $questid) {
+            return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
+            
+        } else if ($cm->module == $feedid) {
+            return (get_record('feedback_completed', 'id', $cm->instance, 'userid', $userid) !== false);
+    
+        } else if ($cm->module == $survid) {
+            return (get_record('survey_answers', 'id', $cm->instance, 'userid', $userid) !== false);
+    
+        } else if ($cm->module == $scormid) {
+            require_once($CFG->dirroot.'/mod/scorm/locallib.php');
+            $scorm = get_record('scorm', 'id', $cm->instance);
+            $score = scorm_grade_user($scorm, $userid);
+            if (($scorm->grademethod % 10) == 0) { // GRADESCOES
+                if (!$scorm->maxgrade = count_records_select('scorm_scoes',"scorm='$scormid' AND launch<>''")) {
+                    return NULL;
+                }
+            } else {
+                $return->maxgrade = $scorm->maxgrade;
+                $grade = (int)(((float)$score / (float)$scorm->maxgrade) * 100.0);
+                return ($grade >= (int)$activity->linkgrade);
+            }
 
-    } else if ($cm->module == $questid) {
-        return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
-        
-    } else if ($cm->module == $feedid) {
-        return (get_record('feedback_completed', 'id', $cm->instance, 'userid', $userid) !== false);
+        } else if ($cm->module == $lessid) {
+            require_once($CFG->dirroot.'/mod/lesson/locallib.php');
+            if (!($lesson = get_record('lesson', 'id', $cm->instance))) {
+                return true;
+            } else {
+                $ntries = count_records("lesson_grades", "lessonid", $lesson->id, "userid", $userid) - 1;
+                $gradeinfo = lesson_grade($lesson, $ntries);
+                return ($gradeinfo->grade >= (int)$activity->linkgrade);
+    
+            }
 
-    } else if ($cm->module == $survid) {
-        return (get_record('survey_answers', 'id', $cm->instance, 'userid', $userid) !== false);
-
-    } else if ($cm->module == $scormid) {
-        require_once($CFG->dirroot.'/mod/scorm/locallib.php');
-        $scorm = get_record('scorm', 'id', $cm->instance);
-        $score = scorm_grade_user($scorm, $userid);
-    if (($scorm->grademethod % 10) == 0) { // GRADESCOES
-        if (!$scorm->maxgrade = count_records_select('scorm_scoes',"scorm='$scormid' AND launch<>''")) {
-            return NULL;
-        }
-    } else {
-        $return->maxgrade = $scorm->maxgrade;
-        $grade = (int)(((float)$score / (float)$scorm->maxgrade) * 100.0);
-        return ($grade >= (int)$activity->linkgrade);
-    }
-
-    } else if ($cm->module == $lessid) {
-        require_once($CFG->dirroot.'/mod/lesson/locallib.php');
-        if (!($lesson = get_record('lesson', 'id', $cm->instance))) {
-            return true;
         } else {
-            $ntries = count_records("lesson_grades", "lessonid", $lesson->id, "userid", $userid) - 1;
-            $gradeinfo = lesson_grade($lesson, $ntries);
-            return ($gradeinfo->grade >= (int)$activity->linkgrade);
-
-}
+            return true;
+        }
     } else {
         return true;
     }
