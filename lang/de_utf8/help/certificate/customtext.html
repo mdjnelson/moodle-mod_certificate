@@ -1,0 +1,20 @@
+<p align="center"><b>Custom Text</b></p>
+<p>If you want the certificate to print different names for the teacher than those who are assigned
+the role of teacher, do not select Print Teacher or any signature image except for the line image.  Enter the teacher names in this text box as you would like them to appear.  By default, this text is placed in the lower left of the certificate. You can change this placement in your certificate/type/&quot;type name&quot;/certificate.php file. </p>
+<p>In that file, find the line of code similar to this at the very bottom of the page:</p>
+<p>cert_printtext(150, 450, '', '', '', '', ''); </p>
+<p>The two numbers reflect the X placement (over from the left) and Y placement (down from the top) values for the text. You can change these if you would like. </p>
+<p>You can also use the text box to enter  html. For example, you can add a link or  an image.</p>
+
+<div style="border: 1px solid black;font-size: 12px">
+The following html tags are available:
+<ul type="square">
+<li>&lt;br&gt; and &lt;p&gt;</li>
+<li>&lt;b&gt;, &lt;i&gt; and &lt;u&gt;</li>
+<li>&lt;img&gt; (src and width (or height) are mandatory)</li>
+<li>&lt;a&gt; (href is mandatory)</li>
+<li>&lt;font&gt;: possible attributes are:<br />
+  color: hex color code<br />
+  face: arial, times, courier, helvetica, symbol </li></ul></div>
+<p>Example html:</p>
+<p>Mr. James Salesman, Manager&lt;br&gt;&lt;br&gt;Sales Department&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#0000CC&quot;&gt;&lt;b&gt;Your Company&lt;font face=&quot;Symbol&quot;&gt;&amp;Ograve;&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;&lt;img src=&quot;http://yourmoodle.com/mod/certificate/pix/seals/Logo.png&quot; width=&quot;100&quot;&gt;&lt;p&gt;&lt;a href=&quot;http://www.site.com target=&quot;_blank&quot;&gt;Click here&lt;/a&gt;&lt;/p&gt;</p>
