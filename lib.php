@@ -1,4 +1,4 @@
-<?PHP //$Id: version.php,v 3.1.8
+<?php //$Id$
 require_once($CFG->dirroot.'/course/lib.php');
 
 define ('CERTCOURSETIMEID', -1);
