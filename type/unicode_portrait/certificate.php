@@ -114,6 +114,8 @@ $code = $certrecord->code;
 //Print the student name
 $studentname = '';
 $studentname = $certrecord->studentname;
+$classname = '';
+$classname = $certrecord->classname;
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;
@@ -149,7 +151,7 @@ $customtext = $certificate->customtext;
     cert_printtext(45, 230, 'C', 'FreeSerif', 'B', 20, get_string("introportrait", "certificate"));
     cert_printtext(45, 280, 'C', 'FreeSerif', '', 30, $studentname);
     cert_printtext(45, 330, 'C', 'FreeSerif', '', 20, get_string("statementportrait", "certificate"));
-    cert_printtext(45, 380, 'C', 'FreeSerif', '', 20, $course->fullname);
+    cert_printtext(45, 380, 'C', 'FreeSerif', '', 20, $classname);
     cert_printtext(45, 420, 'C', 'FreeSerif', '', 20, get_string("ondayportrait", "certificate"));
     cert_printtext(45, 460, 'C', 'FreeSerif', '', 14, $certificatedate);
     cert_printtext(45, 540, 'C', 'FreeSerif', '', 10, $grade);
