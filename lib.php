@@ -23,6 +23,7 @@ function certificate_add_instance($certificate) {
     }
 
     if ($returnid = insert_record("certificate", $certificate)) {
+        $certificate->id = $returnid;
 
         if (isset($certificate->linkid) and is_array($certificate->linkid)) {
             foreach ($certificate->linkid as $key => $linkid) {
@@ -136,19 +137,21 @@ function certificate_update_instance($certificate) {
 /************************************************************************
  * Deletes an instance of a certificate                                 *
  ************************************************************************/
-function certificate_delete_instance($certificate) {
+function certificate_delete_instance($id) {
+
+    if (!$certificate = get_record('certificate', 'id', $id)) {
+        return false;
+        }
+
     $result = true;
 
-        if (!delete_records('certificate_issues', 'certificateid', $certificate->id)) {
-            $result = false;
-        }
+    delete_records('certificate_issues', 'certificateid', $certificate->id);
+    delete_records('certificate_linked_modules', 'certificate_id', $certificate->id);
 
         if (!delete_records('certificate', 'id', $certificate->id)) {
             $result = false;
         }
         
-       delete_records('certificate_issues', 'certificateid', $certificate->id);
-
         return $result;
     }
 
@@ -598,6 +601,9 @@ function certificate_get_mod_grades() {
 
                 $sectionmods = explode(",", $section->sequence);
                 foreach ($sectionmods as $sectionmod) {
+                    if (empty($mods[$sectionmod])) {
+                        continue;
+                    }
                     $mod = $mods[$sectionmod];
                     // no labels
                     if ( $mod->modname != "label") {
@@ -687,6 +693,9 @@ function certificate_get_course_grade($id){
             if (!empty($section->sequence)) {
                 $sectionmods = explode(",", $section->sequence);
                 foreach ($sectionmods as $sectionmod) {
+                    if (empty($mods[$sectionmod])) {
+                        continue;
+                    }
                     $mod = $mods[$sectionmod];
                     if ($mod->visible) {
                         $instance = get_record("$mod->modname", "id", "$mod->instance");
