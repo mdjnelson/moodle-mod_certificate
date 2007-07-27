@@ -1483,7 +1483,9 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         $scormid = get_field('modules', 'id', 'name', 'scorm');
     }
 
-    if (!empty($cm)) {
+    /// If the module is not visible, it can't be accessed by students (assignment module
+    /// will give us errors), so return true if its not visible.
+    if (!empty($cm) && $cm->visible) {
         if ($cm->module == $quizid) {
             require_once($CFG->dirroot.'/mod/quiz/locallib.php');
             $quiz = get_record('quiz', 'id', $cm->instance);
