@@ -697,7 +697,9 @@ function certificate_get_course_grade($id){
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                    if ($mod->visible) {
+
+                    $context = get_context_instance(CONTEXT_MODULE, $mod->id);
+                    if ($mod->visible || has_capability('moodle/course:viewhiddenactivities', $context)) {
                         $instance = get_record("$mod->modname", "id", "$mod->instance");
                         $libfile = "$CFG->dirroot/mod/$mod->modname/lib.php";
                         if (file_exists($libfile)) {
@@ -1494,7 +1496,11 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
 
     /// If the module is not visible, it can't be accessed by students (assignment module
     /// will give us errors), so return true if its not visible.
-    if (!empty($cm) && $cm->visible) {
+    if (!empty($cm)) {
+        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        if (!$cm->visible and !has_capability('moodle/course:viewhiddenactivities', $context)) {
+            return true;
+        }
         if ($cm->module == $quizid) {
             require_once($CFG->dirroot.'/mod/quiz/locallib.php');
             $quiz = get_record('quiz', 'id', $cm->instance);
