@@ -114,6 +114,7 @@ $code = $certrecord->code;
 //Print the student name
 $studentname = '';
 $studentname = $certrecord->studentname;
+//Print the course name
 $classname = '';
 $classname = $certrecord->classname;
 //Print the credit hours
