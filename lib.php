@@ -1527,10 +1527,10 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
             return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
             
         } else if ($cm->module == $feedid) {
-            return (get_record('feedback_completed', 'id', $cm->instance, 'userid', $userid) !== false);
+            return (get_record('feedback_completed', 'feedback', $cm->instance, 'userid', $userid) !== false);
     
         } else if ($cm->module == $survid) {
-            return (get_record('survey_answers', 'id', $cm->instance, 'userid', $userid) !== false);
+            return (get_record('survey_answers', 'survey', $cm->instance, 'userid', $userid) !== false);
     
         } else if ($cm->module == $scormid) {
             require_once($CFG->dirroot.'/mod/scorm/locallib.php');
