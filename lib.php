@@ -1,5 +1,6 @@
 <?php //$Id$
 require_once($CFG->dirroot.'/course/lib.php');
+require_once($CFG->libdir.'/gradelib.php');
 
 define ('CERTCOURSETIMEID', -1);
 
@@ -607,34 +608,25 @@ function certificate_get_mod_grades() {
                     $mod = $mods[$sectionmod];
                     // no labels
                     if ( $mod->modname != "label") {
+                        $mod->courseid = $course->id;
                         $instance = get_record("$mod->modname", "id", "$mod->instance");
-                        $libfile = "$CFG->dirroot/mod/$mod->modname/lib.php";
-                        if (file_exists($libfile)) {
-                            require_once($libfile);
-                            $gradefunction = $mod->modname."_grades";
-                            // Modules with grade function (excluding forums)
-                            if (function_exists($gradefunction) and $mod->modname != "forum") {
-                                // Modules with grading set
-                                if ($modgrades = $gradefunction($mod->instance) and !empty($modgrades->maxgrade)) {
-                                    $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name;
-                                }
-                            }
-                            else { //Modules without a grade set but with a grade function
-                            }
-
-                        } // libfile
+                        if ($grade_items = grade_get_grade_items_for_activity($mod)) {
+                            $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name;
+                        } 
                     } // no labels
                 } //close foreach
             } // if section
         } // isset section
     }
-    if(isset($printgrade)) {
+    if (isset($printgrade)) {
         $gradeoptions['0'] = get_string('no');
         $gradeoptions['1'] = get_string('coursegradeoption', 'certificate');
-        foreach($printgrade as $key => $value) {
+        foreach ($printgrade as $key => $value) {
             $gradeoptions[$key] = $value;
         }
-    } else { $gradeoptions['0'] = get_string('nogrades', 'certificate'); }
+    } else { 
+        $gradeoptions['0'] = get_string('nogrades', 'certificate'); 
+    }
     return ($gradeoptions);
 }
 
@@ -645,21 +637,18 @@ function certificate_mod_grade($course, $moduleid) {
     global $USER, $CFG;
     $cm = get_record("course_modules", "id", $moduleid);
     $module = get_record("modules", "id", $cm->module);
-    $libfile = $CFG->dirroot."/mod/".$module->name."/lib.php";
-    if (file_exists($libfile)) {
-        require_once($libfile);
-        $gradefunction = $module->name."_grades";
-        if (function_exists($gradefunction)) {   
-            if ($modgrades = $gradefunction($cm->instance)) {
-                $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
-                $modinfo->percentage = round(($modgrades->grades[$USER->id]*100/$modgrades->maxgrade),2);
-                $modinfo->points = $modgrades->grades[$USER->id];
-                return $modinfo;
-            }
-        }
+
+    if ($grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $USER->id)) {
+        $item = reset($grade_item->items);
+        $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
+        $modinfo->percentage = round(($item->grades[$USER->id]->grade*100/$item->grademax),2);
+        $modinfo->points = $item->grades[$USER->id]->grade;
+        return $modinfo;
     }
+
     return false;
 }
+
 /************************************************************************
  * Search through all the modules, pulling out grade data               *
  * and prepare to print the course grade.                               * 
@@ -667,69 +656,12 @@ function certificate_mod_grade($course, $moduleid) {
  ************************************************************************/
 
 function certificate_get_course_grade($id){
-    global $course, $CFG, $USER;
+    global $course, $USER;
     $course = get_record("course", "id", $id);
-    $strgrades = get_string("grades");
-    $strgrade = get_string("grade");
-    $strmax = get_string("maximumshort");
-    $stractivityreport = get_string("activityreport");
-
-/// Get a list of all students
-
-    $columnhtml = array();  // Accumulate column html in this array.
-    $grades = array();      // Collect all grades in this array
-    $maxgrades = array();   // Collect all max grades in this array
-    $totalgrade = 0;
-    $totalmaxgrade = .000001;
-
-/// Collect modules data
-    $test=get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
-
-/// Search through all the modules, pulling out grade data
-    $sections = get_all_sections($course->id); // Sort everything the same as the course
-    for ($i=0; $i<=$course->numsections; $i++) {
-        if (isset($sections[$i])) {   // should always be true
-            $section = $sections[$i];
-            if (!empty($section->sequence)) {
-                $sectionmods = explode(",", $section->sequence);
-                foreach ($sectionmods as $sectionmod) {
-                    if (empty($mods[$sectionmod])) {
-                        continue;
-                    }
-                    $mod = $mods[$sectionmod];
-
-                    $context = get_context_instance(CONTEXT_MODULE, $mod->id);
-                    if ($mod->visible || has_capability('moodle/course:viewhiddenactivities', $context)) {
-                        $instance = get_record("$mod->modname", "id", "$mod->instance");
-                        $libfile = "$CFG->dirroot/mod/$mod->modname/lib.php";
-                        if (file_exists($libfile)) {
-                            require_once($libfile);
-                            $gradefunction = $mod->modname."_grades";
-                            if (function_exists($gradefunction)) {   // Skip modules without grade function
-                                if ($modgrades = $gradefunction($mod->instance)) {
-                                    if (empty($modgrades->grades[$USER->id])) {
-                                        $grades[]  = "";
-                                    } else {
-                                        $grades[]  = $modgrades->grades[$USER->id];
-                                        $totalgrade += (float)$modgrades->grades[$USER->id];
-                                    }
-                                    if (empty($modgrades->maxgrade) || empty($modgrades)) {
-                                        $maxgrades[] = "";
-                                    } else {
-                                        $maxgrades[]    = $modgrades->maxgrade;
-                                        $totalmaxgrade += $modgrades->maxgrade;
-                                    }
-    
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    $coursegrade->percentage = round(($totalgrade*100/$totalmaxgrade),2);
-    $coursegrade->points = $totalgrade;  
+    $course_item = grade_get_grade_items($id, 'course');
+    $course_item = reset($course_item); // grade_get_grade_items() returns an array of items
+    $coursegrade->points = grade_get_course_grade($USER->id, $id);  
+    $coursegrade->percentage = round(($coursegrade->points * 100 / $course_item->grademax), 2);
     return $coursegrade;
 }
 
