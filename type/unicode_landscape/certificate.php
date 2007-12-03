@@ -13,6 +13,7 @@ $strcoursegrade = get_string('coursegrade', 'certificate');
 $strcredithours = get_string('credithours', 'certificate');
 
 // Date formatting - can be customized if necessary
+setlocale (LC_TIME, '');
 $certificatedate = '';
 if ($certrecord->certdate > 0) {
 $certdate = $certrecord->certdate;
@@ -29,80 +30,43 @@ if($certificate->printdate > 0)    {
     }
 }
 
-//Grade formatting - can be customized if necessary
+//Grade formatting
 $grade = '';
 //Print the course grade
-$coursegrade = certificate_get_course_grade($course->id);    
+$coursegrade = certificate_get_course_grade($course->id);  
+if ($certrecord->reportgrade == !null) {
+$reportgrade = $certrecord->reportgrade;
+    $grade = $strcoursegrade.':  '.$reportgrade;
+}else   
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
-    $grade = $strcoursegrade.':  '.$coursegrade->percentage.'%';
+    $grade = $strcoursegrade.':  '.$coursegrade->percentage;
 }   if($certificate->gradefmt == 2) {
     $grade = $strcoursegrade.':  '.$coursegrade->points;
 }   if($certificate->gradefmt == 3) {
-    $clg = $coursegrade->percentage;
-    if ($clg <= 100.99){
-    $grade = $strcoursegrade.':  '.'A';
-}   if ($clg <= 92.99){
-    $grade = $strcoursegrade.':  '.'A-'; 
-}   if ($clg <=89.99){
-    $grade = $strcoursegrade.':  '.'B+';
-}   if ($clg <= 82.99){
-    $grade = $strcoursegrade.':  '.'B-'; 
-}   if ($clg <= 86.99){
-    $grade = $strcoursegrade.':  '.'B';
-}   if ($clg <= 79.99){
-    $grade = $strcoursegrade.':  '.'C+'; 
-}   if ($clg <= 76.99){
-    $grade = $strcoursegrade.':  '.'C'; 
-}   if ($clg <= 72.99){
-    $grade = $strcoursegrade.':  '.'C-'; 
-}   if ($clg <= 69.99){
-    $grade = $strcoursegrade.':  '.'D+'; 
-}   if ($clg <= 66.99){
-    $grade = $strcoursegrade.':  '.'D'; 
-}   if ($clg <= 59.99){
-    $grade = $strcoursegrade.':  '.'F';
-    }
+    $grade = $strcoursegrade.':  '.$coursegrade->letter;
+
   }
 } else {
 //Print the mod grade
 $modinfo = certificate_mod_grade($course, $certificate->printgrade);
+if ($certrecord->reportgrade == !null) {
+$modgrade = $certrecord->reportgrade;
+    $grade = $modinfo->name.' '.$strgrade.': '.$modgrade;
+}else 
     if($certificate->printgrade > 1) {
     if ($certificate->gradefmt == 1) {
-    $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->percentage.'%';
+    $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->percentage;
 }
     if ($certificate->gradefmt == 2) {          
     $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->points;
 }
     if($certificate->gradefmt == 3) {
-    $mlg = $modinfo->percentage;
-    if ($mlg <= 100.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'A';
-}   if ($mlg <= 92.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'A-'; 
-}   if ($mlg <=89.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'B+';
-}   if ($mlg <= 82.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'B-'; 
-}   if ($mlg <= 86.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'B';
-}   if ($mlg <= 79.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'C+'; 
-}   if ($mlg <= 76.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'C'; 
-}   if ($mlg <= 72.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'C-'; 
-}   if ($mlg <= 69.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'D+'; 
-}   if ($mlg <= 66.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'D'; 
-}   if ($mlg <= 59.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'F';
-    }
+    $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->letter;
+     }
+	}
   }
-}
-}
 }
 
 // Print the code number
@@ -114,7 +78,6 @@ $code = $certrecord->code;
 //Print the student name
 $studentname = '';
 $studentname = $certrecord->studentname;
-//Print the course name
 $classname = '';
 $classname = $certrecord->classname;
 //Print the credit hours

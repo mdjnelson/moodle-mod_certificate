@@ -46,7 +46,8 @@
                 fwrite ($bf,full_tag("NAME",4,false,$certificate->name));
                 fwrite ($bf,full_tag("EMAILTEACHERS",4,false,$certificate->emailteachers));
                 fwrite ($bf,full_tag("EMAILOTHERS",4,false,$certificate->emailothers));
-                fwrite ($bf,full_tag("SAVE",4,false,$certificate->save));
+                fwrite ($bf,full_tag("SAVECERT",4,false,$certificate->savecert));
+                fwrite ($bf,full_tag("REPORTCERT",4,false,$certificate->reportcert));
                 fwrite ($bf,full_tag("DELIVERY",4,false,$certificate->delivery));
                 fwrite ($bf,full_tag("TYPE",4,false,$certificate->certificatetype));
                 fwrite ($bf,full_tag("BORDERSTYLE",4,false,$certificate->borderstyle));
@@ -97,11 +98,12 @@
                 fwrite ($bf,full_tag("ID",6,false,$cert_iss->id));
                 fwrite ($bf,full_tag("CERTIFICATEID",6,false,$cert_iss->certificateid)); 
                 fwrite ($bf,full_tag("USERID",6,false,$cert_iss->userid));       
-                fwrite ($bf,full_tag("TIMECREATED",6,false,$cert_iss->timecreated));        
+                fwrite ($bf,full_tag("TIMECREATED",6,false,$cert_iss->timecreated));       
                 fwrite ($bf,full_tag("STUDENTNAME",6,false,$cert_iss->studentname));
                 fwrite ($bf,full_tag("CODE",6,false,$cert_iss->code));       
                 fwrite ($bf,full_tag("CLASSNAME",6,false,$cert_iss->classname));       
                 fwrite ($bf,full_tag("CERTDATE",6,false,$cert_iss->certdate));       
+                fwrite ($bf,full_tag("REPORTGRADE",6,false,$cert_iss->reportgrade));       
                 fwrite ($bf,full_tag("MAILED",6,false,$cert_iss->mailed));       
                 
                 //End viewed

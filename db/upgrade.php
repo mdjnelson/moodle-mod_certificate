@@ -23,6 +23,21 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     $result = true;
 
+    if ($result && $oldversion < 2007102800) {
+    /// Add new fields to certificate table
+
+        $table = new XMLDBTable('certificate');
+        $field = new XMLDBField('reportcert');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'savecert');
+        $result = $result && add_field($table, $field);
+		
+		$table = new XMLDBTable('certificate_issues');
+        $field = new XMLDBField('reportgrade');
+        $field->setAttributes(XMLDB_TYPE_CHAR, '10', null, null, null, null, null, null, 'certdate');
+        $result = $result && add_field($table, $field);
+
+    }
+
     if ($result && $oldversion < 2007061300) {
     /// Add new fields to certificate table
 

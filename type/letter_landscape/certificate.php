@@ -27,80 +27,43 @@ if($certificate->printdate > 0)    {
     }
 }
 
-//Grade formatting - can be customized if necessary
+//Grade formatting
 $grade = '';
 //Print the course grade
-$coursegrade = certificate_get_course_grade($course->id);    
+$coursegrade = certificate_get_course_grade($course->id);  
+if ($certrecord->reportgrade == !null) {
+$reportgrade = $certrecord->reportgrade;
+    $grade = $strcoursegrade.':  '.$reportgrade;
+}else   
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
-    $grade = $strcoursegrade.':  '.$coursegrade->percentage.'%';
+    $grade = $strcoursegrade.':  '.$coursegrade->percentage;
 }   if($certificate->gradefmt == 2) {
     $grade = $strcoursegrade.':  '.$coursegrade->points;
 }   if($certificate->gradefmt == 3) {
-    $clg = $coursegrade->percentage;
-    if ($clg <= 100.99){
-    $grade = $strcoursegrade.':  '.'A';
-}   if ($clg <= 92.99){
-    $grade = $strcoursegrade.':  '.'A-'; 
-}   if ($clg <=89.99){
-    $grade = $strcoursegrade.':  '.'B+';
-}   if ($clg <= 82.99){
-    $grade = $strcoursegrade.':  '.'B-'; 
-}   if ($clg <= 86.99){
-    $grade = $strcoursegrade.':  '.'B';
-}   if ($clg <= 79.99){
-    $grade = $strcoursegrade.':  '.'C+'; 
-}   if ($clg <= 76.99){
-    $grade = $strcoursegrade.':  '.'C'; 
-}   if ($clg <= 72.99){
-    $grade = $strcoursegrade.':  '.'C-'; 
-}   if ($clg <= 69.99){
-    $grade = $strcoursegrade.':  '.'D+'; 
-}   if ($clg <= 66.99){
-    $grade = $strcoursegrade.':  '.'D'; 
-}   if ($clg <= 59.99){
-    $grade = $strcoursegrade.':  '.'F';
-    }
+    $grade = $strcoursegrade.':  '.$coursegrade->letter;
+
   }
 } else {
 //Print the mod grade
 $modinfo = certificate_mod_grade($course, $certificate->printgrade);
+if ($certrecord->reportgrade == !null) {
+$modgrade = $certrecord->reportgrade;
+    $grade = $modinfo->name.' '.$strgrade.': '.$modgrade;
+}else 
     if($certificate->printgrade > 1) {
     if ($certificate->gradefmt == 1) {
-    $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->percentage.'%';
+    $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->percentage;
 }
     if ($certificate->gradefmt == 2) {          
     $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->points;
 }
     if($certificate->gradefmt == 3) {
-    $mlg = $modinfo->percentage;
-    if ($mlg <= 100.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'A';
-}   if ($mlg <= 92.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'A-'; 
-}   if ($mlg <=89.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'B+';
-}   if ($mlg <= 82.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'B-'; 
-}   if ($mlg <= 86.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'B';
-}   if ($mlg <= 79.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'C+'; 
-}   if ($mlg <= 76.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'C'; 
-}   if ($mlg <= 72.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'C-'; 
-}   if ($mlg <= 69.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'D+'; 
-}   if ($mlg <= 66.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'D'; 
-}   if ($mlg <= 59.99){
-    $grade = $modinfo->name.' '.$strgrade.': '.'F';
-    }
+    $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->letter;
+     }
+	}
   }
-}
-}
 }
 
 // Print the code number
@@ -111,9 +74,6 @@ $code = $certrecord->code;
 //Print the student name
 $studentname = '';
 $studentname = $certrecord->studentname;
-//Print the course name
-$classname = '';
-$classname = $certrecord->classname;
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;
@@ -144,7 +104,7 @@ $customtext = $certificate->customtext;
     cert_printtext(150, 180, 'C', 'Times', 'B', 20, utf8_decode(get_string("introletterlandscape", "certificate")));
     cert_printtext(150, 230, 'C', 'Helvetica', '', 30, utf8_decode($studentname));
     cert_printtext(150, 280, 'C', 'Helvetica', '', 20, utf8_decode(get_string("statementletterlandscape", "certificate")));
-    cert_printtext(150, 330, 'C', 'Helvetica', '', 20, utf8_decode($classname));
+    cert_printtext(150, 330, 'C', 'Helvetica', '', 20, utf8_decode($course->fullname));
     cert_printtext(150, 380, 'C', 'Helvetica', '', 14, utf8_decode($certificatedate));
     cert_printtext(150, 420, 'C', 'Times', '', 10, utf8_decode($grade));
     cert_printtext(150, 432, 'C', 'Times', '', 10, utf8_decode($credithours));
@@ -157,7 +117,7 @@ $customtext = $certificate->customtext;
 			$i++;
 	cert_printtext(110, 460+($i *12) , 'L', 'Times', '', 12, utf8_decode(fullname($teacher)));
 }}}
-    cert_printtext(120, 470, '', '', '', '12', '');
+    cert_printtext(120, 470, '', '', '', '', '');
 	$pdf->SetLeftMargin(110);
 	$pdf->WriteHTML($customtext);
 ?>

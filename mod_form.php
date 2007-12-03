@@ -24,15 +24,22 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addElement('text', 'emailothers', get_string('emailothers', 'certificate'), array('size'=>'40', 'maxsize'=>'200'));
 		$mform->setType('emailothers', PARAM_TEXT);
 	    $mform->setHelpButton('emailothers', array('emailothers', get_string('emailothers', 'certificate'), 'certificate'));
-	
-        $mform->addElement('select', 'savecert', get_string('savecertificate', 'certificate'), $ynoptions);
-        $mform->setDefault('savecert', 0);
-	    $mform->setHelpButton('savecert', array('save', get_string('savecertificate', 'certificate'), 'certificate'));
 
         $deliveryoptions = array( 0 => get_string('openbrowser', 'certificate'), 1 => get_string('download', 'certificate'), 2 => get_string('emailcertificate', 'certificate'));
         $mform->addElement('select', 'delivery', get_string('deliver', 'certificate'), $deliveryoptions);
         $mform->setDefault('delivery', 0);
 	    $mform->setHelpButton('delivery', array('delivery', get_string('deliver', 'certificate'), 'certificate'));
+	
+        $mform->addElement('select', 'savecert', get_string('savecertificate', 'certificate'), $ynoptions);
+        $mform->setDefault('savecert', 0);
+	    $mform->setHelpButton('savecert', array('save', get_string('savecertificate', 'certificate'), 'certificate'));
+	
+        $reportfile = "$CFG->dirroot/certificates/view.php";
+        if (file_exists($reportfile)) {
+        $mform->addElement('select', 'reportcert', get_string('reportcertificate', 'certificate'), $ynoptions);
+        $mform->setDefault('reportcert', 0);
+	    $mform->setHelpButton('reportcert', array('reportcert', get_string('reportcertificate', 'certificate'), 'certificate'));
+		}
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'lockingoptions', get_string('lockingoptions', 'certificate'));
 
@@ -64,7 +71,7 @@ class mod_certificate_mod_form extends moodleform_mod {
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));		
 
-        $dateoptions = array( 0 => get_string('no'), 1 => get_string('receiveddate', 'certificate'), 2 => get_string('courseenddate', 'certificate'));
+        $dateoptions = certificate_get_mod_grade_date($COURSE);
         $mform->addElement('select', 'printdate', get_string('printdate', 'certificate'), $dateoptions);
         $mform->setDefault('printdate', 0);
 	    $mform->setHelpButton('printdate', array('printdate', get_string('datehelp', 'certificate'), 'certificate'));
@@ -149,7 +156,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         global $form;
 
         /// This gets called more than once, and there's no way to tell which time this is, so set a 
-        /// variable to matk it as called so we only do this processing once.
+        /// variable to make it as called so we only do this processing once.
         if (!empty($this->def_after_data_done)) {
             return;
         }

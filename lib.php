@@ -1,7 +1,6 @@
 <?php //$Id$
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->libdir.'/gradelib.php');
-
 define ('CERTCOURSETIMEID', -1);
 
 // STANDARD FUNCTIONS ////////////////////////////////////////////////////////
@@ -157,7 +156,7 @@ function certificate_delete_instance($id) {
     }
 
 /************************************************************************
- * Deletes any files associated with this field                          *
+ * Deletes any files associated with this field                         *
  ************************************************************************/
 function delete_certificate_files($certificate='') {
         global $CFG;
@@ -236,9 +235,9 @@ function view_header($course, $certificate, $cm) {
       
     $strcertificates = get_string('modulenameplural', 'certificate');
     $strcertificate  = get_string('modulename', 'certificate');      
-    $navigation = "<a href=\"index.php?id=$course->id\">$strcertificates</a> ->";
-    print_header_simple(format_string($certificate->name), "",
-                 "$navigation ".format_string($certificate->name), "", "", true, update_module_button($cm->id, $course->id, $strcertificate), navmenu($course, $cm));
+    $navigation = build_navigation('', $cm);
+    print_header_simple(format_string($certificate->name), '', $navigation, '', '', true,
+                  update_module_button($cm->id, $course->id, $strcertificate), navmenu($course, $cm));
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     if (has_capability('mod/certificate:manage', $context)) {
@@ -287,7 +286,7 @@ function certificate_get_unmailed_certificates($course, $user) {
     return get_records_sql("SELECT s.*, a.course, a.name
                               FROM {$CFG->prefix}certificate_issues s, 
                                    {$CFG->prefix}certificate a,
-                                   {$CFG->prefix}user_students us
+                                   {$CFG->prefix}user us
                              WHERE s.mailed = 0 
                                AND s.certificate = a.id
                                AND s.userid = us.userid
@@ -513,7 +512,7 @@ function certificate_print_user_files($userid=0) {
 }
 
 /************************************************************************
- * Returns user information about issued certificates.  Used for index and review.*
+ * Returns user information about issued certificates -- used for index and review.*
  ************************************************************************/
 function certificate_get_issue($course, $user) {
     global $certificate;
@@ -538,11 +537,70 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC") 
                              ORDER BY $sort");
 }
 
-// FUNCTIONS NEEDED TO PRINT A CERTIFICATE///////////////////////////////////////////////////////
+/************************************************************************
+ * Inserts preliminary user data when a certificate is viewed.          *
+ ************************************************************************/
+function certificate_prepare_issue($course, $user) {
+    global $USER, $certificate;
+    if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
+    return;
+} else 
+    $timecreated = time();
+    $code = certificate_generate_code();
+    $studentname = certificate_generate_studentname($course, $user);
+    $newrec = new Object();
+    $newrec->certificateid = $certificate->id;
+    $newrec->userid = $user->id;
+    $newrec->timecreated = $timecreated;
+    $newrec->studentname = addslashes($studentname);
+    $newrec->code = addslashes($code);
+    $newrec->classname = addslashes($course->fullname);
+    
+    insert_record("certificate_issues", $newrec, false);
+}
 
 /************************************************************************
- * Returns an array of installed certificate types indexed and sorted   * 
- * by name.                                                             *
+ * Inserts final user data when a certificate is created.               *
+ ************************************************************************/
+function certificate_issue($course, $user) {
+    global $USER, $certificate;
+    $certrecord = certificate_get_issue($course, $USER, $certificate->id);
+
+    if($certificate->printgrade > 0) {
+   if($certificate->printgrade == 1) {
+	$grade = certificate_get_course_grade($course->id);    
+} else if($certificate->printgrade > 1) {
+    $grade = certificate_mod_grade($course, $certificate->printgrade);
+}
+    if ($certificate->gradefmt == 1) {
+	$certrecord->reportgrade = addslashes($grade->percentage);
+}
+    if ($certificate->gradefmt == 2) {          
+	$certrecord->reportgrade = addslashes($grade->points);
+}
+    if($certificate->gradefmt == 3) {
+	$certrecord->reportgrade = addslashes($grade->letter);
+   }
+}
+    $date = certificate_generate_date($certificate, $course);
+    $certrecord->certdate = $date;
+    update_record('certificate_issues', $certrecord);
+    certificate_email_teachers($certificate);
+    certificate_email_others($certificate);
+}
+
+/************************************************************************
+ * Used for course participation report (in case certificate is added). *
+ ************************************************************************/
+function certificate_get_view_actions() {
+    return array('view','view all','view report');
+}
+function certificate_get_post_actions() {
+    return array('received');
+}
+
+/************************************************************************
+ * Get certificate types indexed and sorted by name for mod_form.       *
  * @return array The index is the name of the certificate type, the     *
  * value its name from the language string                              *
  ************************************************************************/
@@ -555,30 +613,124 @@ function certificate_types() {
     asort($types);
     return $types;
 }
-/*
-function certificate_print_teachers($teachers, $cm) {
-    global $certificate, $course;
-    $i = 0 ;
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    if($certificate->printteacher){
-    
-    if ($teachers = get_users_by_capability($context, 'mod/certificate:teacher')) {
-        foreach ($teachers as $teacher) {
-            $i++;
-            if($i <5) {
-                $fullname = fullname($teacher, isteacher($course->id));
-            /// Fixed formating
-                    cert_printtext(150, 440+($i *12) , 'L', 'Times', '', 12, $fullname);
-}}        }
-    }
-}*/
+
 /************************************************************************
- * Search through all the modules, pulling out grade data               *
- * David Cannon                                                         *
+ * Get border images for mod_form.                                      *
+ ************************************************************************/
+function certificate_get_borders () {
+    global $CFG;
+/// load border files
+    $my_path = "$CFG->dirroot/mod/certificate/pix/borders";
+    $borderstyleoptions = array();
+    if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.'); 
+                if($i > 1) {
+                /// Set the style name
+                    $borderstyleoptions[$file] = substr($file, 0, $i);
+               
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+/// Sort borders
+    ksort($borderstyleoptions);
+
+/// Add default borders
+    $borderstyleoptions[0] = get_string('no');    
+    return $borderstyleoptions;
+    }
+
+/************************************************************************
+ * Get seal images for mod_form.                                        *
+ ************************************************************************/
+function certificate_get_seals () {
+    global $CFG;
+
+    $my_path = "$CFG->dirroot/mod/certificate/pix/seals";
+        $sealoptions = array();
+        if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.');
+                if($i > 1) {
+                    $sealoptions[$file] = substr($file, 0, $i);
+                }
+            }
+        }
+        closedir($handle);
+    }
+        ksort($sealoptions);
+
+    $sealoptions[0] = get_string('no');
+    return $sealoptions;
+    }
+	
+/************************************************************************
+ * Get watermark images for mod_form.                                   *
+ ************************************************************************/
+function certificate_get_watermarks () {
+    global $CFG;
+/// load watermark files
+    $my_path = "$CFG->dirroot/mod/certificate/pix/watermarks";
+    $wmarkoptions = array();
+    if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+            $i = strpos($file, '.');
+                if($i > 1) {
+                    $wmarkoptions[$file] = substr($file, 0, $i);
+
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+/// Order watermarks
+    ksort($wmarkoptions);
+
+    $wmarkoptions[0] = get_string('no');
+    return $wmarkoptions;
+    
+    }
+
+/************************************************************************
+ * Get signature images for mod_form.                                   *
+ ************************************************************************/
+function certificate_get_signatures () {
+    global $CFG;
+
+/// load signature files
+    $my_path = "$CFG->dirroot/mod/certificate/pix/signatures";
+    $signatureoptions = array();
+    if ($handle = opendir($my_path)) {
+        while (false !== ($file = readdir($handle))) {
+            if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.');
+                if($i > 1) {
+                    $signatureoptions[$file] = substr($file, 0, $i);
+                }
+            }
+        }
+        closedir($handle);
+    }
+    ksort($signatureoptions);
+
+    $signatureoptions[0] = get_string('no');
+    return $signatureoptions;
+}
+
+/************************************************************************
+ * Search through all the modules for grade data for mod_form.          *
  ************************************************************************/
 function certificate_get_mod_grades() {
     global $course, $CFG;
 
+    $strgrade = get_string('grade', 'certificate');
     /// Collect modules data
     get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
 
@@ -606,17 +758,18 @@ function certificate_get_mod_grades() {
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                    // no labels
-                    if ( $mod->modname != "label") {
                         $mod->courseid = $course->id;
                         $instance = get_record("$mod->modname", "id", "$mod->instance");
                         if ($grade_items = grade_get_grade_items_for_activity($mod)) {
-                            $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name;
-                        } 
-                    } // no labels
-                } //close foreach
-            } // if section
-        } // isset section
+							$mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
+    $item = reset($mod_item->items);
+        if(isset($item->grademax)){
+                            $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name.' '.$strgrade;
+                        }
+				    }
+                }
+            }
+        }
     }
     if (isset($printgrade)) {
         $gradeoptions['0'] = get_string('no');
@@ -631,7 +784,65 @@ function certificate_get_mod_grades() {
 }
 
 /************************************************************************
- * Prepare mod grade for printing                                       *
+ * Search through all the modules for grade data for mod_form.          *
+ ************************************************************************/
+function certificate_get_mod_grade_date() {
+    global $course, $CFG;
+    $strgradedate = get_string('gradedate', 'certificate');
+    /// Collect modules data
+    get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
+
+    $printgrade = array();
+    $sections = get_all_sections($course->id); // Sort everything the same as the course
+    for ($i=0; $i<=$course->numsections; $i++) {
+        // should always be true
+        if (isset($sections[$i])) {
+            $section = $sections[$i];
+            if ($section->sequence) {
+                switch ($course->format) {
+                    case "topics":
+                    $sectionlabel = get_string("topic");
+                    break;
+                    case "weeks":
+                    $sectionlabel = get_string("week");
+                    break;
+                    default:
+                    $sectionlabel = get_string("section");
+                }
+
+                $sectionmods = explode(",", $section->sequence);
+                foreach ($sectionmods as $sectionmod) {
+                    if (empty($mods[$sectionmod])) {
+                        continue;
+                    }
+                    $mod = $mods[$sectionmod];
+                        $mod->courseid = $course->id;
+                        $instance = get_record("$mod->modname", "id", "$mod->instance");
+                        if ($grade_items = grade_get_grade_items_for_activity($mod)) {
+							$mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
+    $item = reset($mod_item->items);
+        if(isset($item->grademax)){
+
+                            $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name.' '.$strgradedate;
+                        }
+				    }
+                }
+            }
+        }
+    }
+        $dateoptions['0'] = get_string('no');
+        $dateoptions['1'] = get_string('receiveddate', 'certificate');
+        $dateoptions['2'] = get_string('courseenddate', 'certificate');
+        foreach ($printgrade as $key => $value) {
+            $dateoptions[$key] = $value;
+    }
+    return ($dateoptions);
+}
+
+// FUNCTIONS NEEDED TO PRINT A CERTIFICATE////////////////////////////////
+
+/************************************************************************
+ * Prepare to print an activity grade.                                  *
  ************************************************************************/
 function certificate_mod_grade($course, $moduleid) {
     global $USER, $CFG;
@@ -641,27 +852,43 @@ function certificate_mod_grade($course, $moduleid) {
     if ($grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $USER->id)) {
         $item = reset($grade_item->items);
         $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
-        $modinfo->percentage = round(($item->grades[$USER->id]->grade*100/$item->grademax),2);
-        $modinfo->points = $item->grades[$USER->id]->grade;
+    $grade = $item->grades[$USER->id]->grade;
+    $item->gradetype = GRADE_TYPE_VALUE;
+    $item->courseid = $course->id;
+	if ($grade) {
+    $modinfo->dategraded = $item->grades[$USER->id]->dategraded;
+} else $modinfo->dategraded = time();
+
+        $modinfo->points = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_REAL, $decimals=2);
+		   
+        $modinfo->percentage = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals=2);
+
+        $modinfo->letter = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals=0);
+		   
         return $modinfo;
     }
-
     return false;
 }
 
 /************************************************************************
- * Search through all the modules, pulling out grade data               *
- * and prepare to print the course grade.                               * 
-   Patrick Jeitler                                                      *
+ * Prepare to print the course grade.                                   * 
  ************************************************************************/
-
 function certificate_get_course_grade($id){
     global $course, $USER;
     $course = get_record("course", "id", $id);
     $course_item = grade_get_grade_items($id, 'course');
     $course_item = reset($course_item); // grade_get_grade_items() returns an array of items
-    $coursegrade->points = grade_get_course_grade($USER->id, $id);  
-    $coursegrade->percentage = round(($coursegrade->points * 100 / $course_item->grademax), 2);
+
+    $grade = grade_get_course_grade($USER->id, $id);
+    $course_item->gradetype = GRADE_TYPE_VALUE;
+    $course_item->courseid = $course->id;
+
+        $coursegrade->points = grade_format_gradevalue($grade, $course_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals=2);
+    
+	    $coursegrade->percentage = grade_format_gradevalue($grade, $course_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals=2);
+		
+	    $coursegrade->letter = grade_format_gradevalue($grade, $course_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals=0);
+	
     return $coursegrade;
 }
 
@@ -671,7 +898,6 @@ function certificate_get_course_grade($id){
 * @param int $y vertical position in pixels                             *
 * @param char $align L=left, C=center, R=right                          *
 * @param string $font any available font in font directory              *
-*        Courier  Helvetica Times Symbol  ZapfDingbats                  *
 * @param char $style ''=normal, B=bold, I=italic, U=underline           *
 * @param int $size font size in points                                  *
 * @param string $text the text to print                                 *
@@ -809,6 +1035,7 @@ function draw_frame($certificate, $orientation) {
         }
     }
 }
+
 /************************************************************************
  * Creates rectangles for line border for letter size paper.            *
  ************************************************************************/
@@ -916,6 +1143,7 @@ function draw_frame_letter($certificate, $orientation) {
             if ($certificate->bordercolor == 2)    {
             $pdf->SetFillColor(153, 102, 51); //brown
         } 
+
             if ($certificate->bordercolor == 3)    {
             $pdf->SetFillColor( 0, 51, 204); //blue
         } 
@@ -930,8 +1158,9 @@ function draw_frame_letter($certificate, $orientation) {
         }
     }
 }
+
 /************************************************************************
- * Prints border images from the borders folder in PNG or JPG.          *
+ * Prints border images from the borders folder in PNG or JPG formats.  *
  ************************************************************************/
 function print_border($border, $orientation) {
     global $CFG, $pdf;
@@ -1093,20 +1322,27 @@ function print_seal($seal, $orientation, $x, $y, $w, $h) {
 }
 
 /************************************************************************
- * Generates the date to be printed on the certificate.                 *
+ * Prepare to be print the date -- defaults to time.                    *
  ************************************************************************/
 function certificate_generate_date($certificate, $course) {
     $timecreated = time();
-    if($certificate->printdate == 0)    {//do nothing
+    if($certificate->printdate == 0)    {
+	$certdate = $timecreated;
     } else if($certificate->printdate > 0) { 
         if ($certificate->printdate == 1) {
             $certdate = $timecreated;
         }
         if ($certificate->printdate == 2) {
+            if ($course->enrolenddate) {
             $certdate = $course->enrolenddate;
+        } else $certdate = $timecreated;
         }
-        return $certdate;
+		if ($certificate->printdate > 2) {
+        $modinfo = certificate_mod_grade($course, $certificate->printdate);		
+            $certdate = $modinfo->dategraded;
+}
     }
+return $certdate;
 }
 
 /************************************************************************
@@ -1125,165 +1361,9 @@ function certificate_generate_code() {
 }
 
 /************************************************************************
- * Inserts user data when a certificate is created.                     *
- ************************************************************************/
-function certificate_prepare_issue($course, $user) {
-    global $USER, $certificate;
-    if (record_exists("certificate_issues", "certificateid", $certificate->id, "userid", $user->id)) {
-    return;
-} else 
-    $timecreated = time();
-    $code = certificate_generate_code();
-    $studentname = certificate_generate_studentname($course, $user);
-    $newrec = new Object();
-    $newrec->certificateid = $certificate->id;
-    $newrec->userid = $user->id;
-    $newrec->timecreated = $timecreated;
-    $newrec->studentname = addslashes($studentname);
-    $newrec->code = addslashes($code);
-    $newrec->classname = addslashes($course->fullname);
-    
-    insert_record("certificate_issues", $newrec, false);
-}
-/************************************************************************
- * Inserts user data when a certificate is created.                     *
- ************************************************************************/
-function certificate_issue($course, $user) {
-    global $USER, $certificate;
-    $certrecord = certificate_get_issue($course, $USER, $certificate->id);
-    $certrecord->certdate = time();
-    $certrecord = addslashes_object($certrecord);
-    update_record("certificate_issues", $certrecord);
-    certificate_email_teachers($certificate);
-    certificate_email_others($certificate);
-}
-
-/************************************************************************
- * Used for course participation report (in case certificate is added) .*
- ************************************************************************/
-function certificate_get_view_actions() {
-    return array('view','view all','view report');
-}
-function certificate_get_post_actions() {
-    return array('received');
-}
-
-
-/************************************************************************
- * Get border images.                                                   *
- ************************************************************************/
-function certificate_get_borders () {
-    global $CFG;
-/// load border files
-    $my_path = "$CFG->dirroot/mod/certificate/pix/borders";
-    $borderstyleoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-                $i = strpos($file, '.'); 
-                if($i > 1) {
-                /// Set the style name
-                    $borderstyleoptions[$file] = substr($file, 0, $i);
-               
-                }
-            }
-        }
-        closedir($handle);
-    }
-
-/// Sort borders
-    ksort($borderstyleoptions);
-
-/// Add default borders
-    $borderstyleoptions[0] = get_string('no');    
-    return $borderstyleoptions;
-    }
-
-/************************************************************************
- * Get seal images.                                                     *
- ************************************************************************/
-function certificate_get_seals () {
-    global $CFG;
-
-    $my_path = "$CFG->dirroot/mod/certificate/pix/seals";
-        $sealoptions = array();
-        if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-                $i = strpos($file, '.');
-                if($i > 1) {
-                    $sealoptions[$file] = substr($file, 0, $i);
-                }
-            }
-        }
-        closedir($handle);
-    }
-        ksort($sealoptions);
-
-    $sealoptions[0] = get_string('no');
-    return $sealoptions;
-    }
-/************************************************************************
- * Get watermark images.                                                *
- ************************************************************************/
-function certificate_get_watermarks () {
-    global $CFG;
-/// load watermark files
-    $my_path = "$CFG->dirroot/mod/certificate/pix/watermarks";
-    $wmarkoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-            $i = strpos($file, '.');
-                if($i > 1) {
-                    $wmarkoptions[$file] = substr($file, 0, $i);
-
-                }
-            }
-        }
-        closedir($handle);
-    }
-
-/// Order watermarks
-    ksort($wmarkoptions);
-
-    $wmarkoptions[0] = get_string('no');
-    return $wmarkoptions;
-    
-    }
-
-/************************************************************************
- * Get signature images.                                                *
- ************************************************************************/
-function certificate_get_signatures () {
-    global $CFG;
-
-/// load signature files
-    $my_path = "$CFG->dirroot/mod/certificate/pix/signatures";
-    $signatureoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-            if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-                $i = strpos($file, '.');
-                if($i > 1) {
-                    $signatureoptions[$file] = substr($file, 0, $i);
-                }
-            }
-        }
-        closedir($handle);
-    }
-    ksort($signatureoptions);
-
-    $signatureoptions[0] = get_string('no');
-    return $signatureoptions;
-}
-
-
-/************************************************************************
  * Grade/Lock functions-functions for conditionally locking certificate.*
  * Mike Churchward                                                      *
  ************************************************************************/
-
 function certificate_grade_condition() {
     global $certificate, $course;
 
@@ -1459,10 +1539,10 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
             return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
             
         } else if ($cm->module == $feedid) {
-            return (get_record('feedback_completed', 'feedback', $cm->instance, 'userid', $userid) !== false);
+            return (get_record('feedback_completed', 'id', $cm->instance, 'userid', $userid) !== false);
     
         } else if ($cm->module == $survid) {
-            return (get_record('survey_answers', 'survey', $cm->instance, 'userid', $userid) !== false);
+            return (get_record('survey_answers', 'id', $cm->instance, 'userid', $userid) !== false);
     
         } else if ($cm->module == $scormid) {
             require_once($CFG->dirroot.'/mod/scorm/locallib.php');

@@ -129,10 +129,10 @@ function OpenTag($tag,$attr)
 		case 'TR':
 		case 'BLOCKQUOTE':
 		case 'BR':
-			$this->Ln(5);
+			$this->Ln(10);
 			break;
 		case 'P':
-			$this->Ln(10);
+			$this->Ln(20);
 			break;
 		case 'FONT':
 			if (isset($attr['COLOR']) and $attr['COLOR']!='') {

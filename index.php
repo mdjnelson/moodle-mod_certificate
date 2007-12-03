@@ -21,7 +21,11 @@
 
 
 /// Print the header
-print_header_simple($strcertificates, "", $strcertificates, "", "", true, "", navmenu($course));
+    $navlinks = array();
+    $navlinks[] = array('name' => $strcertificates, 'link' => '', 'type' => 'activity');
+    $navigation = build_navigation($navlinks);
+
+    print_header_simple($strcertificates, "", $navigation, "", "", true, "", navmenu($course));
 
 /// Get all the appropriate data
 if (! $certificates = get_all_instances_in_course("certificate", $course)) {

@@ -23,7 +23,8 @@
             $certificate->name = backup_todb($info['MOD']['#']['NAME']['0']['#']);
             $certificate->emailteachers = backup_todb($info['MOD']['#']['EMAILTEACHERS']['0']['#']);
             $certificate->emailothers = backup_todb($info['MOD']['#']['EMAILOTHERS']['0']['#']);
-            $certificate->save = backup_todb($info['MOD']['#']['SAVE']['0']['#']);
+            $certificate->savecert = backup_todb($info['MOD']['#']['SAVECERT']['0']['#']);
+            $certificate->reportcert = backup_todb($info['MOD']['#']['REPORTCERT']['0']['#']);
             $certificate->delivery = backup_todb($info['MOD']['#']['DELIVERY']['0']['#']);
             $certificate->certificatetype = backup_todb($info['MOD']['#']['TYPE']['0']['#']);
             $certificate->borderstyle = backup_todb($info['MOD']['#']['BORDERSTYLE']['0']['#']);
@@ -105,6 +106,7 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
             $issue->code = backup_todb($iss_info['#']['CODE']['0']['#']);
             $issue->classname = backup_todb($iss_info['#']['CLASSNAME']['0']['#']);
             $issue->certdate = backup_todb($iss_info['#']['CERTDATE']['0']['#']);
+            $issue->reportgrade = backup_todb($iss_info['#']['REPORTGRADE']['0']['#']);
             $issue->mailed = backup_todb($iss_info['#']['MAILED']['0']['#']);
 
  //We have to recode the userid field

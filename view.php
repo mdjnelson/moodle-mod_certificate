@@ -81,7 +81,7 @@ include_once('html2pdf.php');
     
             echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
             echo '<center>';
-            echo '<form action="'.$CFG->wwwroot.'/mod/certificate/view.php" method="get" name="form1" target="certframe">';
+            echo '<form action="" method="get" name="form1" target="certframe">';
             echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
             echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
             echo '<input type="submit" name="Submit" value="'.$strreviewcertificate.'" />';
@@ -109,17 +109,17 @@ include_once('html2pdf.php');
             }
 
             echo '<center>';
-            echo '<form action="'.$CFG->wwwroot.'/mod/certificate/view.php" method="get" name="form1" target="_blank">';
+            echo '<form action="" method="get" name="form1" target="_blank">';
             echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
             echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
             echo '<input type="submit" name="Submit" value="'.$strgetcertificate.'" />';
             echo '</form>';
             echo '</center>';
-            add_to_log($course->id, "certificate", "received", "view.php?id=$cm->id", $certificate->id, $cm->id);
+add_to_log($course->id, "certificate", "received", "view.php?id=$cm->id", $certificate->id, $cm->id);
             print_footer(NULL, $course);
             exit;
         }
-        certificate_issue($course, $USER); // update certrecord as issued
+certificate_issue($course, $USER); // update certrecord as issued
     }
 // Output to pdf
     $userid = $USER->id;

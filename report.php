@@ -30,11 +30,9 @@ $strreport= get_string('report', 'certificate');
 
 add_to_log($course->id, "certificate", "view", "report.php?id=$cm->id", "$certificate->id", $cm->id);
 
+        $navigation = build_navigation($strreport, $cm);    
+        print_header_simple(format_string($certificate->name).": $strreport", "", $navigation, "", '', true);
     
- print_header_simple(format_string($certificate->name), "",
-                 "<a href=\"index.php?id=$course->id\">$strcertificates</a> ->
-                  <a href=\"view.php?id=$cm->id\">".format_string($certificate->name,true)."</a> -> $strreport",
-                  "", "", true);
 /*this isn't working--and needs updating for permissions
 // Check to see if groups are being used 
         if ($groupmode = groupmode($course, $cm)) {   // Groups are being used

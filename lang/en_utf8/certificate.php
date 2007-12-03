@@ -35,8 +35,9 @@ $string['bordergreen'] = 'Green';
 $string['printwmark'] = 'Watermark Image';
 $string['datehelp'] = 'Date';
 $string['dateformat'] = 'Date Format';
-$string['receiveddate'] = "Date Received";
+$string['receiveddate'] = 'Date Received';
 $string['courseenddate'] = 'Course End Date (Must be set!)';
+$string['gradedate'] = 'Grade Date';
 $string['printcode'] = 'Print Code';
 $string['printgrade'] = 'Print Grade';
 $string['coursegradeoption'] = 'Course Grade';
@@ -75,8 +76,7 @@ $string['course'] = 'For';
 $string['date'] = 'On';
 
 //Certificate view, index, report strings
-$string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.
-                               'activities. Please return to the course to complete your coursework.';
+$string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.'activities. Please return to the course to complete your coursework.';
 $string['issued'] = 'Issued';
 $string['notissued'] = 'Not Issued';
 $string['notissuedyet'] = 'Not issued yet';
@@ -149,4 +149,14 @@ $string['ondayportrait'] = 'on this day';
 $string['titleletterportrait'] = 'CERTIFICATE of ACHIEVEMENT';
 $string['introletterportrait'] = 'This is to certify that';
 $string['statementletterportrait'] = 'has completed the course';
+
+//Certificate transcript strings
+$string['notapplicable'] = 'N/A';
+$string['certificatesfor'] = 'Certificates for';
+$string['coursename'] = 'Course';
+$string['viewtranscript'] = 'View Certificates';
+$string['mycertificates'] = 'My Certificates';
+$string['nocertificatesreceived'] = 'has not received any course certificates.';
+$string['notissued'] = 'Not received';
+$string['reportcertificate'] = 'Report Certificates';
 ?>
