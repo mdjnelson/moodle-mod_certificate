@@ -1484,8 +1484,12 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
 
 function certificate_get_linked_activities($certid) {
 
-    return get_records('certificate_linked_modules', 'certificate_id', $certid, 'id',
-                       'linkid,id,certificate_id,linkgrade,timemodified');
+    if (is_numeric($certid)) {
+        return get_records('certificate_linked_modules', 'certificate_id', $certid, 'id',
+                           'linkid,id,certificate_id,linkgrade,timemodified');
+    } else {
+        return false;
+    }
 }
 
 function certificate_activity_completed(&$activity, &$cm, $userid=0) {
