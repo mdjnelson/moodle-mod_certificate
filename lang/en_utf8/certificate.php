@@ -97,8 +97,8 @@ $string['receivedcerts'] = 'Received certificates';
 $string['errorlockgrade'] = 'Your current grade on $a->mod ($a->current%%) is below the grade required ($a->needed%%) to receive the certificate.';
 $string['errorlocksurvey'] = 'You need to complete all course surveys before receving your certificate.';
 $string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
-$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
-$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
+$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receiving your certificate.';
+$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receiving your certificate.';
 
 //Email text
 $string['emailstudenttext'] = 'Attached is your certificate for $a->course.';
