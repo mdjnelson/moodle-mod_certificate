@@ -41,24 +41,13 @@ class mod_certificate_mod_form extends moodleform_mod {
 
         $reportfile = "$CFG->dirroot/certificates/index.php";
         if (file_exists($reportfile)) {
-            $mform->addElement('select', 'setcertification',get_string('setcertification', 'local'), $this->reqcerts);$mform->addElement('select', 'reportcert', get_string('reportcertificate', 'certificate'), $ynoptions);
-            $mform->setDefault('reportcert', 0);
-            $mform->setHelpButton('reportcert', array('reportcert', get_string('reportcertificate', 'certificate'), 'certificate'));
+        $mform->addElement('select', 'reportcert', get_string('reportcertificate', 'certificate'), $ynoptions);
+        $mform->setDefault('reportcert', 0);
+	    $mform->setHelpButton('reportcert', array('reportcert', get_string('reportcertificate', 'certificate'), 'certificate'));
 		}
-        $sql = "SELECT i.id,i.name FROM {$CFG->prefix}user_info_field i, {$CFG->prefix}user_info_category c WHERE c.name='certification' AND i.categoryid=c.id";
-        $reqcerts = get_records_sql($sql);
-        $this->reqcerts = array();
-        $this->reqcerts[0] = get_string('no');
-        foreach($reqcerts as $rc) {
-            $this->reqcerts[$rc->id] = $rc->name;
-        }
-        $mform->addElement('select', 'setcertification',get_string('setcertification', 'local'), $this->reqcerts);
-
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'lockingoptions', get_string('lockingoptions', 'certificate'));
-        
-        $mform->addElement('select', 'requiredcertification',get_string('requiredcertification', 'local'), $this->reqcerts);
-        
+
         $this->restrictoptions = array();
         $this->restrictoptions[0]  = get_string('no');
         for ($i = 100; $i > 0; $i--) {
