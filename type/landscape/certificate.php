@@ -1,16 +1,8 @@
-<?php  
-
-// Load certificate info
-$certificateid = $certificate->id;
-$certrecord = certificate_get_issue($course, $USER, $certificateid);
-$strreviewcertificate = get_string('reviewcertificate', 'certificate');
-$strgetcertificate = get_string('getcertificate', 'certificate');
-$strgrade = get_string('grade', 'certificate');
-$strcoursegrade = get_string('coursegrade', 'certificate');
-$strcredithours = get_string('credithours', 'certificate');
-
+<?php
+if (!defined('MOODLE_INTERNAL')) {
+    die('Direct access to this script is forbidden.');    ///  It must be included from view.php in mod/tracker
+}
 // Date formatting - can be customized if necessary
-setlocale (LC_TIME, '');
 $certificatedate = '';
 if ($certrecord->certdate > 0) {
 $certdate = $certrecord->certdate;
@@ -24,17 +16,20 @@ if($certificate->printdate > 0)    {
     $certificatedate = str_replace(' 0', '', strftime('%d %B %Y', $certdate));
 }   if ($certificate->datefmt == 4) {
     $certificatedate = strftime('%B %Y', $certdate);
+}   if ($certificate->datefmt == 5) {
+    $timeformat = get_string('strftimedate');
+    $certificatedate = userdate($certdate, $timeformat);
     }
 }
 
 //Grade formatting
 $grade = '';
 //Print the course grade
-$coursegrade = certificate_get_course_grade($course->id);  
-if ($certrecord->reportgrade == !null) {
+$coursegrade = certificate_print_course_grade($course);
+if ($certificate->printgrade == 1 && $certrecord->reportgrade == !null) {
 $reportgrade = $certrecord->reportgrade;
     $grade = $strcoursegrade.':  '.$reportgrade;
-}else   
+}else
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
@@ -47,16 +42,16 @@ $reportgrade = $certrecord->reportgrade;
   }
 } else {
 //Print the mod grade
-$modinfo = certificate_mod_grade($course, $certificate->printgrade);
+$modinfo = certificate_print_mod_grade($course, $certificate->printgrade);
 if ($certrecord->reportgrade == !null) {
 $modgrade = $certrecord->reportgrade;
     $grade = $modinfo->name.' '.$strgrade.': '.$modgrade;
-}else 
+}else
     if($certificate->printgrade > 1) {
     if ($certificate->gradefmt == 1) {
     $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->percentage;
 }
-    if ($certificate->gradefmt == 2) {          
+    if ($certificate->gradefmt == 2) {
     $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->points;
 }
     if($certificate->gradefmt == 3) {
@@ -65,7 +60,12 @@ $modgrade = $certrecord->reportgrade;
 	}
   }
 }
-
+//Print the outcome
+$outcome = '';
+$outcomeinfo = certificate_print_outcome($course, $certificate->printoutcome);
+if($certificate->printoutcome > 0) {
+    $outcome = $outcomeinfo->name.': '.$outcomeinfo->grade;
+}
 // Print the code number
 $code = '';
 if($certificate->printnumber) {
@@ -89,7 +89,7 @@ $customtext = $certificate->customtext;
     $pdf=new PDF($orientation, 'pt', 'A4');
     $pdf->SetProtection(array('print'));
     $pdf->AddPage();
-    	if(ini_get('magic_quotes_gpc')=='1')
+    if(ini_get('magic_quotes_gpc')=='1')
 		$customtext=stripslashes($customtext);
 
 // Add images and lines
@@ -109,7 +109,8 @@ $customtext = $certificate->customtext;
     cert_printtext(170, 330, 'C', 'Helvetica', '', 20, utf8_decode($classname));
     cert_printtext(170, 380, 'C', 'Helvetica', '', 14, utf8_decode($certificatedate));
     cert_printtext(170, 420, 'C', 'Times', '', 10, utf8_decode($grade));
-    cert_printtext(170, 432, 'C', 'Times', '', 10, utf8_decode($credithours));
+    cert_printtext(170, 431, 'C', 'Times', '', 10, utf8_decode($outcome));
+    cert_printtext(170, 442, 'C', 'Times', '', 10, utf8_decode($credithours));
     cert_printtext(170, 500, 'C', 'Times', '', 10, utf8_decode($code));
     $i = 0 ;
 	if($certificate->printteacher){

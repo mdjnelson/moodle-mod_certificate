@@ -9,7 +9,7 @@ function tl_get_course_time ($courseid, $userid) {
     $logs = get_logs ($sql_log, 'l.time ASC', '', '', $totalcount);
 
     if (!is_array ($logs)) return 0;
-    
+
     $totaltime = 0;
     foreach ($logs as $log) {
          if (!isset($login)) {
@@ -26,7 +26,7 @@ function tl_get_course_time ($courseid, $userid) {
              $login = $log->time;
          } else {
              $totaltime += $delay;
-         } 
+         }
          // now the actual log became the previous log for the next cycle
          $last_hit = $log->time;
     }

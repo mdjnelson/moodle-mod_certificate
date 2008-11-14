@@ -7,50 +7,38 @@ include '../../lib/fpdf/fpdfprotection.php';
 include_once('html2pdf.php');
 
     $id = required_param('id', PARAM_INT);    // Course Module ID
-    $action = optional_param('action', '');
-    if ($id) {
-        if (! $cm = get_coursemodule_from_id('certificate', $id)) {
-                error("Course Module ID was incorrect");
-            }
-       
-        if (! $course = get_record("course", "id", $cm->course)) {
-            error("course is misconfigured");
-        }
-    
-        if (! $certificate = get_record("certificate", "id", $cm->instance)) {
-            error("course module is incorrect");
-        }
-    } else {
-        if (! $certificate = get_record("certificate", "id", $a)) {
-            error("course module is incorrect");
-        }
-        if (! $course = get_record("course", "id", $certificate->course)) {
-            error("course is misconfigured");
-        }
-        if (! $cm = get_coursemodule_from_instance("certificate", $certificate->id, $course->id)) {
-            error("course Module ID was incorrect");
-        }
+    $action = optional_param('action', '', PARAM_ALPHA);
+
+    if (! $cm = get_coursemodule_from_id('certificate', $id)) {
+        error('Course Module ID was incorrect');
+    }
+    if (! $course = get_record('course', 'id', $cm->course)) {
+        error('course is misconfigured');
+    }
+    if (! $certificate = get_record('certificate', 'id', $cm->instance)) {
+        error('course module is incorrect');
     }
 
+    global $USER;
     require_login($course->id);
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     require_capability('mod/certificate:view', $context);
 
 // log update
-    add_to_log($course->id, "certificate", "view", "view.php?id=$cm->id", $certificate->id, $cm->id);
+    add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
 
-// Get teacher name of group
-    if (groupmode($course, null) == SEPARATEGROUPS) {   // Separate groups are being used
-        if (!$group = user_group($course->id, $USER->id)) {             // Try to find a group
-            $group->id = 0;                                             // Not in a group, never mind
+    //check to see if requiredcertification and user has not completed.
+    if (!empty($certificate->requiredcertification)) {
+        //get any certifications this user has.       
+        $usercert = get_field('user_info_data', 'data','fieldid', $certificate->requiredcertification, 'userid', $USER->id);        
+        if (empty($usercert)) {
+            view_header($course, $certificate, $cm);
+            print_simple_box(notify(get_string('requiredcertificationdesc','local')));
+            print_continue("$CFG->wwwroot/course/view.php?id=$course->id");
+            print_footer();
+            die;
         }
-        $teachers = get_group_teachers($course->id, $group->id);        // Works even if not in group
-    } else {
-        $teachers = get_course_teachers($course->id);
     }
-
-/// Create certrecord
-    certificate_prepare_issue($course, $USER);
 
 /// Check locked grades
     $restrict_errors = certificate_grade_condition();
@@ -67,80 +55,81 @@ include_once('html2pdf.php');
         print_footer();
         die;
     }
-  
-// Load custom type
-    $type = $certificate->certificatetype;
-    require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
-    $certificateid = $certificate->id;
-    $certrecord = certificate_get_issue($course, $USER, $certificateid);
 
-//Review certificate
-    if($certrecord->certdate > 0) {
-        if (!isset($_GET['certificate'])) {    
+/// Create certrecord
+    certificate_prepare_issue($course, $USER, $certificate);
+
+/// Load custom type
+    $type = $certificate->certificatetype;
+    $certificateid = $certificate->id;
+    $certrecord = get_record('certificate_issues', 'certificateid', $certificateid, 'userid', $USER->id);
+
+/// Load some strings
+    $strreviewcertificate = get_string('reviewcertificate', 'certificate');
+    $strgetcertificate = get_string('getcertificate', 'certificate');
+    $strgrade = get_string('grade', 'certificate');
+    $strcoursegrade = get_string('coursegrade', 'certificate');
+    $strcredithours = get_string('credithours', 'certificate');
+///Load the specific certificatetype
+    require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
+
+    if($certrecord->certdate > 0) { ///Review certificate
+        if (empty($action)) {
             view_header($course, $certificate, $cm);
-    
+
             echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
             echo '<center>';
-            echo '<form action="" method="get" name="form1" target="certframe">';
-            echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
-            echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
-            echo '<input type="submit" name="Submit" value="'.$strreviewcertificate.'" />';
-            echo '</form>';
+            $opt = new stdclass();
+            $opt->id = $cm->id;
+            $opt->action = 'review';
+            print_single_button('', $opt, $strreviewcertificate, 'get', 'certframe');
+            //TODO: not sure why this iframe is used - in FF it seems to operate the same as the create certificate below. - might be able to be removed?
             echo '<iframe name="certframe" id="certframe" frameborder="NO" border="0" style="width:90%;height:500px;border:0px;"></iframe>';
             echo '</center>';
 
             print_footer(NULL, $course);
             exit;
         }
-    }
-
-//Create certificate 
-    if($certrecord->certdate == 0) {
-        if(!isset($_GET['certificate'])) {    
+    } elseif($certrecord->certdate == 0) { ///Create certificate
+        if(empty($action)) {
             view_header($course, $certificate, $cm);
             if ($certificate->delivery == 0)    {
                 echo '<p align="center">'.get_string('openwindow', 'certificate').'</p>';
-            }
-            if ($certificate->delivery == 1)    {
+            } elseif ($certificate->delivery == 1)    {
                 echo '<p align="center">'.get_string('opendownload', 'certificate').'</p>';
-            }
-            if ($certificate->delivery == 2)    {
+            } elseif ($certificate->delivery == 2)    {
                 echo '<p align="center">'.get_string('openemail', 'certificate').'</p>';
             }
 
+            $opt = new stdclass();
+            $opt->id = $cm->id;
+            $opt->action = 'get';
             echo '<center>';
-            echo '<form action="" method="get" name="form1" target="_blank">';
-            echo '<input type="hidden" name="id" value="'.$cm->id.'" />';
-            echo '<input type="hidden" name="certificate" value="'.$certificate->id.'" />';
-            echo '<input type="submit" name="Submit" value="'.$strgetcertificate.'" />';
-            echo '</form>';
+            print_single_button('view.php', $opt, $strgetcertificate, 'get', '_blank');
             echo '</center>';
-add_to_log($course->id, "certificate", "received", "view.php?id=$cm->id", $certificate->id, $cm->id);
+            add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
             print_footer(NULL, $course);
             exit;
         }
-certificate_issue($course, $USER); // update certrecord as issued
+        certificate_issue($course, $certificate, $certrecord, $cm); // update certrecord as issued
     }
 // Output to pdf
-    $userid = $USER->id;
-    certificate_file_area($userid);
-    $file = $CFG->dataroot.'/'.$course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/'.$certificate->name.'.pdf';
+    certificate_file_area($USER->id);
+    $filesafe = clean_filename($certificate->name.'.pdf');
+    $file = $CFG->dataroot.'/'.$course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/'.$filesafe;
 
     if ($certificate->savecert == 1){
         $pdf->Output($file, 'F');//save as file
     }
     if ($certificate->delivery == 0){
-        $pdf->Output(''.$certificate->name.'.pdf', 'I');// open in browser
-    }
-    if ($certificate->delivery == 1 && $certrecord->certdate == 0){
-        $pdf->Output(''.$certificate->name.'.pdf', 'D'); // force download when create
-    }
-	if ($certificate->delivery == 1 && $certrecord->certdate > 0){
-        $pdf->Output(''.$certificate->name.'.pdf', 'I');// open in frame when review
-    }
-    if ($certificate->delivery == 2){
-        certificate_email_students($USER);
-        $pdf->Output(''.$certificate->name.'.pdf', 'I');// open in browser
+        $pdf->Output($filesafe, 'I');// open in browser
+    } elseif ($certificate->delivery == 1 && $certrecord->certdate == 0){
+        $pdf->Output($filesafe, 'D'); // force download when create
+    } elseif ($certificate->delivery == 1 && $certrecord->certdate > 0){
+        $pdf->Output($filesafe, 'I');// open in frame when review
+    } elseif ($certificate->delivery == 2){
+        certificate_email_students($USER, $course, $certificate, $certrecord);
+        $pdf->Output($filesafe, 'I');// open in browser
         $pdf->Output('', 'S');// send
     }
 ?>

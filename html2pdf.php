@@ -1,5 +1,5 @@
 <?php
-//HTML2PDF by Clément Lavoillotte
+//HTML2PDF by Clement Lavoillotte
 //ac.lavoillotte@noos.fr
 //webmaster@streetpc.tk
 //http://www.streetpc.tk
@@ -153,7 +153,7 @@ function CloseTag($tag)
 	//Closing tag
 	if($tag=='STRONG')
 		$tag='B';
-	
+
 	if($tag=='/span')
 		$tag='B';
 

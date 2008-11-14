@@ -1,6 +1,6 @@
 <?php  //$Id$
 
-// This file keeps track of upgrades to 
+// This file keeps track of upgrades to
 // the certificate module
 //
 // Sometimes, changes between versions involve
@@ -23,6 +23,24 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     $result = true;
 
+    if ($result && $oldversion < 2008041801) {
+    /// Add new fields to certificate table
+
+        $table = new XMLDBTable('certificate');
+        $field = new XMLDBField('intro');
+        $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'name');
+        $result = $result && add_field($table, $field);
+    }
+
+    if ($result && $oldversion < 2007102806) {
+    /// Add new fields to certificate table
+
+        $table = new XMLDBTable('certificate');
+        $field = new XMLDBField('printoutcome');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'gradefmt');
+        $result = $result && add_field($table, $field);
+    }
+
     if ($result && $oldversion < 2007102800) {
     /// Add new fields to certificate table
 
@@ -30,12 +48,11 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field = new XMLDBField('reportcert');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'savecert');
         $result = $result && add_field($table, $field);
-		
+
 		$table = new XMLDBTable('certificate_issues');
         $field = new XMLDBField('reportgrade');
         $field->setAttributes(XMLDB_TYPE_CHAR, '10', null, null, null, null, null, null, 'certdate');
         $result = $result && add_field($table, $field);
-
     }
 
     if ($result && $oldversion < 2007061300) {
@@ -71,7 +88,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         } else {
             $field = new XMLDBField('savecert');
             $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'emailothers');
-            
+
             $result = $result && add_field($table, $field);
         }
 
@@ -101,7 +118,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'certificate_id');
         $result = change_field_unsigned($table, $field);
     }
-
     return $result;
 }
 

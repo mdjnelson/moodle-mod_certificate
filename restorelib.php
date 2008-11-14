@@ -1,6 +1,6 @@
-<?php //$Id: version.php,v 3.1.0
+<?php //$Id: version.php,v 3.1.9.3
     //This php script contains all the stuff to backup/restore
-   
+
     //This function executes all the restore procedure about this mod
     function certificate_restore_mods($mod,$restore) {
 
@@ -21,6 +21,7 @@
             //Now, build the certificate record structure
             $certificate->course = $restore->course_id;
             $certificate->name = backup_todb($info['MOD']['#']['NAME']['0']['#']);
+            $certificate->intro = backup_todb($info['MOD']['#']['INTRO']['0']['#']);
             $certificate->emailteachers = backup_todb($info['MOD']['#']['EMAILTEACHERS']['0']['#']);
             $certificate->emailothers = backup_todb($info['MOD']['#']['EMAILOTHERS']['0']['#']);
             $certificate->savecert = backup_todb($info['MOD']['#']['SAVECERT']['0']['#']);
@@ -36,6 +37,7 @@
             $certificate->printnumber = backup_todb($info['MOD']['#']['PRINTNUMBER']['0']['#']);
             $certificate->printgrade = backup_todb($info['MOD']['#']['PRINTGRADE']['0']['#']);
             $certificate->gradefmt = backup_todb($info['MOD']['#']['GRADEFMT']['0']['#']);
+            $certificate->printoutcome = backup_todb($info['MOD']['#']['PRINTOUTCOME']['0']['#']);
             $certificate->lockgrade = backup_todb($info['MOD']['#']['LOCKGRADE']['0']['#']);
             $certificate->requiredgrade = backup_todb($info['MOD']['#']['REQUIREDGRADE']['0']['#']);
             $certificate->printteacher = backup_todb($info['MOD']['#']['PRINTTEACHER']['0']['#']);
@@ -50,23 +52,19 @@
               //The structure is equal to the db, so insert the assignment
             $newid = insert_record ("certificate",$certificate);
 
-            //Do some output     
+            //Do some output
             if (!defined('RESTORE_SILENTLY')) {
                 echo "<li>".get_string('modulename','certificate')." \"".format_string(stripslashes($certificate->name),true)."\"</li>";
             }
-          
+
             if ($newid) {
                 //We have the newid, update backup_ids
                 backup_putid($restore->backup_unique_code,$mod->modtype,
                              $mod->id, $newid);
                 //Now check if want to restore user data and do it.
-
-           if (function_exists('restore_userdata_selected')) {
-               $restore_userdata_selected = restore_userdata_selected($restore, 'certificate', $mod->id);
-            }
-                if (restore_userdata_selected) { 
-                    //Restore assignmet_issues
-                    $status = certificate_issues_restore_mods ($mod->id, $newid,$info,$restore);
+                if (restore_userdata_selected($restore,'certificate',$mod->id)) {
+                    //Restore assignmet_submissions
+                    $status = certificate_issues_restore_mods($mod->id, $newid,$info,$restore) && $status;
                 }
             } else {
                 $status = false;
@@ -77,6 +75,7 @@
 
         return $status;
     }
+
 //This function restores the certificate_issues
 function certificate_issues_restore_mods($old_certificate_id, $new_certificate_id,$info,$restore) {
 
@@ -84,7 +83,7 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
 
         $status = true;
 
-        //Get the issued array 
+        //Get the issued array
         $issues = $info['MOD']['#']['ISSUES']['0']['#']['ISSUE'];
 
         //Iterate over issueds
@@ -113,7 +112,7 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
             $user = backup_getid($restore->backup_unique_code,"user",$issue->userid);
             if ($user) {
                 $issue->userid = $user->new_id;
-            }             
+            }
 
 //The structure is equal to the db, so insert the certificate_issue
             $newid = insert_record ("certificate_issues",$issue);
@@ -135,7 +134,7 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
                              $newid);
 
                 //Now copy moddata associated files
-                $status = certificate_restore_files ($old_certificate_id, $new_certificate_id, 
+                $status = certificate_restore_files ($old_certificate_id, $new_certificate_id,
                                                     $olduserid, $issue->userid, $restore);
 
             } else {
@@ -147,12 +146,12 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
     }
 
 
-          
+
 
  //This function copies the certificate related info from backup temp dir to course moddata folder,
-    //creating it if needed and recoding everything (certificate id and user id) 
+    //creating it if needed and recoding everything (certificate id and user id)
     function certificate_restore_files ($old_cert_id, $new_cert_id, $old_user_id, $new_user_id, $restore) {
-        global $course, $certificate, $CFG;     
+        global $course, $certificate, $CFG;
 
         $status = true;
         $todo = false;
@@ -167,7 +166,7 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
 
         //Now, locate course's moddata directory
         $moddata_path = $CFG->dataroot."/".$restore->course_id."/".$CFG->moddata;
-   
+
         //Check it exists and create it
         $status = check_dir_exists($moddata_path,true);
 
@@ -197,15 +196,15 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
             //And now, copy temp_path to user_certificate_path
             $status = @backup_copy_file($temp_path, $user_certificate_path);
         }
-       
+
         return $status;
     }
  //This function returns a log record with all the necessay transformations
     //done. It's used by restore_log_module() to restore modules log.
     function certificate_restore_logs($restore,$log) {
-                    
+
         $status = false;
-                    
+
         //Depending of the action, we recode different things
         switch ($log->action) {
         case "add":

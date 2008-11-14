@@ -1,40 +1,40 @@
-<?php  
-
-// Load certificate info
-$certificateid = $certificate->id;
-$certrecord = certificate_get_issue($course, $USER, $certificateid);
-$strreviewcertificate = get_string('reviewcertificate', 'certificate');
-$strgetcertificate = get_string('getcertificate', 'certificate');
-$strgrade = get_string('grade', 'certificate');
-$strcoursegrade = get_string('coursegrade', 'certificate');
-$strcredithours = get_string('credithours', 'certificate');
-
+<?php
+if (!defined('MOODLE_INTERNAL')) {
+    die('Direct access to this script is forbidden.');    ///  It must be included from view.php in mod/tracker
+}
 // Date formatting - can be customized if necessary
-setlocale (LC_TIME, '');
 $certificatedate = '';
 if ($certrecord->certdate > 0) {
-$certdate = $certrecord->certdate;
-}else $certdate = certificate_generate_date($certificate, $course);
+    $certdate = $certrecord->certdate;
+}else {
+    $certdate = certificate_generate_date($certificate, $course);
+}
 if($certificate->printdate > 0)    {
     if ($certificate->datefmt == 1)    {
-    $certificatedate = str_replace(' 0', ' ', strftime('%B %d, %Y', $certdate));
-}   if ($certificate->datefmt == 2) {
-    $certificatedate = date('F jS, Y', $certdate);
-}   if ($certificate->datefmt == 3) {
-    $certificatedate = str_replace(' 0', '', strftime('%d %B %Y', $certdate));
-}   if ($certificate->datefmt == 4) {
+        $certificatedate = str_replace(' 0', ' ', strftime('%B %d, %Y', $certdate));
+    }
+    if ($certificate->datefmt == 2) {
+        $certificatedate = date('F jS, Y', $certdate);
+    }
+    if ($certificate->datefmt == 3) {
+        $certificatedate = str_replace(' 0', '', strftime('%d %B %Y', $certdate));
+}
+   if ($certificate->datefmt == 4) {
     $certificatedate = strftime('%B %Y', $certdate);
+}   if ($certificate->datefmt == 5) {
+    $timeformat = get_string('strftimedate');
+    $certificatedate = userdate($certdate, $timeformat);
     }
 }
 
 //Grade formatting
 $grade = '';
 //Print the course grade
-$coursegrade = certificate_get_course_grade($course->id);  
-if ($certrecord->reportgrade == !null) {
-$reportgrade = $certrecord->reportgrade;
+$coursegrade = certificate_print_course_grade($course);
+if ($certificate->printgrade == 1 && $certrecord->reportgrade == !null) {
+    $reportgrade = $certrecord->reportgrade;
     $grade = $strcoursegrade.':  '.$reportgrade;
-}else   
+}else
     if($certificate->printgrade > 0) {
     if($certificate->printgrade == 1) {
     if($certificate->gradefmt == 1) {
@@ -47,16 +47,16 @@ $reportgrade = $certrecord->reportgrade;
   }
 } else {
 //Print the mod grade
-$modinfo = certificate_mod_grade($course, $certificate->printgrade);
+$modinfo = certificate_print_mod_grade($course, $certificate->printgrade);
 if ($certrecord->reportgrade == !null) {
 $modgrade = $certrecord->reportgrade;
     $grade = $modinfo->name.' '.$strgrade.': '.$modgrade;
-}else 
+}else
     if($certificate->printgrade > 1) {
     if ($certificate->gradefmt == 1) {
     $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->percentage;
 }
-    if ($certificate->gradefmt == 2) {          
+    if ($certificate->gradefmt == 2) {
     $grade = $modinfo->name.' '.$strgrade.': '.$modinfo->points;
 }
     if($certificate->gradefmt == 3) {
@@ -64,6 +64,12 @@ $modgrade = $certrecord->reportgrade;
      }
 	}
   }
+}
+//Print the outcome
+$outcome = '';
+$outcomeinfo = certificate_print_outcome($course, $certificate->printoutcome);
+if($certificate->printoutcome > 0) {
+    $outcome = $outcomeinfo->name.': '.$outcomeinfo->grade;
 }
 
 // Print the code number
@@ -87,9 +93,9 @@ $customtext = $certificate->customtext;
     $pdf=new PDF($orientation, 'pt', 'Letter');
     $pdf->SetProtection(array('print'));
     $pdf->AddPage();
-    	if(ini_get('magic_quotes_gpc')=='1')
+    if(ini_get('magic_quotes_gpc')=='1')
 		$customtext=stripslashes($customtext);
-    
+
 // Add images and lines
     print_border_letter($certificate->borderstyle, $orientation);
 	draw_frame_letter($certificate->bordercolor, $orientation);
@@ -108,7 +114,8 @@ $customtext = $certificate->customtext;
     cert_printtext(58, 420, 'C', 'Helvetica', '', 20, utf8_decode(get_string("ondayportrait", "certificate")));
     cert_printtext(58, 460, 'C', 'Helvetica', '', 14, utf8_decode($certificatedate));
     cert_printtext(58, 540, 'C', 'Times', '', 10, utf8_decode($grade));
-    cert_printtext(58, 552, 'C', 'Times', '', 10, utf8_decode($credithours));
+    cert_printtext(58, 551, 'C', 'Times', '', 10, utf8_decode($outcome));
+    cert_printtext(58, 562, 'C', 'Times', '', 10, utf8_decode($credithours));
     cert_printtext(58, 720, 'C', 'Times', '', 10, utf8_decode($code));
     $i = 0 ;
 	if($certificate->printteacher){

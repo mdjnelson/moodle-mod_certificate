@@ -10,6 +10,7 @@ $string['certificate:printteacher'] = 'Print Teacher';
 $string['certificate:student'] = 'Get Certificate';
 
 //Adding an instance
+$string['intro'] = 'Introduction';
 $string['addlinklabel'] = 'Add another linked activity option';
 $string['addlinktitle'] = 'Click to add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
@@ -35,12 +36,13 @@ $string['bordergreen'] = 'Green';
 $string['printwmark'] = 'Watermark Image';
 $string['datehelp'] = 'Date';
 $string['dateformat'] = 'Date Format';
+$string['userdateformat'] = 'User\'s Language Date Format';
 $string['receiveddate'] = 'Date Received';
 $string['courseenddate'] = 'Course End Date (Must be set!)';
 $string['gradedate'] = 'Grade Date';
 $string['printcode'] = 'Print Code';
 $string['printgrade'] = 'Print Grade';
-$string['coursegradeoption'] = 'Course Grade';
+$string['printoutcome'] = 'Print Outcome';
 $string['nogrades'] = 'No grades available';
 $string['gradeformat'] = 'Grade Format';
 $string['gradepercent'] = 'Percentage Grade';
@@ -62,21 +64,21 @@ $string['activitylocklabel'] = 'Linked Activity/Minimum Grade %';
 $string['coursetimedependency'] = 'Minimum required minutes in course';
 $string['activitydependencies'] = 'Dependent activities';
 
-//Strings for verification block 
-$string['configcontent'] = 'Config content';
+//Strings for verification block
+$string['entercode'] = 'Enter certificate code to verify:';
 $string['validate'] = 'Verify';
 $string['certificate'] = 'Verification for certificate code:';
 $string['verifycertificate'] = 'Verify Certificate';
-$string['dontallowall'] = 'Do not allow all';
-$string['cert'] = '#';
 $string['notfound'] = 'The certificate number could not be validated.';
 $string['back'] = 'Back';
 $string['to'] = 'Awarded to';
 $string['course'] = 'For';
 $string['date'] = 'On';
+$string['grade'] = 'Grade';
 
 //Certificate view, index, report strings
 $string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.'activities. Please return to the course to complete your coursework.';
+$string['awardedto'] = 'Awarded To';
 $string['issued'] = 'Issued';
 $string['notissued'] = 'Not Issued';
 $string['notissuedyet'] = 'Not issued yet';
@@ -97,8 +99,8 @@ $string['receivedcerts'] = 'Received certificates';
 $string['errorlockgrade'] = 'Your current grade on $a->mod ($a->current%%) is below the grade required ($a->needed%%) to receive the certificate.';
 $string['errorlocksurvey'] = 'You need to complete all course surveys before receving your certificate.';
 $string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
-$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receiving your certificate.';
-$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receiving your certificate.';
+$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
+$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
 
 //Email text
 $string['emailstudenttext'] = 'Attached is your certificate for $a->course.';
@@ -117,8 +119,6 @@ for $a->course.
 You can review it here:
 
     <a href=\"$a->url\">Certificate Report</a>.';
-
-
 
 //Names of type folders
 $string['typeportrait'] = 'Portrait';
@@ -159,4 +159,12 @@ $string['mycertificates'] = 'My Certificates';
 $string['nocertificatesreceived'] = 'has not received any course certificates.';
 $string['notissued'] = 'Not received';
 $string['reportcertificate'] = 'Report Certificates';
+$string['certificatereport'] = 'Certificates Report';
+$string['printerfriendly'] = 'Printer-friendly page';
+
+//Custom strings
+$string['field1'] = 'Institution';
+$string['field2'] = 'I am a';
+$string['field3'] = 'I am training as';
+
 ?>
