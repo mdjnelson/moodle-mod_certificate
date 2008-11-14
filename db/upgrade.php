@@ -23,15 +23,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     $result = true;
 
-    if ($result && $oldversion < 2008041801) {
-    /// Add new fields to certificate table
-
-        $table = new XMLDBTable('certificate');
-        $field = new XMLDBField('intro');
-        $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'name');
-        $result = $result && add_field($table, $field);
-    }
-
     if ($result && $oldversion < 2007102806) {
     /// Add new fields to certificate table
 
@@ -117,6 +108,17 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field = new XMLDBField('linkid');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'certificate_id');
         $result = change_field_unsigned($table, $field);
+    }
+    
+    if ($result && $oldversion < 2008080904) {
+    /// Add new fields to certificate table if they dont already exist
+
+        $table = new XMLDBTable('certificate');
+        $field = new XMLDBField('intro');
+        $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'name');
+        if (!field_exists($table, $field)) {
+            $result = $result && add_field($table, $field);
+        }
     }
     return $result;
 }
