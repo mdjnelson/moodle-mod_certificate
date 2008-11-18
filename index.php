@@ -82,7 +82,7 @@ foreach ($certificates as $certificate) {
         $currentsection = $certificate->section;
     }
 
-    $certrecord = certificate_get_issue($course, $USER);
+    $certrecord = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $USER->id);
     if($certrecord) {
         if($certrecord->certdate > 0) {
             $issued = userdate($certrecord->certdate);
