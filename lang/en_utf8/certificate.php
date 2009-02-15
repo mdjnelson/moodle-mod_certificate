@@ -162,9 +162,4 @@ $string['reportcertificate'] = 'Report Certificates';
 $string['certificatereport'] = 'Certificates Report';
 $string['printerfriendly'] = 'Printer-friendly page';
 
-//Custom strings
-$string['field1'] = 'Institution';
-$string['field2'] = 'I am a';
-$string['field3'] = 'I am training as';
-
 ?>
