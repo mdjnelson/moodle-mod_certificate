@@ -509,7 +509,7 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC", 
     global $CFG;
     //get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'id');
+    $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
     //get all the users that have certificates issued.
     $users = get_records_sql("SELECT u.*,u.picture, s.code, s.timecreated, s.certdate, s.studentname, s.reportgrade
