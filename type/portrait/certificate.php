@@ -115,7 +115,7 @@ $customtext = $certificate->customtext;
     $i = 0 ;
 	if($certificate->printteacher){
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher')) {
+    if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort='u.lastname ASC','','','','',false)) {
 		foreach ($teachers as $teacher) {
 			$i++;
 	cert_printtext(85, 590+($i *12) , 'L', 'Times', '', 12, utf8_decode(fullname($teacher)));
