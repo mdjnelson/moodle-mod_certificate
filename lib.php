@@ -1531,7 +1531,7 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         } else if ($cm->module == $assid) {
             require_once($CFG->dirroot.'/mod/assignment/lib.php');
             $assignment = get_record('assignment', 'id', $cm->instance);
-            require ("$CFG->dirroot/mod/assignment/type/$assignment->assignmenttype/assignment.class.php");
+            require_once ("$CFG->dirroot/mod/assignment/type/$assignment->assignmenttype/assignment.class.php");
             $assignmentclass = "assignment_$assignment->assignmenttype";
             $assignmentinstance = new $assignmentclass($cm->id, $assignment, $cm);
             if (!($submission = $assignmentinstance->get_submission($userid))) {
