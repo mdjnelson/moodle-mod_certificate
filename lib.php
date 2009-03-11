@@ -1482,6 +1482,18 @@ function certificate_get_possible_linked_activities(&$course, $certid) {
             $lacts[$key] = 'Scorm: '.$name;
         }
     }
+    if (record_exists('modules', 'name', 'facetoface')) {
+        $sql = 'SELECT DISTINCT cm.id,a.name ' .
+               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'facetoface a,'.
+               $CFG->prefix.'modules m '.
+               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
+               'm.name = \'facetoface\' AND cm.module = m.id AND a.course = '.$course->id;
+        if ($mods = get_records_sql_menu($sql)) {
+            foreach ($mods as $key => $name) {
+                $lacts[$key] = 'Face-to-face: '.$name;
+            }
+        }
+    }
 
     return $lacts;
 }
@@ -1498,7 +1510,7 @@ function certificate_get_linked_activities($certid) {
 
 function certificate_activity_completed(&$activity, &$cm, $userid=0) {
     global $CFG, $USER;
-    static $quizid, $questid, $assid, $lessid, $feedid, $survid, $scormid;
+    static $quizid, $questid, $assid, $lessid, $feedid, $survid, $scormid,$facetofaceid;
 
     if (!$userid) {
         $userid = $USER->id;
@@ -1512,6 +1524,7 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
         $feedid = get_field('modules', 'id', 'name', 'feedback');
         $survid = get_field('modules', 'id', 'name', 'survey');
         $scormid = get_field('modules', 'id', 'name', 'scorm');
+        $facetofaceid = get_field('modules', 'id', 'name', 'facetoface');
     }
 
     /// If the module is not visible, it can't be accessed by students (assignment module
@@ -1576,6 +1589,15 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
                 return ($gradeinfo->grade >= (int)$activity->linkgrade);
     
             }
+        } else if ($cm->module == $facetofaceid) {
+
+            require_once($CFG->libdir.'/gradelib.php');
+            $grading_info = grade_get_grades($cm->course, 'mod', 'facetoface', $cm->instance, $userid);
+            if (empty($grading_info)) {
+                return false;
+            }
+            $grade = $grading_info->items[0]->grades[$userid]->grade;
+            return ($grade >= (int)$activity->linkgrade);
 
         } else {
             return true;
