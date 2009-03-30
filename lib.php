@@ -1560,14 +1560,13 @@ function certificate_activity_completed(&$activity, &$cm, $userid=0) {
             $scorm = get_record('scorm', 'id', $cm->instance);
             $score = scorm_grade_user($scorm, $userid);
             if (($scorm->grademethod % 10) == 0) { // GRADESCOES
-                if (!$scorm->maxgrade = count_records_select('scorm_scoes',"scorm='$scormid' AND " . sql_isnotempty('scorm_scoes', 'launch', false, true))) {
-                    return NULL;
+                if (!$scorm->maxgrade = count_records_select('scorm_scoes',"scorm='$scorm->id' AND launch<>'".sql_empty()."'")) {
+                    return true;
                 }
-            } else {
-                $return->maxgrade = $scorm->maxgrade;
-                $grade = (int)(((float)$score / (float)$scorm->maxgrade) * 100.0);
-                return ($grade >= (int)$activity->linkgrade);
             }
+            $return->maxgrade = $scorm->maxgrade;
+            $grade = (int)(((float)$score / (float)$scorm->maxgrade) * 100.0);
+            return ($grade >= (int)$activity->linkgrade);
 
         } else if ($cm->module == $lessid) {
             require_once($CFG->dirroot.'/mod/lesson/locallib.php');
