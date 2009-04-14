@@ -27,19 +27,6 @@ include_once('html2pdf.php');
 // log update
     add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
 
-    //check to see if requiredcertification and user has not completed.
-    if (!empty($certificate->requiredcertification)) {
-        //get any certifications this user has.       
-        $usercert = get_field('user_info_data', 'data','fieldid', $certificate->requiredcertification, 'userid', $USER->id);        
-        if (empty($usercert)) {
-            view_header($course, $certificate, $cm);
-            print_simple_box(notify(get_string('requiredcertificationdesc','local')));
-            print_continue("$CFG->wwwroot/course/view.php?id=$course->id");
-            print_footer();
-            die;
-        }
-    }
-
 /// Check locked grades
     $restrict_errors = certificate_grade_condition();
 

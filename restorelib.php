@@ -66,6 +66,33 @@
                     //Restore assignmet_submissions
                     $status = certificate_issues_restore_mods($mod->id, $newid,$info,$restore) && $status;
                 }
+                //now restore the linked Modules
+                if (!empty($info['MOD']['#']['LINKS']['0']['#']['LINK'])) {
+                    $links = $info['MOD']['#']['LINKS']['0']['#']['LINK'];
+                    //Iterate over issueds
+                    for($i = 0; $i < sizeof($links); $i++) {
+                        $insertlink = true;
+                        $link_info = $links[$i];
+                        $cert_link = new stdClass();
+                        $linkid = backup_todb($link_info['#']['LINKID']['0']['#']);
+                        if ($linkid > 0) {
+                            $linkid = backup_getid($restore->backup_unique_code,"course_modules",$linkid)->new_id;
+                            if (!$linkid) { //if no linkid returned - mark this as a failure.
+                               $insertlink = false;
+                                if (!defined('RESTORE_SILENTLY')) {
+                                    notify(get_string('errorrestoringlink', 'certificate'));
+                                }
+                            }
+                        }
+                        if ($insertlink) {
+                            $cert_link->certificate_id =$newid;
+                            $cert_link->linkid = $linkid;
+                            $cert_link->linkgrade = backup_todb($link_info['#']['LINKGRADE']['0']['#']);
+                            $cert_link->timemodified = backup_todb($link_info['#']['TIMEMODIFIED']['0']['#']);
+                            insert_record("certificate_linked_modules", $cert_link);
+                        }
+                    }
+                }
             } else {
                 $status = false;
             }
@@ -76,72 +103,70 @@
         return $status;
     }
 
-//This function restores the certificate_issues
-function certificate_issues_restore_mods($old_certificate_id, $new_certificate_id,$info,$restore) {
-
-         global $CFG;
+    //This function restores the certificate_issues
+    function certificate_issues_restore_mods($old_certificate_id, $new_certificate_id,$info,$restore) {
+        global $CFG;
 
         $status = true;
+        if (!empty($info['MOD']['#']['ISSUES']['0']['#']['ISSUE'])) {
+            //Get the issued array
+            $issues = $info['MOD']['#']['ISSUES']['0']['#']['ISSUE'];
 
-        //Get the issued array
-        $issues = $info['MOD']['#']['ISSUES']['0']['#']['ISSUE'];
+            //Iterate over issueds
+            for($i = 0; $i < sizeof($issues); $i++) {
+                $iss_info = $issues[$i];
+                //traverse_xmlize($view_info);                                                                 //Debug
+                //print_object ($GLOBALS['traverse_array']);                                                  //Debug
+                //$GLOBALS['traverse_array']="";                                                              //Debug
 
-        //Iterate over issueds
-        for($i = 0; $i < sizeof($issues); $i++) {
-            $iss_info = $issues[$i];
-            //traverse_xmlize($view_info);                                                                 //Debug
-            //print_object ($GLOBALS['traverse_array']);                                                  //Debug
-            //$GLOBALS['traverse_array']="";                                                              //Debug
+                //We'll need this later!!
+                $oldid = backup_todb($iss_info['#']['ID']['0']['#']);
+                $olduserid = backup_todb($iss_info['#']['USERID']['0']['#']);
 
-            //We'll need this later!!
-            $oldid = backup_todb($iss_info['#']['ID']['0']['#']);
-            $olduserid = backup_todb($iss_info['#']['USERID']['0']['#']);
+                //Now, build the certificate_issues record structure
+                $issue->certificateid = $new_certificate_id;
+                $issue->userid = backup_todb($iss_info['#']['USERID']['0']['#']);
+                $issue->timecreated = backup_todb($iss_info['#']['TIMECREATED']['0']['#']);
+                $issue->studentname = backup_todb($iss_info['#']['STUDENTNAME']['0']['#']);
+                $issue->code = backup_todb($iss_info['#']['CODE']['0']['#']);
+                $issue->classname = backup_todb($iss_info['#']['CLASSNAME']['0']['#']);
+                $issue->certdate = backup_todb($iss_info['#']['CERTDATE']['0']['#']);
+                $issue->reportgrade = backup_todb($iss_info['#']['REPORTGRADE']['0']['#']);
+                $issue->mailed = backup_todb($iss_info['#']['MAILED']['0']['#']);
 
-            //Now, build the certificate_issues record structure
-            $issue->certificateid = $new_certificate_id;
-            $issue->userid = backup_todb($iss_info['#']['USERID']['0']['#']);
-            $issue->timecreated = backup_todb($iss_info['#']['TIMECREATED']['0']['#']);
-            $issue->studentname = backup_todb($iss_info['#']['STUDENTNAME']['0']['#']);
-            $issue->code = backup_todb($iss_info['#']['CODE']['0']['#']);
-            $issue->classname = backup_todb($iss_info['#']['CLASSNAME']['0']['#']);
-            $issue->certdate = backup_todb($iss_info['#']['CERTDATE']['0']['#']);
-            $issue->reportgrade = backup_todb($iss_info['#']['REPORTGRADE']['0']['#']);
-            $issue->mailed = backup_todb($iss_info['#']['MAILED']['0']['#']);
+                //We have to recode the userid field
+                $user = backup_getid($restore->backup_unique_code,"user",$issue->userid);
+                if ($user) {
+                    $issue->userid = $user->new_id;
+                }
 
- //We have to recode the userid field
-            $user = backup_getid($restore->backup_unique_code,"user",$issue->userid);
-            if ($user) {
-                $issue->userid = $user->new_id;
-            }
+                //The structure is equal to the db, so insert the certificate_issue
+                $newid = insert_record ("certificate_issues",$issue);
 
-//The structure is equal to the db, so insert the certificate_issue
-            $newid = insert_record ("certificate_issues",$issue);
+                //Do some output
+                if (($i+1) % 50 == 0) {
+                    if (!defined('RESTORE_SILENTLY')) {
+                        echo ".";
+                        if (($i+1) % 1000 == 0) {
+                            echo "<br />";
+                        }
+                    }
+                    backup_flush(300);
+                }
 
- //Do some output
-        if (($i+1) % 50 == 0) {
-            if (!defined('RESTORE_SILENTLY')) {
-                echo ".";
-                if (($i+1) % 1000 == 0) {
-                    echo "<br />";
+                if ($newid) {
+                    //We have the newid, update backup_ids
+                    backup_putid($restore->backup_unique_code,"certificate_issues",$oldid,
+                                 $newid);
+
+                    //Now copy moddata associated files
+                    $status = certificate_restore_files ($old_certificate_id, $new_certificate_id,
+                                                         $olduserid, $issue->userid, $restore);
+                } else {
+                    $status = false;
                 }
             }
-            backup_flush(300);
         }
-
-  if ($newid) {
-                //We have the newid, update backup_ids
-                backup_putid($restore->backup_unique_code,"certificate_issues",$oldid,
-                             $newid);
-
-                //Now copy moddata associated files
-                $status = certificate_restore_files ($old_certificate_id, $new_certificate_id,
-                                                    $olduserid, $issue->userid, $restore);
-
-            } else {
-                $status = false;
-            }
-        }
-
         return $status;
     }
 
