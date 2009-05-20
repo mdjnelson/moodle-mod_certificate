@@ -221,6 +221,30 @@ function certificate_get_participants($certificateid) {
     return $participants;
 }
 
+/**
+ * This function returns if a scale is being used by one book
+ * it it has support for grading and scales. Commented code should be
+ * modified if necessary. See forum, glossary or journal modules
+ * as reference.
+ * @param $bookid int
+ * @param $scaleid int
+ * @return boolean True if the scale is used by any journal
+ */
+function certificate_scale_used ($bookid,$scaleid) {
+    return false;
+}
+
+/**
+ * Checks if scale is being used by any instance of book
+ *
+ * This is used to find out if scale used anywhere
+ * @param $scaleid int
+ * @return boolean True if the scale is used by any journal
+ */
+function certificate_scale_used_anywhere($scaleid) {
+    return false;
+}
+
 // NON-STANDARD FUNCTIONS ////////////////////////////////////////////////
 
 /************************************************************************
