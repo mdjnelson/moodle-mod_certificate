@@ -19,7 +19,9 @@
 
 function xmldb_certificate_upgrade($oldversion=0) {
 
-    global $CFG, $THEME, $db;
+    global $CFG, $THEME, $DB;
+
+    $dbman = $DB->get_manager();
 
     $result = true;
 
@@ -109,7 +111,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'certificate_id');
         $result = change_field_unsigned($table, $field);
     }
-    
+
     if ($result && $oldversion < 2008080904) {
     /// Add new fields to certificate table if they dont already exist
 
@@ -120,6 +122,31 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $result = $result && add_field($table, $field);
         }
     }
+
+    if ($result && $oldversion < 2009051700) {
+    /// Add new fields to certificate table if they dont already exist
+
+        $table = new XMLDBTable('certificate');
+        $table->deleteField('lockgrade');
+        $field = new XMLDBField('lockgrade');
+
+        if ($dbman->field_exists($table, $field)) {
+            $result = $result && $dbman->drop_field($table, $field);
+        }
+        $field = new XMLDBField('requiredgrade');
+        if ($dbman->field_exists($table, $field)) {
+            $result = $result && $dbman->drop_field($table, $field);
+        }
+
+        $table = new XMLDBTable('certificate_linked_modules');
+        if ($dbman->table_exists($table)) {
+            $result = $result && $dbman->drop_table($table);
+        }
+
+    /// assignment savepoint reached
+        upgrade_mod_savepoint($result, 2009051700, 'certificate');
+    }
+
     return $result;
 }
 

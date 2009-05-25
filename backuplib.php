@@ -4,64 +4,71 @@
 
     function certificate_backup_mods($bf,$preferences) {
 
-        global $CFG;
+        global $CFG, $DB;
 
         $status = true;
 
         //Iterate over certificate table
 
-        if ($certificates = get_records('certificate','course',$preferences->backup_course,"id")) {
-            foreach ($certificates as $certificate) {
-                $backup_mod_selected = backup_mod_selected($preferences, 'certificate', $certificate->id);
-                if ($backup_mod_selected) {
-                    $status = certificate_backup_one_mod($bf,$preferences,$data);
-                    // backup files happens in backup_one_mod now too.
-                }
+ if ($certificates = $DB->get_records('certificate',array('course'=>$preferences->backup_course),"id")) {
+        foreach ($certificates as $certificate) {
+           if (function_exists('backup_mod_selected')) {
+                    // Moodle 1.6
+                    $backup_mod_selected = backup_mod_selected($preferences, 'certificate', $certificate->id);
+            } else {
+                    // Moodle 1.5
+                $backup_mod_selected = true;
+            }
+            if ($backup_mod_selected) {
+                $status = data_backup_one_mod($bf,$preferences,$data);
+                // backup files happens in backup_one_mod now too.
             }
         }
-        return $status;
     }
+    return $status;
+}
 
-    function certificate_backup_one_mod($bf,$preferences,$certificate) {
-        global $CFG;
+        function certificate_backup_one_mod($bf,$preferences,$certificate) {
+
+        global $CFG, $DB;
 
         if (is_numeric($certificate)) {
-            $certificate = get_record('certificate','id',$certificate);
+            $certificate = $DB->get_record('certificate',array('id'=>$certificate));
         }
 
         $status = true;
 
-        //Start mod
-        fwrite ($bf,start_tag("MOD",3,true));
-        //Print certificate data
-        fwrite ($bf,full_tag("ID",4,false,$certificate->id));
-        fwrite ($bf,full_tag("MODTYPE",4,false,"certificate"));
-        fwrite ($bf,full_tag("NAME",4,false,$certificate->name));
-        fwrite ($bf,full_tag("INTRO",4,false,$certificate->intro));
-        fwrite ($bf,full_tag("EMAILTEACHERS",4,false,$certificate->emailteachers));
-        fwrite ($bf,full_tag("EMAILOTHERS",4,false,$certificate->emailothers));
-        fwrite ($bf,full_tag("SAVECERT",4,false,$certificate->savecert));
-        fwrite ($bf,full_tag("REPORTCERT",4,false,$certificate->reportcert));
-        fwrite ($bf,full_tag("DELIVERY",4,false,$certificate->delivery));
-        fwrite ($bf,full_tag("TYPE",4,false,$certificate->certificatetype));
-        fwrite ($bf,full_tag("BORDERSTYLE",4,false,$certificate->borderstyle));
-        fwrite ($bf,full_tag("BORDERCOLOR",4,false,$certificate->bordercolor));
-        fwrite ($bf,full_tag("PRINTWMARK",4,false,$certificate->printwmark));
-        fwrite ($bf,full_tag("PRINTDATE",4,false,$certificate->printdate));
-        fwrite ($bf,full_tag("DATEFMT",4,false,$certificate->datefmt));
-        fwrite ($bf,full_tag("PRINTOUTCOME",4,false,$certificate->printoutcome));
-        fwrite ($bf,full_tag("PRINTNUMBER",4,false,$certificate->printnumber));
-        fwrite ($bf,full_tag("PRINTGRADE",4,false,$certificate->printgrade));
-        fwrite ($bf,full_tag("GRADEFMT",4,false,$certificate->gradefmt));
-        fwrite ($bf,full_tag("PRINTHOURS",4,false,$certificate->printhours));
-        fwrite ($bf,full_tag("LOCKGRADE",4,false,$certificate->lockgrade));
-        fwrite ($bf,full_tag("REQUIREDGRADE",4,false,$certificate->requiredgrade));
-        fwrite ($bf,full_tag("PRINTTEACHER",4,false,$certificate->printteacher));
-        fwrite ($bf,full_tag("CUSTOMTEXT",4,false,$certificate->customtext));
-        fwrite ($bf,full_tag("PRINTSIGNATURE",4,false,$certificate->printsignature));
-        fwrite ($bf,full_tag("PRINTSEAL",4,false,$certificate->printseal));
-        fwrite ($bf,full_tag("TIMEMODIFIED",4,false,$certificate->timemodified));
-        //if we've selected to backup users info, then execute backup_certificate_issues and
+                //Start mod
+                fwrite ($bf,start_tag("MOD",3,true));
+                //Print certificate data
+                fwrite ($bf,full_tag("ID",4,false,$certificate->id));
+                fwrite ($bf,full_tag("MODTYPE",4,false,"certificate"));
+                fwrite ($bf,full_tag("NAME",4,false,$certificate->name));
+                fwrite ($bf,full_tag("INTRO",4,false,$certificate->intro));
+                fwrite ($bf,full_tag("EMAILTEACHERS",4,false,$certificate->emailteachers));
+                fwrite ($bf,full_tag("EMAILOTHERS",4,false,$certificate->emailothers));
+                fwrite ($bf,full_tag("SAVECERT",4,false,$certificate->savecert));
+                fwrite ($bf,full_tag("REPORTCERT",4,false,$certificate->reportcert));
+                fwrite ($bf,full_tag("DELIVERY",4,false,$certificate->delivery));
+                fwrite ($bf,full_tag("TYPE",4,false,$certificate->certificatetype));
+                fwrite ($bf,full_tag("BORDERSTYLE",4,false,$certificate->borderstyle));
+                fwrite ($bf,full_tag("BORDERCOLOR",4,false,$certificate->bordercolor));
+                fwrite ($bf,full_tag("PRINTWMARK",4,false,$certificate->printwmark));
+                fwrite ($bf,full_tag("PRINTDATE",4,false,$certificate->printdate));
+                fwrite ($bf,full_tag("DATEFMT",4,false,$certificate->datefmt));
+                fwrite ($bf,full_tag("PRINTOUTCOME",4,false,$certificate->printoutcome));
+                fwrite ($bf,full_tag("PRINTNUMBER",4,false,$certificate->printnumber));
+                fwrite ($bf,full_tag("PRINTGRADE",4,false,$certificate->printgrade));
+                fwrite ($bf,full_tag("GRADEFMT",4,false,$certificate->gradefmt));
+                fwrite ($bf,full_tag("PRINTHOURS",4,false,$certificate->printhours));
+                fwrite ($bf,full_tag("LOCKGRADE",4,false,$certificate->lockgrade));
+                fwrite ($bf,full_tag("REQUIREDGRADE",4,false,$certificate->requiredgrade));
+                fwrite ($bf,full_tag("PRINTTEACHER",4,false,$certificate->printteacher));
+                fwrite ($bf,full_tag("CUSTOMTEXT",4,false,$certificate->customtext));
+                fwrite ($bf,full_tag("PRINTSIGNATURE",4,false,$certificate->printsignature));
+                fwrite ($bf,full_tag("PRINTSEAL",4,false,$certificate->printseal));
+                fwrite ($bf,full_tag("TIMEMODIFIED",4,false,$certificate->timemodified));
+       //if we've selected to backup users info, then execute backup_certificate_issues and
         //backup_certificate_files_instance
         if (backup_userdata_selected($preferences,'certificate',$certificate->id)) {
             $status = backup_certificate_issues($bf,$preferences,$certificate->id);
@@ -70,21 +77,18 @@
                 $status = backup_certificate_file_instance($bf,$preferences,$certificate->id);
             }
         }
-        //now backup the linked stuff
-        $status = backup_certificate_linked_modules ($bf,$preferences,$certificate->id);
-
         //End mod
-        fwrite ($bf,end_tag("MOD",3,true));
-        return $status;
+       fwrite ($bf,end_tag("MOD",3,true));
+       return $status;
     }
 
  //Backup certificate_issues contents (executed from certificate_backup_mods)
     function backup_certificate_issues ($bf,$preferences,$certificateid) {
 
-        global $CFG;
+        global $CFG,$DB;
         $status = true;
 
-        $certificate_issues = get_records("certificate_issues","certificateid",$certificateid);
+        $certificate_issues = $DB->get_records("certificate_issues",array("certificateid"=>$certificateid));
         //If there is issues
         if ($certificate_issues) {
             //Write start tag
@@ -117,10 +121,10 @@
  //Backup certificate_linked_modules contents (executed from certificate_backup_mods)
     function backup_certificate_linked_modules ($bf,$preferences,$certificate_id) {
 
-        global $CFG;
+        global $CFG, $DB;
         $status = true;
 
-        $certificate_linked_modules = get_records("certificate_linked_modules","certificate_id",$certificate_id);
+        $certificate_linked_modules = $DB->get_records("certificate_linked_modules",array("certificate_id"=>$certificate_id));
         //If there is issues
         if ($certificate_linked_modules) {
             //Write start tag
@@ -133,7 +137,7 @@
                 fwrite ($bf,full_tag("ID",6,false,$cert_link->id));
                 fwrite ($bf,full_tag("CERTIFICATE_ID",6,false,$cert_link->certificate_id));
                 fwrite ($bf,full_tag("LINKID",6,false,$cert_link->linkid));
-                fwrite ($bf,full_tag("LINKGRADE",6,false,$cert_link->linkgrade));
+                fwrite ($bf,full_tag("LINKGRADE",6,false,$cert_link->timecreated));
                 fwrite ($bf,full_tag("TIMEMODIFIED",6,false,$cert_link->timemodified));
 
                 //End viewed
@@ -242,18 +246,18 @@ function backup_certificate_file_instance($bf,$preferences,$instanceid) {
       //Returns an array of certificate ids
     function certificate_ids ($course) {
 
-        global $CFG;
+        global $CFG,$DB;
 
-        return get_records_sql ("SELECT a.id, a.course
+        return $DB->get_records_sql ("SELECT a.id, a.course
                                  FROM {$CFG->prefix}certificate a
                                  WHERE a.course = '$course'");
     }
    //Returns an array of certificate_issues id
     function certificate_issues_ids_by_course ($course) {
 
-        global $CFG;
+        global $CFG, $DB;
 
-        return get_records_sql ("SELECT s.id , s.certificateid
+        return $DB->get_records_sql ("SELECT s.id , s.certificateid
                                  FROM {$CFG->prefix}certificate_issues s,
                                       {$CFG->prefix}certificate a
                                  WHERE a.course = '$course' AND
@@ -262,9 +266,9 @@ function backup_certificate_file_instance($bf,$preferences,$instanceid) {
    //Returns an array of certificate_issues id
     function certificate_issues_ids_by_instance ($instanceid) {
 
-        global $CFG;
+        global $CFG, $DB;
 
-        return get_records_sql ("SELECT s.id , s.certificateid
+        return $DB->get_records_sql ("SELECT s.id , s.certificateid
                                  FROM {$CFG->prefix}certificate_issues s
                                  WHERE s.certificateid = $instanceid");
     }

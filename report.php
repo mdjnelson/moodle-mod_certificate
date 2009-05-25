@@ -11,10 +11,10 @@
             error('Course Module ID was incorrect');
         }
 
-    if (! $course = get_record('course', 'id', $cm->course)) {
+    if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
         error('Course is misconfigured');
     }
-    if (! $certificate = get_record('certificate', 'id', $cm->instance)) {
+    if (! $certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
         error('Certificate ID was incorrect');
     }
 

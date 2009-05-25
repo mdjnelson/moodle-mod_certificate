@@ -9,7 +9,6 @@
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/grade/lib.php');
 require_once($CFG->dirroot.'/grade/querylib.php');
-define ('CERTCOURSETIMEID', -1);
 
 // STANDARD FUNCTIONS ////////////////////////////////////////////////////////
 
@@ -21,36 +20,12 @@ define ('CERTCOURSETIMEID', -1);
  ************************************************************************/
 
 function certificate_add_instance($certificate) {
+    global $DB;
 
     $certificate->timemodified = time();
 
-    if (!empty($certificate->requiredgrade)) {
-        $certificate->lockgrade = 1;
-    } else {
-        $certificate->lockgrade = 0;
-    }
-
-    if ($returnid = insert_record('certificate', $certificate)) {
+    if ($returnid = $DB->insert_record('certificate', $certificate)) {
         $certificate->id = $returnid;
-
-        if (isset($certificate->linkid) and is_array($certificate->linkid)) {
-            foreach ($certificate->linkid as $key => $linkid) {
-                if ($linkid > 0) {
-                    $clm->certificate_id = $certificate->id;
-                    $clm->linkid = $linkid;
-                    $clm->linkgrade = $certificate->linkgrade[$key];
-                    $clm->timemodified = $certificate->timemodified;
-                    $retval = insert_record('certificate_linked_modules', $clm) and $retval;
-                }
-            }
-        }
-        if (isset($certificate->coursetime)) {
-            $clm->certificate_id = $certificate->id;
-            $clm->linkid = CERTCOURSETIMEID;
-            $clm->linkgrade = $certificate->coursetime;
-            $clm->timemodified = $certificate->timemodified;
-            $retval = insert_record('certificate_linked_modules', $clm) and $retval;
-        }
 
         $event = NULL;
         $event->name        = $certificate->name;
@@ -70,60 +45,15 @@ function certificate_add_instance($certificate) {
  * Updates an instance of a certificate                                 *
  ************************************************************************/
 function certificate_update_instance($certificate) {
+    global $DB;
 
     $certificate->timemodified = time();
     $certificate->id = $certificate->instance;
 
-    if (!empty($certificate->requiredgrade)) {
-        $certificate->lockgrade = 1;
-    } else {
-        $certificate->lockgrade = 0;
-    }
+    if ($returnid = $DB->update_record('certificate', $certificate)) {
 
-    if ($returnid = update_record('certificate', $certificate)) {
-
-        if (isset($certificate->linkid) and is_array($certificate->linkid)) {
-            foreach ($certificate->linkid as $key => $linkid) {
-                if (isset($certificate->linkentry[$key])) {
-                    if ($linkid > 0) {
-                        unset($clm);
-                        $clm->id = $certificate->linkentry[$key];
-                        $clm->certificate_id = $certificate->id;
-                        $clm->linkid = $linkid;
-                        $clm->linkgrade = $certificate->linkgrade[$key];
-                        $clm->timemodified = $certificate->timemodified;
-                        $retval = update_record('certificate_linked_modules', $clm) and $retval;
-                    } else {
-                        $retval = delete_records('certificate_linked_modules', 'id',
-                                                 $certificate->linkentry[$key]) and $retval;
-                    }
-                } else if ($linkid > 0) {
-                    unset($clm);
-                    $clm->certificate_id = $certificate->id;
-                    $clm->linkid = $linkid;
-                    $clm->linkgrade = $certificate->linkgrade[$key];
-                    $clm->timemodified = $certificate->timemodified;
-                    $retval = insert_record('certificate_linked_modules', $clm) and $retval;
-                }
-            }
-        }
-        if (isset($certificate->coursetime)) {
-            $clm->certificate_id = $certificate->id;
-            $clm->linkid = CERTCOURSETIMEID;
-            $clm->linkgrade = $certificate->coursetime;
-            $clm->timemodified = $certificate->timemodified;
-            if ($oldrec = get_record('certificate_linked_modules', 'certificate_id', $certificate->id,
-                                     'linkid', CERTCOURSETIMEID)) {
-                $clm->id = $oldrec->id;
-                $retval = update_record('certificate_linked_modules', $clm) and $retval;
-            } else {
-                $retval = insert_record('certificate_linked_modules', $clm) and $retval;
-            }
-        }
-
-        if ($event->id = get_field('event', 'id', 'modulename', 'certificate', 'instance', $certificate->id)) {
+        if ($event->id = $DB->get_field('event', 'id', array('modulename'=> 'certificate', 'instance'=> $certificate->id))) {
             $event->name        = $certificate->name;
-
             update_event($event);
         } else {
             $event = NULL;
@@ -138,7 +68,7 @@ function certificate_update_instance($certificate) {
             add_event($event);
         }
     } else {
-        delete_records('event', 'modulename', 'certificate', 'instance', $certificate->id);
+        $DB->delete_records('event', array('modulename'=>'certificate', 'instance'=> $certificate->id));
     }
 
     return $returnid;
@@ -148,18 +78,17 @@ function certificate_update_instance($certificate) {
  * Deletes an instance of a certificate                                 *
  ************************************************************************/
 function certificate_delete_instance($id) {
-    global $CFG;
+    global $CFG, $DB;
 
-    if (!$certificate = get_record('certificate', 'id', $id)) {
+    if (!$certificate = $DB->get_record('certificate', array('id'=> $id))) {
         return false;
     }
 
     $result = true;
 
-    delete_records('certificate_issues', 'certificateid', $certificate->id);
-    delete_records('certificate_linked_modules', 'certificate_id', $certificate->id);
+    $DB->delete_records('certificate_issues', array('certificateid'=> $certificate->id));
 
-    if (!delete_records('certificate', 'id', $certificate->id)) {
+    if (!$DB->delete_records('certificate', array('id'=> $certificate->id))) {
         $result = false;
     }
 
@@ -175,11 +104,13 @@ function certificate_delete_instance($id) {
  * Used for user activity reports.                                      *
  ************************************************************************/
 function certificate_user_outline($course, $user, $mod, $certificate) {
-    if ($issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+    global $DB;
+    
+    if ($issue = $DB->get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
         $result->info = get_string('issued', 'certificate');
         $result->time = $issue->certdate;
     }
-    if (!$issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+    if (!$issue = $DB->get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
         $result->info = get_string('notissued', 'certificate');
     }
     return $result;
@@ -191,7 +122,9 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
  * Used for user activity reports.                                      *
  ************************************************************************/
 function certificate_user_complete($course, $user, $mod, $certificate) {
-    if ($issue = get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+   global $DB;
+
+   if ($issue = $DB->get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
         print_simple_box_start();
         echo get_string('issued', 'certificate').": ";
         echo userdate($issue->certdate);
@@ -210,12 +143,12 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
  * for a given instance of certificate.                                 *
  ************************************************************************/
 function certificate_get_participants($certificateid) {
-    global $CFG;
+    global $CFG, $DB;
 
     //Get students
-    $participants = get_records_sql("SELECT DISTINCT u.id, u.id
-                                 FROM {$CFG->prefix}user u,
-                                      {$CFG->prefix}certificate_issues a
+    $participants = $DB->get_records_sql("SELECT DISTINCT u.id, u.id
+                                 FROM {user} u,
+                                      {certificate_issues} a
                                  WHERE a.certificateid = '$certificateid' and
                                        u.id = a.userid");
     return $participants;
@@ -250,7 +183,7 @@ function certificate_scale_used_anywhere($scaleid) {
 /************************************************************************
  * Prints the header in view.  Used to help prevent FPDF header errors. *
  ************************************************************************/
-function view_header($course, $certificate, $cm) {
+function certificate_view_header($course, $certificate, $cm) {
     global $CFG;
 
     $strcertificate  = get_string('modulename', 'certificate');
@@ -300,12 +233,12 @@ function certificate_cron () {
  * for currently enrolled students                                      *
  * @return array                                                        *
  ************************************************************************/
-function certificate_get_unmailed_certificates($course, $user) {  //TODO: this function doesn't appear to be used.
-    global $CFG;
-    return get_records_sql("SELECT s.*, a.course, a.name
-                              FROM {$CFG->prefix}certificate_issues s,
-                                   {$CFG->prefix}certificate a,
-                                   {$CFG->prefix}user us
+function certificate_get_unmailed_certificates($course, $user) {  //to be used for cron.
+    global $CFG, $DB;
+    return $DB->get_records_sql("SELECT s.*, a.course, a.name
+                              FROM {certificate_issues} s,
+                                   {certificate} a,
+                                   {user} us
                              WHERE s.mailed = 0
                                AND s.certificate = a.id
                                AND s.userid = us.userid
@@ -365,13 +298,13 @@ function certificate_get_teachers($certificate, $user, $course, $cm) {
  * whether the option to email teachers is set for this certificate.    *
  ************************************************************************/
 function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
-    global $USER, $CFG;
+    global $USER, $CFG, $DB;
 
     if ($certificate->emailteachers == 0) {          // No need to do anything
         return;
     }
     $student = $certrecord->studentname;
-    $user = get_record('user', 'id', $certrecord->userid);
+    $user = $DB->get_record('user', array('id'=> $certrecord->userid));
 
     if ($teachers = certificate_get_teachers($certificate, $user, $course, $cm)) {
 
@@ -457,6 +390,7 @@ function certificate_email_teachers_html($info) {
  * attachment.                                                          *
  ************************************************************************/
 function certificate_email_students($user, $course, $certificate, $certrecord) {
+    global $DB;
 
     if ($certrecord->mailed > 0)    {
         return;
@@ -477,7 +411,7 @@ function certificate_email_students($user, $course, $certificate, $certrecord) {
     $attachment = $course->id.'/moddata/certificate/'.$certificate->id.'/'.$user->id.'/'.$filesafe;
     $attachname = $filesafe;
 
-    set_field('certificate_issues','mailed','1','certificateid', $certificate->id, 'userid', $user->id);
+    $DB->set_field('certificate_issues','mailed','1',array('certificateid'=> $certificate->id, 'userid'=> $user->id));
     return email_to_user($user, $from, $subject, $message, $messagehtml, $attachment, $attachname);
 }
 
@@ -485,8 +419,27 @@ function certificate_email_students($user, $course, $certificate, $certrecord) {
  * Count certificates issued. Used for report link.                     *
  ************************************************************************/
 function certificate_count_issues($certificate) {
-    global $CFG;
+    global $CFG, $DB;
 
+     
+	    $cm = get_coursemodule_from_instance('certificate', $certificate->id);
+        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        if ($users = get_users_by_capability($context, 'mod/certificate:view')) {
+            foreach ($users as $user) {
+        if (isset($certmanagers[$id])) { //exclude certmanagers.
+            unset($users[$id]);
+		    $array[] = $user->id;
+            }
+        }
+
+            return $DB->count_records_sql("SELECT COUNT(*)
+                                      FROM {$CFG->prefix}certificate_issues
+                                     WHERE certificateid = '$certificate->id' 
+                                       AND certdate > 0
+                                       AND userid IN $userlists ");
+        } else {
+            return 0; // no users enroled in course
+    }
 }
 
 /************************************************************************
@@ -530,19 +483,18 @@ function certificate_print_user_files($userid=0) {
  * Returns a list of issued certificates - sorted for report.           *
  ************************************************************************/
 function certificate_get_issues($certificate, $user, $sort="u.studentname ASC", $groupmode, $cm) {
-    global $CFG;
+    global $CFG, $DB;
     //get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
     //get all the users that have certificates issued.
-    $users = get_records_sql("SELECT u.*,u.picture, s.code, s.timecreated, s.certdate, s.studentname, s.reportgrade
-                              FROM {$CFG->prefix}certificate_issues s,
-                                   {$CFG->prefix}user u
-                             WHERE s.certificateid = '$certificate'
-                               AND s.userid = u.id
-                               AND s.certdate > 0
-                             ORDER BY $sort");
+    $sql = 'SELECT u.*, s.code, s.timecreated, s.certdate, s.studentname, s.reportgrade ' .
+           'FROM {certificate_issues} s ' .
+           'INNER JOIN {user} u ON u.id = s.userid ' .
+           'WHERE s.certificateid = :certificate AND s.certdate > 0 ' .
+           'ORDER BY '.$sort;
+    $users = $DB->get_records_sql($sql, array('certificate' => $certificate));
     //now exclude all the certmanagers.
     foreach ($users as $id=>$user) {
         if (isset($certmanagers[$id])) { //exclude certmanagers.
@@ -583,7 +535,9 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC", 
  * Prevents form from issuing a certificate upon browser refresh.       *
  ************************************************************************/
 function certificate_prepare_issue($course, $user, $certificate) {
-    if (record_exists('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+    global $DB;
+
+    if ($DB->record_exists('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
         return;
     }
     $timecreated = time();
@@ -593,17 +547,18 @@ function certificate_prepare_issue($course, $user, $certificate) {
     $newrec->certificateid = $certificate->id;
     $newrec->userid = $user->id;
     $newrec->timecreated = $timecreated;
-    $newrec->studentname = addslashes($studentname);
-    $newrec->code = addslashes($code);
-    $newrec->classname = addslashes($course->fullname);
+    $newrec->studentname = $studentname;
+    $newrec->code = $code;
+    $newrec->classname = $course->fullname;
 
-    insert_record('certificate_issues', $newrec, false);
+    $DB->insert_record('certificate_issues', $newrec, false);
 }
 
 /************************************************************************
  * Inserts final user data when a certificate is created.               *
  ************************************************************************/
 function certificate_issue($course, $certificate, $certrecord, $cm) {
+    global $DB;
 
     if($certificate->printgrade > 0) {
         if($certificate->printgrade == 1) {
@@ -612,18 +567,18 @@ function certificate_issue($course, $certificate, $certrecord, $cm) {
             $grade = certificate_print_mod_grade($course, $certificate->printgrade);
         }
         if ($certificate->gradefmt == 1) {
-            $certrecord->reportgrade = addslashes($grade->percentage);
+            $certrecord->reportgrade = $grade->percentage;
         }
         if ($certificate->gradefmt == 2) {
-            $certrecord->reportgrade = addslashes($grade->points);
+            $certrecord->reportgrade = $grade->points;
         }
         if($certificate->gradefmt == 3) {
-            $certrecord->reportgrade = addslashes($grade->letter);
+            $certrecord->reportgrade = $grade->letter;
         }
     }
     $date = certificate_generate_date($certificate, $course);
     $certrecord->certdate = $date;
-    update_record('certificate_issues', addslashes_object($certrecord));
+    $DB->update_record('certificate_issues', $certrecord);
     certificate_email_teachers($course, $certificate, $certrecord, $cm);
     certificate_email_others($course, $certificate, $certrecord, $cm);
 }
@@ -767,7 +722,7 @@ function certificate_get_signatures () {
  * Search through all the modules for grade data for mod_form.          *
  ************************************************************************/
 function certificate_get_mod_grades() {
-    global $course, $CFG;
+    global $course, $CFG, $DB;
 
     $strgrade = get_string('grade', 'certificate');
     /// Collect modules data
@@ -797,12 +752,12 @@ function certificate_get_mod_grades() {
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                        $mod->courseid = $course->id;
-                        $instance = get_record($mod->modname, 'id', $mod->instance);
-                        if ($grade_items = grade_get_grade_items_for_activity($mod)) {
-                            $mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
-    $item = reset($mod_item->items);
-        if(isset($item->grademax)){
+                    $mod->courseid = $course->id;
+                    $instance = $DB->get_record($mod->modname, array('id' => $mod->instance));
+                    if ($grade_items = grade_get_grade_items_for_activity($mod)) {
+                        $mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
+                        $item = reset($mod_item->items);
+                        if(isset($item->grademax)){
                             $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name.' '.$strgrade;
                         }
                     }
@@ -857,13 +812,14 @@ function certificate_get_outcomes() {
  * Prepare to print an activity grade.                                  *
  ************************************************************************/
 function certificate_print_mod_grade($course, $moduleid) {
-    global $USER;
-    $cm = get_record('course_modules', 'id', $moduleid);
-    $module = get_record('modules', 'id', $cm->module);
+    global $USER, $DB;
+
+    $cm = $DB->get_record('course_modules', array('id'=> $moduleid));
+    $module = $DB->get_record('modules', array('id'=> $cm->module));
 
     if ($grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $USER->id)) {
         $item = reset($grade_item->items);
-        $modinfo->name = utf8_decode(get_field($module->name, 'name', 'id', $cm->instance));
+        $modinfo->name = utf8_decode($DB->get_field($module->name, 'name', array('id'=> $cm->instance)));
         $grade = $item->grades[$USER->id]->grade;
         $item->gradetype = GRADE_TYPE_VALUE;
         $item->courseid = $course->id;
@@ -1375,318 +1331,5 @@ return $certdate;
  ************************************************************************/
 function certificate_generate_code() {
     return (random_string(10));
-}
-
-/************************************************************************
- * Grade/Lock functions-functions for conditionally locking certificate.*
- * Mike Churchward                                                      *
- ************************************************************************/
-function certificate_grade_condition() {
-    global $certificate, $course;
-
-    $restrict_errors = '';
-    if ($linked_acts = certificate_get_linked_activities($certificate->id)) {
-        if (!certificate_is_available_time($linked_acts, $course->id)) {
-            $restrict_errors[] = get_string('errorlocktime', 'certificate');
-        }
-        if (!certificate_is_available_mod($linked_acts, $course->id)) {
-            $restrict_errors[] = get_string('errorlockmod', 'certificate');
-        }
-    }
-    if ($certificate->lockgrade == 1) {
-        $coursegrade = certificate_print_course_grade($course);
-        if ($certificate->requiredgrade > $coursegrade->points) {
-            $a->current = $coursegrade->points;
-            $a->needed = $certificate->requiredgrade;
-            $restrict_errors[] = get_string('errorlockgradecourse', 'certificate', $a);
-         }
-    }
-
-    return $restrict_errors;
-}
-
-function certificate_get_possible_linked_activities(&$course, $certid) {
-    global $CFG;
-
-    $lacts[0] = '-- none --';
-    if (record_exists('modules', 'name', 'quiz')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'quiz a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'quiz\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Quiz: '.$name;
-            }
-        }
-    }
-
-    if (record_exists('modules', 'name', 'assignment')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'assignment a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'assignment\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Assignment: '.$name;
-            }
-        }
-    }
-
-    if (record_exists('modules', 'name', 'questionnaire')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'questionnaire a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'questionnaire\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Questionnaire: '.$name;
-            }
-        }
-    }
-
-    if (record_exists('modules', 'name', 'lesson')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'lesson a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'lesson\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Lesson: '.$name;
-            }
-        }
-    }
-
-    if (record_exists('modules', 'name', 'feedback')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'feedback a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'feedback\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Feedback: '.$name;
-            }
-        }
-    }
-
-    if (record_exists('modules', 'name', 'survey')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'survey a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'survey\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Survey: '.$name;
-            }
-        }
-    }
-    $sql = 'SELECT DISTINCT cm.id,a.name ' .
-           'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'scorm a,'.
-           $CFG->prefix.'modules m '.
-           'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-           'm.name = \'scorm\' AND cm.module = m.id AND a.course = '.$course->id;
-    if ($mods = get_records_sql_menu($sql)) {
-        foreach ($mods as $key => $name) {
-            $lacts[$key] = 'Scorm: '.$name;
-        }
-    }
-    if (record_exists('modules', 'name', 'facetoface')) {
-        $sql = 'SELECT DISTINCT cm.id,a.name ' .
-               'FROM '.$CFG->prefix.'course_modules cm,'.$CFG->prefix.'facetoface a,'.
-               $CFG->prefix.'modules m '.
-               'WHERE cm.course = '.$course->id.' AND cm.instance = a.id AND '.
-               'm.name = \'facetoface\' AND cm.module = m.id AND a.course = '.$course->id;
-        if ($mods = get_records_sql_menu($sql)) {
-            foreach ($mods as $key => $name) {
-                $lacts[$key] = 'Face-to-face: '.$name;
-            }
-        }
-    }
-
-    return $lacts;
-}
-
-function certificate_get_linked_activities($certid) {
-
-    if (is_numeric($certid)) {
-        return get_records('certificate_linked_modules', 'certificate_id', $certid, 'id',
-                           'linkid,id,certificate_id,linkgrade,timemodified');
-    } else {
-        return false;
-    }
-}
-
-function certificate_activity_completed(&$activity, &$cm, $userid=0) {
-    global $CFG, $USER;
-    static $quizid, $questid, $assid, $lessid, $feedid, $survid, $scormid,$facetofaceid;
-
-    if (!$userid) {
-        $userid = $USER->id;
-    }
-
-    if (empty($quizid)) {
-        $quizid = get_field('modules', 'id', 'name', 'quiz');
-        $questid = get_field('modules', 'id', 'name', 'questionnaire');
-        $assid = get_field('modules', 'id', 'name', 'assignment');
-        $lessid = get_field('modules', 'id', 'name', 'lesson');
-        $feedid = get_field('modules', 'id', 'name', 'feedback');
-        $survid = get_field('modules', 'id', 'name', 'survey');
-        $scormid = get_field('modules', 'id', 'name', 'scorm');
-        $facetofaceid = get_field('modules', 'id', 'name', 'facetoface');
-    }
-
-    /// If the module is not visible, it can't be accessed by students (assignment module
-    /// will give us errors), so return true if its not visible.
-    if (!empty($cm)) {
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-        if (!$cm->visible and !has_capability('moodle/course:viewhiddenactivities', $context)) {
-            return true;
-        }
-        if ($cm->module == $quizid) {
-            require_once($CFG->dirroot.'/mod/quiz/locallib.php');
-            $quiz = get_record('quiz', 'id', $cm->instance);
-            $score = quiz_get_best_grade($quiz, $userid);
-            $grade = (int)(((float)$score / (float)$quiz->grade) * 100.0);
-            return ($grade >= (int)$activity->linkgrade);
-
-        } else if ($cm->module == $assid) {
-            require_once($CFG->dirroot.'/mod/assignment/lib.php');
-            $assignment = get_record('assignment', 'id', $cm->instance);
-            require_once("$CFG->dirroot/mod/assignment/type/$assignment->assignmenttype/assignment.class.php");
-            $assignmentclass = "assignment_$assignment->assignmenttype";
-            $assignmentinstance = new $assignmentclass($cm->id, $assignment, $cm);
-            if (!($submission = $assignmentinstance->get_submission($userid))) {
-                return false;
-            } else if ($assignmentinstance->assignment->grade <= 0) {
-                return true;
-            } else {
-                $grade = (int)(((float)$submission->grade / (float)$assignmentinstance->assignment->grade) * 100.0);
-                return ($grade >= (int)$activity->linkgrade);
-            }
-
-        } else if ($cm->module == $questid) {
-            return (get_record('questionnaire_attempts', 'qid', $cm->instance, 'userid', $userid) !== false);
-
-        } else if ($cm->module == $feedid) {
-            return (get_record('feedback_completed', 'feedback', $cm->instance, 'userid', $userid) !== false);
-
-        } else if ($cm->module == $survid) {
-            return (get_record('survey_answers', 'id', $cm->instance, 'userid', $userid) !== false);
-
-        } else if ($cm->module == $scormid) {
-            require_once($CFG->dirroot.'/mod/scorm/locallib.php');
-            $scorm = get_record('scorm', 'id', $cm->instance);
-            $score = scorm_grade_user($scorm, $userid);
-            if (($scorm->grademethod % 10) == 0) { // GRADESCOES
-                if (!$scorm->maxgrade = count_records_select('scorm_scoes',"scorm='$scorm->id' AND launch<>'".sql_empty()."'")) {
-                    return true;
-                }
-            }
-            $return->maxgrade = $scorm->maxgrade;
-            $grade = (int)(((float)$score / (float)$scorm->maxgrade) * 100.0);
-            return ($grade >= (int)$activity->linkgrade);
-
-        } else if ($cm->module == $lessid) {
-            require_once($CFG->dirroot.'/mod/lesson/locallib.php');
-            if (!($lesson = get_record('lesson', 'id', $cm->instance))) {
-                return true;
-            } else {
-                $ntries = count_records('lesson_grades', 'lessonid', $lesson->id, 'userid', $userid) - 1;
-                $gradeinfo = lesson_grade($lesson, $ntries);
-                return ($gradeinfo->grade >= (int)$activity->linkgrade);
-
-            }
-        } else if ($cm->module == $facetofaceid) {
-
-            require_once($CFG->libdir.'/gradelib.php');
-            $grading_info = grade_get_grades($cm->course, 'mod', 'facetoface', $cm->instance, $userid);
-            if (empty($grading_info)) {
-                return false;
-            }
-            $grade = $grading_info->items[0]->grades[$userid]->grade;
-            return ($grade >= (int)$activity->linkgrade);
-
-        } else {
-            return true;
-        }
-    } else {
-        return true;
-    }
-}
-
-function certificate_is_available_time($linked_acts, $courseid, $userid=0) {
-    global $USER;
-
-    if (!$userid) {
-        $userid = $USER->id;
-    }
-    $message = '';
-    require_once('timinglib.php');
-    $tlcoursetime = tl_get_course_time($courseid, $userid);
-    foreach ($linked_acts as $key => $activity) {
-        if ($activity->linkid == CERTCOURSETIMEID) {
-            if (($activity->linkgrade != 0) &&
-                (($tlcoursetime/60) < $activity->linkgrade)) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-function certificate_is_available_mod($linked_acts, $courseid, $userid=0) {
-    global $USER;
-
-    if (!$userid) {
-        $userid = $USER->id;
-    }
-
-    $message = '';
-    foreach ($linked_acts as $key => $activity) {
-        $cm = get_record('course_modules', 'id', $activity->linkid);
-        if (!certificate_activity_completed($activity, $cm, $userid)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/************************************************************************
- * Upgrade functions - functions basically used only once...
- ************************************************************************/
-
-/**
- * Upgrade any grade locks to the new system.
- *
- */
-function certificate_upgrade_grading_info() {
-    $status = true;
-    $select = 'lockgrade > 0';
-    if ($records = get_records_select('certificate', $select)) {
-        foreach ($records as $record) {
-            if ($record->lockgrade == 1) {
-            /// Course grade. Leave as is.
-            } else {
-            /// Activity grade. Create a new activity link.
-                $newrec = new Object();
-                $newrec->certificate_id = $record->id;
-                $newrec->linkid = $record->lockgrade;
-                $newrec->linkgrade = $record->requiredgrade;
-                $newrec->timemodified = $record->timemodified;
-                if (insert_record('certificate_linked_modules', $newrec)) {
-                    set_field('certificate', 'lockgrade', 0, 'id', $record->id);
-                    set_field('certificate', 'requiredgrade', 0, 'id', $record->id);
-                } else {
-                    $status = false;
-                }
-            }
-        }
-    }
-    return $status;
 }
 ?>

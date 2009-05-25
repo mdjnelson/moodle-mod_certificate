@@ -1,6 +1,7 @@
 <?php
 require_once ($CFG->dirroot.'/course/moodleform_mod.php');
 require_once($CFG->dirroot.'/mod/certificate/lib.php');
+
 class mod_certificate_mod_form extends moodleform_mod {
 
 	function definition() {
@@ -15,9 +16,7 @@ class mod_certificate_mod_form extends moodleform_mod {
 		$mform->setType('name', PARAM_TEXT);
 		$mform->addRule('name', null, 'required', null, 'client');
 
-        $mform->addElement('htmleditor', 'intro', get_string('intro', 'certificate'));
-        $mform->setType('intro', PARAM_RAW);
-        $mform->setHelpButton('intro', array('writing', 'questions', 'text'), false, 'editorhelpbutton');
+        $this->add_intro_editor(true, get_string('intro', 'certificate'));
 
 //-------------------------------------------------------------------------------
 		$mform->addElement('header', 'issueoptions', get_string('issueoptions', 'certificate'));
@@ -43,37 +42,10 @@ class mod_certificate_mod_form extends moodleform_mod {
         if (file_exists($reportfile)) {
         $mform->addElement('select', 'reportcert', get_string('reportcertificate', 'certificate'), $ynoptions);
         $mform->setDefault('reportcert', 0);
-	    $mform->setHelpButton('reportcert', array('reportcert', get_string('reportcertificate', 'certificate'), 'certificate'));
-		}
-//-------------------------------------------------------------------------------
-        $mform->addElement('header', 'lockingoptions', get_string('lockingoptions', 'certificate'));
-
-        $this->restrictoptions = array();
-        $this->restrictoptions[0]  = get_string('no');
-        for ($i = 100; $i > 0; $i--) {
-            $this->restrictoptions[$i] = $i.'%';
+        $mform->setHelpButton('reportcert', array('reportcert', get_string('reportcertificate', 'certificate'), 'certificate'));
         }
-		$mform->addElement('select', 'requiredgrade', get_string('requiredgrade', 'certificate'), $this->restrictoptions);
-        $mform->setHelpButton('requiredgrade', array('requiredgrade', get_string('requiredgrade', 'certificate'), 'certificate'));
 
-        $this->activities = certificate_get_possible_linked_activities($COURSE, $form->instance);
-        $this->linkedacts = certificate_get_linked_activities($form->instance);
-
-        $mform->addElement('text', 'coursetime', get_string('coursetimedependency', 'certificate'), array('size'=>'3'));
-        $mform->setDefault('coursetime', isset($this->linkedacts[CERTCOURSETIMEID]) ? $this->linkedacts[CERTCOURSETIMEID]->linkgrade : 0);
-	    $mform->setHelpButton('coursetime', array('coursetime', get_string('coursetime', 'certificate'), 'certificate'));
-        $formgroup = array();
-        $formgroup[] =& $mform->createElement('static', 'linkedactlabel', 'Linked Activity', get_string('linkedactivity', 'certificate'));
-        $formgroup[] =& $mform->createElement('static', 'linkedactgrade', 'Minimum Grade %', get_string('minimumgrade', 'certificate'));
-        $mform->addGroup($formgroup, 'actlabel', get_string('activitydependencies', 'certificate'), array(' '), false);
-        $mform->setHelpButton('actlabel', array('lockedmod', get_string('activitydependencies', 'certificate'), 'certificate'));
-
-/// The linked activities portion goes here, but is forced in in the 'definition_after_data' function so that we can get any elements added in the form and not overwrite them with what's in the database.
-
-        $mform->addElement('submit', 'addlink', get_string('addlinklabel', 'certificate'),
-                           array('title' => get_string('addlinktitle', 'certificate')));
-        $mform->registerNoSubmitButton('addlink');
-
+        
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));
 
@@ -161,74 +133,6 @@ class mod_certificate_mod_form extends moodleform_mod {
         $this->standard_coursemodule_elements($features);
 
         $this->add_action_buttons();
-
-	}
-
-/**
- * Add the linked activities portion only after the entire form has been created. That way,
- * we can act on previous added values that haven't been committed to the database.
- * Check for an 'addlink' button. If the linked activities fields are all full, add an empty one.
- */
-    function definition_after_data() {
-        global $form;
-
-        /// This gets called more than once, and there's no way to tell which time this is, so set a
-        /// variable to make it as called so we only do this processing once.
-        if (!empty($this->def_after_data_done)) {
-            return;
-        }
-        $this->def_after_data_done = true;
-
-        $mform    =& $this->_form;
-        $fdata = $mform->getSubmitValues();
-
-    /// Get the existing linked activities from the database, unless this form has resubmitted itself, in
-    /// which case they will be in the form already.
-        $linkids = array();
-        $linkgrade = array();
-        $linkentry = array();
-
-        if (empty($fdata)) {
-            if ($linkedacts = certificate_get_linked_activities($form->instance)) {
-                foreach ($linkedacts as $idx => $linkedact) {
-                    if ($idx != CERTCOURSETIMEID) {
-                        $linkids[] = $linkedact->linkid;
-                        $linkgrades[] = $linkedact->linkgrade;
-                        $linkentry[] = $linkedact->id;
-                    }
-                }
-            }
-        } else {
-            foreach ($fdata['linkid'] as $idx => $linkid) {
-                $linkids[$idx] = $linkid;
-                $linkgrades[$idx] = $fdata['linkgrade'][$idx];
-                if (!empty($fdata['linkentry'][$idx])) {
-                    $linkentry[$idx] = $fdata['linkentry'][$idx];
-                }
-            }
-        }
-
-        foreach ($linkids as $idx => $linkid) {
-            $formgroup = array();
-            $formgroup[] =& $mform->createElement('select', 'linkid['.$idx.']', '', $this->activities);
-            $mform->setDefault('linkid['.$idx.']', $linkid);
-            $formgroup[] =& $mform->createElement('select', 'linkgrade['.$idx.']', '', $this->restrictoptions);
-            $mform->setDefault('linkgrade['.$idx.']', $linkgrades[$idx]);
-            $group =& $mform->createElement('group', 'actlab'.$idx, ($idx+1), $formgroup, array(' '), false);
-            $mform->insertElementBefore($group, 'addlink');
-            if (!empty($linkentry[$idx])) {
-                $mform->addElement('hidden', 'linkentry['.$idx.']', $linkentry[$idx]);
-            }
-        }
-
-        $numlacts = count($linkids);
-        $formgroup = array();
-        $formgroup[] =& $mform->createElement('select', 'linkid['.$numlacts.']', '', $this->activities);
-        $mform->setDefault('linkid['.$numlacts.']', 0);
-        $formgroup[] =& $mform->createElement('select', 'linkgrade['.$numlacts.']', '', $this->restrictoptions);
-        $mform->setDefault('linkgrade['.$numlacts.']', '');
-        $group =& $mform->createElement('group', 'actlab'.$numlacts, ($numlacts+1), $formgroup, array(' '), false);
-        $mform->insertElementBefore($group, 'addlink');
 
     }
 }

@@ -25,10 +25,8 @@
         <FIELD NAME="printgrade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printnumber" NEXT="gradefmt"/>
         <FIELD NAME="gradefmt" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printgrade" NEXT="printoutcome"/>
         <FIELD NAME="printoutcome" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="gradefmt" NEXT="printhours"/>
-        <FIELD NAME="printhours" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printoutcome" NEXT="lockgrade"/>
-        <FIELD NAME="lockgrade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printhours" NEXT="requiredgrade"/>
-        <FIELD NAME="requiredgrade" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="lockgrade" NEXT="printteacher"/>
-        <FIELD NAME="printteacher" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="requiredgrade" NEXT="customtext"/>
+        <FIELD NAME="printhours" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printoutcome" NEXT="printteacher"/>
+        <FIELD NAME="printteacher" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printhours" NEXT="customtext"/>
         <FIELD NAME="customtext" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printteacher" NEXT="printsignature"/>
         <FIELD NAME="printsignature" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="customtext" NEXT="printseal"/>
         <FIELD NAME="printseal" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printsignature" NEXT="timemodified"/>
@@ -38,7 +36,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for certificate"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="certificate_issues" COMMENT="Info about issued certificates" PREVIOUS="certificate" NEXT="certificate_linked_modules">
+    <TABLE NAME="certificate_issues" COMMENT="Info about issued certificates" PREVIOUS="certificate">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="certificateid"/>
         <FIELD NAME="certificateid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="userid"/>
@@ -54,22 +52,6 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for certificate_issues"/>
       </KEYS>
-    </TABLE>
-    <TABLE NAME="certificate_linked_modules" COMMENT="Defines certificate dependencies" PREVIOUS="certificate_issues">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="certificate_id"/>
-        <FIELD NAME="certificate_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="linkid"/>
-        <FIELD NAME="linkid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="certificate_id" NEXT="linkgrade"/>
-        <FIELD NAME="linkgrade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="linkid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="linkgrade"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="certificate_id" COMMENT="Primary key for certificate_issues"/>
-        <KEY NAME="certificate_id" TYPE="foreign" FIELDS="certificate_id" REFTABLE="certificate" REFFIELDS="id" PREVIOUS="primary"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="linkid" UNIQUE="false" FIELDS="linkid"/>
-      </INDEXES>
     </TABLE>
   </TABLES>
   <STATEMENTS>
