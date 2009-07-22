@@ -22,12 +22,16 @@
             $certificate->course = $restore->course_id;
             $certificate->name = backup_todb($info['MOD']['#']['NAME']['0']['#']);
             $certificate->intro = backup_todb($info['MOD']['#']['INTRO']['0']['#']);
+            $certificate->introformat = backup_todb($info['MOD']['#']['INTROFORMAT']['0']['#']);
             $certificate->emailteachers = backup_todb($info['MOD']['#']['EMAILTEACHERS']['0']['#']);
             $certificate->emailothers = backup_todb($info['MOD']['#']['EMAILOTHERS']['0']['#']);
             $certificate->savecert = backup_todb($info['MOD']['#']['SAVECERT']['0']['#']);
             $certificate->reportcert = backup_todb($info['MOD']['#']['REPORTCERT']['0']['#']);
+            $certificate->reissuecert = backup_todb($info['MOD']['#']['REISSUECERT']['0']['#']);
             $certificate->delivery = backup_todb($info['MOD']['#']['DELIVERY']['0']['#']);
             $certificate->certificatetype = backup_todb($info['MOD']['#']['TYPE']['0']['#']);
+            $certificate->orientation = backup_todb($info['MOD']['#']['ORIENTATION']['0']['#']);
+            $certificate->reissuecert = backup_todb($info['MOD']['#']['REISSUECERT']['0']['#']);
             $certificate->borderstyle = backup_todb($info['MOD']['#']['BORDERSTYLE']['0']['#']);
             $certificate->bordercolor = backup_todb($info['MOD']['#']['BORDERCOLOR']['0']['#']);
             $certificate->printwmark = backup_todb($info['MOD']['#']['PRINTWMARK']['0']['#']);

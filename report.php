@@ -2,7 +2,9 @@
 
     require_once('../../config.php');
     require_once('lib.php');
-
+    
+    global $DB;
+    
     $id   = optional_param('id', 0, PARAM_INT);          // Course module ID
     $sort = optional_param('sort', '', PARAM_RAW);
     $download = optional_param('download', '', PARAM_ALPHA);
@@ -101,7 +103,7 @@
                 }
                 $myxls->write_string($row,3,$ug2);
                 $myxls->write_string($row,4,userdate($user->certdate));
-				if ($user->reportgrade != null) {
+                if ($user->reportgrade != null) {
                     $grade = $user->reportgrade;
                 } else {
                     $grade = get_string('notapplicable','certificate');

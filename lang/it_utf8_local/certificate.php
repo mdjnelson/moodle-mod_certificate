@@ -132,22 +132,8 @@ $string['grade'] = 'Grade';
 $string['coursegrade'] = 'Course Grade';
 $string['credithours'] = 'Credit Hours';
 
-$string['titlelandscape'] = 'CERTIFICATO di COMPLETAMENTO';
-$string['introlandscape'] = 'Questo documento certifica che';
-$string['statementlandscape'] = 'ha completato con successo il corso';
-
-$string['titleletterlandscape'] = 'CERTIFICATO di COMPLETAMENTO';
-$string['introletterlandscape'] = 'Questo documento certifica che';
-$string['statementletterlandscape'] = 'ha completato con successo il corso';
-
-$string['titleportrait'] = 'CERTIFICATO di COMPLETAMENTO';
-$string['introportrait'] = 'Questo documento certifica che';
-$string['statementportrait'] = 'ha completato con successo il corso';
-$string['ondayportrait'] = 'in data';
-
-$string['titleletterportrait'] = 'CERTIFICATO di COMPLETAMENTO';
-$string['introletterportrait'] = 'Questo documento certifica che';
-$string['statementletterportrait'] = 'ha completato con successo il corso';
-
+$string['title'] = 'CERTIFICATO di COMPLETAMENTO';
+$string['certify'] = 'Questo documento certifica che';
+$string['statement'] = 'ha completato con successo il corso';
 
 ?>

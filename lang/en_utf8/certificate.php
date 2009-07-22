@@ -11,6 +11,7 @@ $string['certificate:student'] = 'Get Certificate';
 
 //Adding an instance
 $string['intro'] = 'Introduction';
+$string['areaintro'] = 'Certificate introduction';
 $string['addlinklabel'] = 'Add another linked activity option';
 $string['addlinktitle'] = 'Click to add another linked activity option';
 $string['issueoptions'] = 'Issue Options';
@@ -21,10 +22,15 @@ $string['certificatetype'] = 'Certificate Type';
 $string['emailteachers'] = 'Email Teachers';
 $string['emailothers'] = 'Email Others';
 $string['savecertificate'] = 'Save Certificates';
+$string['reissuecertificate'] = 'Reissue Certificates';
 $string['deliver'] = 'Delivery';
 $string['download'] = 'Force download';
 $string['openbrowser'] = 'Open in new window';
 $string['emailcertificate'] = 'Email (Must also choose save!)';
+$string['letter'] = 'Letter';
+$string['orientation'] = 'Orientation';
+$string['landscape'] = 'Landscape';
+$string['portrait'] = 'Portrait';
 $string['border'] = 'Border';
 $string['borderstyle'] = 'Border Image';
 $string['borderlines'] = 'Lines';
@@ -38,6 +44,7 @@ $string['datehelp'] = 'Date';
 $string['dateformat'] = 'Date Format';
 $string['userdateformat'] = 'User\'s Language Date Format';
 $string['receiveddate'] = 'Date Received';
+$string['issueddate'] = 'Date Issued';
 $string['courseenddate'] = 'Course End Date (Must be set!)';
 $string['gradedate'] = 'Grade Date';
 $string['printcode'] = 'Print Code';
@@ -55,14 +62,6 @@ $string['printteacher'] = 'Print Teacher Name(s)';
 $string['customtext'] = 'Custom Text';
 $string['printdate'] = 'Print Date';
 $string['printseal'] = 'Seal or Logo Image';
-$string['lockgrade'] = 'Lock by grade';
-$string['requiredgrade'] = 'Required course grade';
-$string['coursetime'] = 'Required course time';
-$string['linkedactivity'] = 'Linked Activity';
-$string['minimumgrade'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Required Grade';
-$string['activitylocklabel'] = 'Linked Activity/Minimum Grade %';
-$string['coursetimedependency'] = 'Minimum required minutes in course';
-$string['activitydependencies'] = 'Dependent activities';
 
 //Strings for verification block
 $string['entercode'] = 'Enter certificate code to verify:';
@@ -96,11 +95,6 @@ to your computer.';
 $string['openemail'] = 'Click the button below and your certificate
 will be sent to you as an email attachment.';
 $string['receivedcerts'] = 'Received certificates';
-$string['errorlockgrade'] = 'Your current grade on $a->mod ($a->current%%) is below the grade required ($a->needed%%) to receive the certificate.';
-$string['errorlocksurvey'] = 'You need to complete all course surveys before receving your certificate.';
-$string['errorlockgradecourse'] = 'Your current course grade ($a->current%%) is below the grade required ($a->needed%%) to receive your certificate.';
-$string['errorlocktime'] = 'You must first meet the requirement for time spent working in this course before receving your certificate.';
-$string['errorlockmod'] = 'You must first meet all course activity grade requirements before receving your certificate.';
 
 //Email text
 $string['emailstudenttext'] = 'Attached is your certificate for $a->course.';
@@ -121,34 +115,19 @@ You can review it here:
     <a href=\"$a->url\">Certificate Report</a>.';
 
 //Names of type folders
-$string['typeportrait'] = 'Portrait';
-$string['typeletter_portrait'] = 'Portrait (letter)';
-$string['typelandscape'] = 'Landscape';
-$string['typeletter_landscape'] = 'Landscape (letter)';
-$string['typeunicode_landscape'] = 'Unicode (landscape)';
-$string['typeunicode_portrait'] = 'Unicode (portrait)';
+$string['typeA4_embedded'] = 'A4 Embedded';
+$string['typeletter_embedded'] = 'Letter Embedded';
+$string['typeA4_non_embedded'] = 'A4 Non-Embedded';
+$string['typeletter_non_embedded'] = 'Letter Non-Embedded';
 
 //Print to certificate strings
 $string['grade'] = 'Grade';
 $string['coursegrade'] = 'Course Grade';
 $string['credithours'] = 'Credit Hours';
 
-$string['titlelandscape'] = 'CERTIFICATE of ACHIEVEMENT';
-$string['introlandscape'] = 'This is to certify that';
-$string['statementlandscape'] = 'has completed the course';
-
-$string['titleletterlandscape'] = 'CERTIFICATE of ACHIEVEMENT';
-$string['introletterlandscape'] = 'This is to certify that';
-$string['statementletterlandscape'] = 'has completed the course';
-
-$string['titleportrait'] = 'CERTIFICATE of ACHIEVEMENT';
-$string['introportrait'] = 'This is to certify that';
-$string['statementportrait'] = 'has completed the course';
-$string['ondayportrait'] = 'on this day';
-
-$string['titleletterportrait'] = 'CERTIFICATE of ACHIEVEMENT';
-$string['introletterportrait'] = 'This is to certify that';
-$string['statementletterportrait'] = 'has completed the course';
+$string['title'] = 'CERTIFICATE of ACHIEVEMENT';
+$string['certify'] = 'This is to certify that';
+$string['statement'] = 'has completed the course';
 
 //Certificate transcript strings
 $string['notapplicable'] = 'N/A';

@@ -130,20 +130,8 @@ $string['grade'] = 'Nota';
 $string['coursegrade'] = 'Nota no curso';
 $string['credithours'] = 'Carga horária';
 
-$string['titlelandscape'] = 'CERTIFICADO DE CONCLUSÃO';
-$string['introlandscape'] = 'Certifico para os devidos fins que';
-$string['statementlandscape'] = 'completou o curso de';
+$string['title'] = 'CERTIFICADO DE CONCLUSÃO';
+$string['certify'] = 'Certifico para os devidos fins que';
+$string['statement'] = 'completou o curso de';
 
-$string['titleletterlandscape'] = 'CERTIFICADO DE CONCLUSÃO';
-$string['introletterlandscape'] = 'Certifico para os devidos fins que';
-$string['statementletterlandscape'] = 'completou o curso de';
-
-$string['titleportrait'] = 'CERTIFICADO DE CONCLUSÃO';
-$string['introportrait'] = 'Certifico para os devidos fins que';
-$string['statementportrait'] = 'completou o curso de';
-$string['ondayportrait'] = 'no dia';
-
-$string['titleletterportrait'] = 'CERTIFICADO DE CONCLUSÃO';
-$string['introletterportrait'] = 'Certifico para os devidos fins que';
-$string['statementletterportrait'] = 'completou o curso de';
 ?>

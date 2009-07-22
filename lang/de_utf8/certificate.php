@@ -121,20 +121,8 @@ $string['grade'] = 'Bewertung';
 $string['coursegrade'] = 'Kursbewertung';
 $string['credithours'] = 'Credit Hours';
 
-$string['titlelandscape'] = 'Abschlußzertifikat';
-$string['introlandscape'] = 'This is to certify that';
-$string['statementlandscape'] = 'has completed the course';
+$string['title'] = 'Abschlußzertifikat';
+$string['certify'] = 'This is to certify that';
+$string['statement'] = 'has completed the course';
 
-$string['titleletterlandscape'] = 'Abschlußzertifikat';
-$string['introletterlandscape'] = 'This is to certify that';
-$string['statementletterlandscape'] = 'über die erfolgreiche Teilnahme am  Kurs';
-
-$string['titleportrait'] = 'Abschlußzertifikat';
-$string['introportrait'] = 'Dies ist, das zu bescheinigen';
-$string['statementportrait'] = 'über die erfolgreiche Teilnahme am  Kurs';
-$string['ondayportrait'] = 'erfolgreich abgeschlossen';
-
-$string['titleletterportrait'] = 'Abschlußzertifikat';
-$string['introletterportrait'] = 'This is to certify that';
-$string['statementletterportrait'] = 'über die erfolgreiche Teilnahme am  Kurs';
 ?>

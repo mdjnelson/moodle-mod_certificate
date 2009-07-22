@@ -57,7 +57,7 @@ $mod_certificate_capabilities = array(
             'admin' => CAP_ALLOW
         )
     ),
-	
+    
      'mod/certificate:printteacher' => array(
 
         'captype' => 'read',
@@ -66,10 +66,10 @@ $mod_certificate_capabilities = array(
             'teacher' => CAP_PREVENT,
             'editingteacher' => CAP_ALLOW,
             'coursecreator' => CAP_PREVENT,
-			'admin' => CAP_PREVENT
+            'admin' => CAP_PREVENT
         )
     ),
-	
+    
 );
 
 ?>

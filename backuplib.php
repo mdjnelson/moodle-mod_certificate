@@ -45,12 +45,15 @@
                 fwrite ($bf,full_tag("MODTYPE",4,false,"certificate"));
                 fwrite ($bf,full_tag("NAME",4,false,$certificate->name));
                 fwrite ($bf,full_tag("INTRO",4,false,$certificate->intro));
+                fwrite ($bf,full_tag("INTROFORMAT",4,false,$certificate->introformat));
                 fwrite ($bf,full_tag("EMAILTEACHERS",4,false,$certificate->emailteachers));
                 fwrite ($bf,full_tag("EMAILOTHERS",4,false,$certificate->emailothers));
                 fwrite ($bf,full_tag("SAVECERT",4,false,$certificate->savecert));
                 fwrite ($bf,full_tag("REPORTCERT",4,false,$certificate->reportcert));
+                fwrite ($bf,full_tag("REISSUECERT",4,false,$certificate->reissuecert));
                 fwrite ($bf,full_tag("DELIVERY",4,false,$certificate->delivery));
                 fwrite ($bf,full_tag("TYPE",4,false,$certificate->certificatetype));
+                fwrite ($bf,full_tag("ORIENTATION",4,false,$certificate->orientation));
                 fwrite ($bf,full_tag("BORDERSTYLE",4,false,$certificate->borderstyle));
                 fwrite ($bf,full_tag("BORDERCOLOR",4,false,$certificate->bordercolor));
                 fwrite ($bf,full_tag("PRINTWMARK",4,false,$certificate->printwmark));
