@@ -28,6 +28,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     /// Add new field to certificate table
         $table = new xmldb_table('certificate');
+        $field = new XMLDBField('customtext', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'printteacher');
         $field = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, '0', 'certificatetype');
         $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
         $dbman->add_field($table, $field);
