@@ -24,53 +24,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     $result = true;
 
-    if ($result && $oldversion < 2009062900) {
-
-    /// Add new field to certificate table
-        $table = new xmldb_table('certificate');
-        $field = new XMLDBField('customtext', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'printteacher');
-        $field = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, '0', 'certificatetype');
-        $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
-        $dbman->add_field($table, $field);
-
-    /// Set default orientation accordingly
-        $sql1 = "UPDATE {certificate} SET orientation='P' WHERE certificatetype='portrait'";
-        $result = $DB->execute($sql1);
-        $sql2 = "UPDATE {certificate} SET orientation='P' WHERE certificatetype='letter_portrait'";
-        $result = $DB->execute($sql2);
-        $sql3 = "UPDATE {certificate} SET orientation='P' WHERE certificatetype='unicode_portrait'";
-        $result = $DB->execute($sql3);
-        $sql4 = "UPDATE {certificate} SET orientation='L' WHERE certificatetype='landscape'";
-        $result = $DB->execute($sql4);
-        $sql5 = "UPDATE {certificate} SET orientation='L' WHERE certificatetype='letter_landscape'";
-        $result = $DB->execute($sql5);
-        $sql6 = "UPDATE {certificate} SET orientation='L' WHERE certificatetype='unicode_landscape'";
-        $result = $DB->execute($sql6);
-
-        // Update all the certificate types
-        $sql12 = "UPDATE {certificate} SET certificatetype='A4_non_embedded' WHERE certificatetype='landscape'";
-        $result = $DB->execute($sql12);
-        $sql22 = "UPDATE {certificate} SET certificatetype='A4_non_embedded' WHERE certificatetype='portrait'";
-        $result = $DB->execute($sql22);
-        $sql32 = "UPDATE {certificate} SET certificatetype='A4_embedded' WHERE certificatetype='unicode_landscape'";
-        $result = $DB->execute($sql32);
-        $sql42 = "UPDATE {certificate} SET certificatetype='A4_embedded' WHERE certificatetype='unicode_portrait'";
-        $result = $DB->execute($sql42);
-        $sql52 = "UPDATE {certificate} SET certificatetype='letter_non_embedded' WHERE certificatetype='letter_landscape'";
-        $result = $DB->execute($sql52);
-        $sql62 = "UPDATE {certificate} SET certificatetype='letter_non_embedded' WHERE certificatetype='letter_portrait'";
-        $result = $DB->execute($sql62);
-
-    /// Add new field to certificate table
-        $table = new xmldb_table('certificate');
-        $field = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'reportcert');
-        $dbman->add_field($table, $field);
-
-    /// savepoint reached
-        upgrade_mod_savepoint($result, 2009062900, 'certificate');
-    }
-
-
 //===== 1.9.0 or older upgrade line ======//
 
     if ($result && $oldversion < 2007102806) {
@@ -159,7 +112,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '0', 'certificate_id');
         $result = change_field_unsigned($table, $field);
     }
-    
+
     if ($result && $oldversion < 2008080904) {
     /// Add new fields to certificate table if they dont already exist
 
@@ -170,6 +123,42 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $result = $result && add_field($table, $field);
         }
     }
+
+//===== 2.0 or older upgrade line ======//
+
+    if ($result && $oldversion < 2009062900) {
+
+    /// Add new field to certificate table
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
+        $dbman->add_field($table, $field);
+
+        $field = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
+        $dbman->add_field($table, $field);
+
+        $field = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
+        $dbman->add_field($table, $field);
+
+    /// Set default orientation accordingly
+        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'portrait'));
+        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'letter_portrait'));
+        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'unicode_portrait'));
+        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'landscape'));
+        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'letter_landscape'));
+        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'unicode_landscape'));
+
+        // Update all the certificate types
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'landscape'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'portrait'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_landscape'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_portrait'));
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
+
+    /// savepoint reached
+        upgrade_mod_savepoint($result, 2009062900, 'certificate');
+    }
+
     return $result;
 }
 
