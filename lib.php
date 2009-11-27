@@ -170,7 +170,9 @@ function view_header($course, $certificate, $cm) {
     }
 
     if (!empty($certificate->intro)) {
-        print_box(format_text($certificate->intro), 'generalbox', 'intro');
+        global $OUTPUT;
+
+        echo $OUTPUT->box(format_text($certificate->intro), 'generalbox', 'intro');
     }
 }
 
@@ -392,7 +394,7 @@ function certificate_email_students($user, $course, $certificate, $certrecord) {
 function certificate_count_issues($certificate) {
     global $CFG, $DB;
 
-     
+
 	    $cm = get_coursemodule_from_instance('certificate', $certificate->id);
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
         if ($users = get_users_by_capability($context, 'mod/certificate:view')) {
@@ -405,7 +407,7 @@ function certificate_count_issues($certificate) {
 
             return $DB->count_records_sql("SELECT COUNT(*)
                                       FROM {$CFG->prefix}certificate_issues
-                                     WHERE certificateid = '$certificate->id' 
+                                     WHERE certificateid = '$certificate->id'
                                        AND certdate > 0
                                        AND userid IN $userlists ");
         } else {
@@ -509,7 +511,7 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC", 
 function certificate_prepare_issue($course, $user, $certificate) {
    global $DB;
 
-    if($certificate->reissuecert == 0) { 
+    if($certificate->reissuecert == 0) {
    if ($DB->record_exists('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id))) {
         return;
 		}
@@ -1228,7 +1230,7 @@ function certificate_generate_date($certificate, $course) {
         } else $certdate = $timecreated;
         }
 		if ($certificate->printdate > 2) {
-        $modinfo = certificate_print_mod_grade($course, $certificate->printdate);		
+        $modinfo = certificate_print_mod_grade($course, $certificate->printdate);
             $certdate = $modinfo->dategraded;
     }
     return $certdate;

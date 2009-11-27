@@ -75,7 +75,7 @@ include '../../lib/pdflib.php';
             link_to_popup_window ('/mod/certificate/view.php?id='.$cm->id.'&action=get', '', $strgetcertificate, 600, 800, $strgetcertificate);
             echo '</center>';
             add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
-            print_footer($course);
+            echo $OUTPUT->footer($course);
             exit;
         }
         certificate_issue($course, $USER, $certificate, $certrecord, $cm); // update certrecord as issued
@@ -84,10 +84,16 @@ include '../../lib/pdflib.php';
             view_header($course, $certificate, $cm);
             echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
             echo '<center>';
-            link_to_popup_window ('/mod/certificate/view.php?id='.$cm->id.'&action=review', '', $strreviewcertificate, 600, 800, $strreviewcertificate);
+            $url = '/mod/certificate/view.php?id='.$cm->id.'&action=get';
+            $linkname = $strreviewcertificate;
+            $name = 'popup';
+            $options= array('width' => 600, 'height' => 800);
+            $link = html_link::make($url, $linkname);
+            $link->add_action(new popup_action('click', $link->url, $name, $options));
+            echo $OUTPUT->link($link);
             echo '</center>';
 
-            print_footer($course);
+            echo $OUTPUT->footer($course);
             exit;
         }
     } else if ($certrecord->certdate == 0) { ///Create certificate
@@ -102,10 +108,16 @@ include '../../lib/pdflib.php';
             }
 
             echo '<center>';
-            link_to_popup_window ('/mod/certificate/view.php?id='.$cm->id.'&action=get', '', $strgetcertificate, 600, 800, $strgetcertificate);
+            $url = '/mod/certificate/view.php?id='.$cm->id.'&action=get';
+            $linkname = $strgetcertificate;
+            $name = 'popup';
+            $options= array('width' => 600, 'height' => 800);
+            $link = html_link::make($url, $linkname);
+            $link->add_action(new popup_action('click', $link->url, $name, $options));
+            echo $OUTPUT->link($link);
             echo '</center>';
             add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
-            print_footer($course);
+            echo $OUTPUT->footer($course);
             exit;
         }
         certificate_issue($course, $certificate, $certrecord, $cm); // update certrecord as issued
