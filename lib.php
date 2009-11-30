@@ -156,11 +156,11 @@ function certificate_get_participants($certificateid) {
  * Prints the header in view.  Used to help prevent FPDF header errors. *
  ************************************************************************/
 function view_header($course, $certificate, $cm) {
-    global $CFG, $DB;
+    global $CFG, $DB, $PAGE, $OUTPUT;
 
-    $strcertificate  = get_string('modulename', 'certificate');
-    $navigation = build_navigation('', $cm);
-    print_header_simple(format_string($certificate->name), '', $navigation, '', '', true, update_module_button($cm->id, $course->id, $strcertificate), navmenu($course, $cm));
+    $PAGE->set_title(format_string($certificate->name));
+    $PAGE->set_heading(format_string($course->fullname));
+    echo $OUTPUT->header();
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     if (has_capability('mod/certificate:manage', $context)) {

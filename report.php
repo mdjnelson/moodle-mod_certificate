@@ -36,7 +36,7 @@
 // Initialize $PAGE, compute blocks
     $PAGE->set_url('mod/certificate/view.php', array('id' => $cm->id));
     $PAGE->set_context($context);
-    $PAGE->set_title(get_string(format_string($certificate->name).": $strreport", 'certificate'));
+    $PAGE->set_title(format_string($certificate->name).": $strreport");
     $PAGE->set_heading(format_string($course->fullname));
     $PAGE->navbar->add($strreport);
 

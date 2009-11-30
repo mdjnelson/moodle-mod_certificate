@@ -19,7 +19,6 @@ include '../../lib/pdflib.php';
         error('course module is incorrect');
     }
 
-    global $USER, $DB;
     require_login($course->id);
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     require_capability('mod/certificate:view', $context);
@@ -29,6 +28,7 @@ include '../../lib/pdflib.php';
 
 // Initialize $PAGE, compute blocks
     $PAGE->set_url('mod/certificate/view.php', array('id' => $cm->id));
+    $PAGE->set_context($context);
 
     if (($edit != -1) and $PAGE->user_allowed_editing()) {
         $USER->editing = $edit;
