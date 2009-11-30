@@ -2,20 +2,21 @@
 
     require_once('../../config.php');
     require_once('lib.php');
-    
+
     global $DB;
-    
-    $id   = optional_param('id', 0, PARAM_INT);          // Course module ID
+
+    $id   = required_param('id', PARAM_INT);          // Course module ID
     $sort = optional_param('sort', '', PARAM_RAW);
     $download = optional_param('download', '', PARAM_ALPHA);
 
     if (! $cm = get_coursemodule_from_id('certificate', $id)) {
             error('Course Module ID was incorrect');
-        }
+    }
 
     if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
         error('Course is misconfigured');
     }
+
     if (! $certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
         error('Certificate ID was incorrect');
     }
@@ -32,6 +33,13 @@
     $strcode = get_string('code', 'certificate');
     $strreport= get_string('report', 'certificate');
 
+// Initialize $PAGE, compute blocks
+    $PAGE->set_url('mod/certificate/view.php', array('id' => $cm->id));
+    $PAGE->set_context($context);
+    $PAGE->set_title(get_string(format_string($certificate->name).": $strreport", 'certificate'));
+    $PAGE->set_heading(format_string($course->fullname));
+    $PAGE->navbar->add($strreport);
+
     add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
    /// Check to see if groups are being used
@@ -44,24 +52,14 @@
     //or to sort by date:
     // $sqlsort = 's.certdate ASC';
     if (!$users = certificate_get_issues($certificate->id, $USER, $sqlsort, $groupmode, $cm)) {
-        $navigation = build_navigation($strreport, $cm);
-        print_header_simple(format_string($certificate->name).": $strreport", "", $navigation, "", '', true);
-        if ($groupmode) {
-            groups_print_activity_menu($cm, 'report.php?id='.$id);
-        }
+        echo $OUTPUT->header();
         notify('There are no issued certificates');
-        print_footer();
+        echo $OUTPUT->footer();
         die;
     }
 
-
-
     if (!$download) {
-        $navigation = build_navigation($strreport, $cm);
-        print_header_simple(format_string($certificate->name).": $strreport", "", $navigation, "", '', true);
-        if ($groupmode) {
-            groups_print_activity_menu($cm, 'report.php?id='.$id);
-        }
+        echo $OUTPUT->header();
     }
 
     if ($download == "ods") {
@@ -223,13 +221,16 @@
     }
 
     echo '<br />';
-    print_heading(get_string('modulenameplural', 'certificate'));
+    echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
 
+    $table = new html_table();
+    $table->width = "95%";
+    $table->tablealign = "center";
     $table->head  = array ($strto, $strdate, $strgrade, $strcode);
     $table->align = array ("LEFT", "LEFT", "CENTER", "CENTER");
 
     foreach ($users as $user) {
-        $name = print_user_picture($user->id, $course->id, $user->picture, false, true).$user->studentname;
+        $name = $OUTPUT->user_picture($user, $course->id).$user->studentname;
         $date = userdate($user->certdate).certificate_print_user_files($user->id);
         if ($user->reportgrade != null) {
             $grade = $user->reportgrade;
@@ -241,23 +242,21 @@
     }
 
     echo '<br />';
-    print_table($table);
+    echo $OUTPUT->table($table);
 
    //now give links for downloading spreadsheets.
     echo "<br />\n";
     echo "<table class=\"downloadreport\"><tr>\n";
     echo "<td>";
-    $options = array();
-    $options["id"] = "$cm->id";
-    $options["download"] = "ods";
-    print_single_button("report.php", $options, get_string("downloadods"));
+    echo $OUTPUT->button(html_form::make_button('report.php', array('id' => $cm->id, 'download' => 'ods',),
+                         get_string("downloadods")));
     echo "</td><td>";
-    $options["download"] = "xls";
-    print_single_button("report.php", $options, get_string("downloadexcel"));
+    echo $OUTPUT->button(html_form::make_button('report.php', array('id' => $cm->id, 'download' => 'xls',),
+                         get_string("downloadexcel")));
     echo "</td><td>";
-    $options["download"] = "txt";
-    print_single_button("report.php", $options, get_string("downloadtext"));
+    echo $OUTPUT->button(html_form::make_button('report.php', array('id' => $cm->id, 'download' => 'txt',),
+                         get_string("downloadtext")));
     echo "</td></tr></table>";
 
-    print_footer($course);
-?>
+    echo $OUTPUT->footer($course);
+ ?>
