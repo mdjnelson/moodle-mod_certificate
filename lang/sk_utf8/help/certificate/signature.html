@@ -1,0 +1,9 @@
+﻿<p align="center"><b>Zobrazenie podpisu</b></p>
+<p>Toto nastavenie umožňuje zobrazenie podpisu zo súboru certificate/pix/signatures. Môžete zvoliť zobrazenie grafického podpisu, alebo čiary pre ručný podpis. Príklady sú vrátane grafického podpisu a čiar.</p>
+<p>Prednastavená pozícia zobrazenia podpisu je v ľavom dolnom rohu certifikátu. Avšak editovaním súboru môžete zmeniť jeho pozíciu certificate/type/&quot;typ certifikátu&quot;/certificate.php.</p>
+<p>V spodnej časti súboru certificate.php nájdete podobný kód:</p>
+<p>print_signature($certificate-&gt;printsignature, $orientation, 110, 450, '', '');</p>
+<p>Dve číselné hodnoty podpisu označujú hodnoty horizontálneho uloženia X (zľava doprava) a vertikálneho uloženia Y (zhora nadol). Tieto hodnoty môžete meniť podľa potreby. </p>
+<p>Pridaním obrázkov podpisu sa zväčšuje veľkosť pdf súboru. Môžete pridať aj vlastný obrázok, alebo okraj do súboru certificate/pix/borders a ten sa vám potom zobrazí v nastaveniach certifikátu. Obrázok, alebo okraj musí byť vo formáte JPEG (.jpg), alebo PNG 8 (.png).</p>
+<p>&nbsp;</p>
+

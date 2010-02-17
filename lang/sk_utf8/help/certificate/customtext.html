@@ -1,0 +1,19 @@
+﻿<p align="center"><b>Ľubovolný text</b></p>
+<p>Ak chcete, aby na certifikáte bolo namiesto predvoleného mena učiteľa vytlačené iné meno, nezvoľte možnosti tlačiť meno učiteľa a ani žiadneho podpisu. Zvoľte len tlač čiary. Zadajte meno učiteľa v tomto poli tak, ako chcete, aby sa zobrazovalo na certifikáte. Predvolená pozícia tohto okna je v ľavom dolnom rohu certifikátu. Môžete ju zmeniť v súbore certificate/type/&quot;druh certifikátu&quot;/certificate.php.</p>
+<p>Na konci súboru certificate.php, nájdete podobný kód:</p>
+<p>cert_printtext(150, 450, '', '', '', '', ''); </p>
+<p>Dve čísla v kóde znázorňujú rozmiestnenie X (sprava doľava), a rozmiestnenie Y (zhora nadol). Tieto čísla môžete zmeniť a prispôsobiť svojím potrebám.</p>
+<p> Tiež môžete použiť vyhradené textové pole na vloženie vlastného html kódu ako napríklad obrázku alebo odkazu.</p>
+
+<div style="border: 1px solid black;font-size: 12px">
+Tieto html tagy sú dostupné:
+<ul type="square">
+<li>&lt;br&gt; a &lt;p&gt;</li>
+<li>&lt;b&gt;, &lt;i&gt; a &lt;u&gt;</li>
+<li>&lt;img&gt; (&lt;src&gt; a &lt;width&gt; alebo &lt;height&gt; sú povynné)</li>
+<li>&lt;a&gt; (href je povýnný)</li>
+<li>&lt;font&gt;: možné atribúty sú:<br />
+  farba: kód hex farieb <br />
+  písmo: arial, times, courier, helvetica, symbol </li></ul></div>
+<p>Príklad html:</p>
+<p>Pán James Salesman, Manažér&lt;br&gt;&lt;br&gt;Obchodného Oddelenia&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#0000CC&quot;&gt;&lt;b&gt;Vaša spoločnosť&lt;font face=&quot;Symbol&quot;&gt;&amp;Ograve;&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;&lt;img src=&quot;http://yourmoodle.com/mod/certificate/pix/seals/Logo.png&quot; width=&quot;100&quot;&gt;&lt;p&gt;&lt;a href=&quot;http://www.site.com target=&quot;_black&quot;&gt;Click here&lt;/a&gt;&lt;/p&gt;</p>

@@ -1,0 +1,8 @@
+﻿<p align="center"><b>Zobrazenie loga alebo pečate</b></p>
+<p>Toto nastavenie umožňuje zobrazenie loga, alebo pečate zo súboru certificate/pix/seals. Príklady sú vrátane štyroch obrázkov pečate a jedného loga. Prednastavená pozícia zobrazenia loga, alebo pečate je v pravom dolnom rohu certifikátu. Avšak editovaním súboru môžete zmeniť jeho pozíciu certificate/type/&quot;typ certifikátu&quot;/certificate.php.</p>
+<p>V spodnej časti súboru certificate.php nájdete podobný kód:</p>
+<p> print_seal($certificate-&gt;printseal, $orientation, 590, 425, '', ''); </p>
+<p>Dve číselné hodnoty zobrania loga, alebo pečate označujú hodnoty horizontálneho uloženia X(zľava doprava) a vertikálneho uloženia Y(zhora nadol). Tieto hodnoty môžete meniť podľa potreby.</p>
+<p>Pridaním obrázkov podpisu sa zväčšuje veľkosť pdf súboru. Môžete pridať aj vlastný obrázok do súboru certificate/pix/seals a ten sa vám potom zobrazí v nastaveniach certifikátu. Obrázok musí byť vo formáte JPEG (.jpg) alebo PNG 8 (.png).
+</p>
+
