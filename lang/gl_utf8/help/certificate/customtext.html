@@ -1,0 +1,19 @@
+<p align="center"><b>Texto Personalizado</b></p>
+<p>Si usted quiere imprimir en el certificado nombres de profesor diferentes a los que están asignados en el rol de profesor del curso, no seleccione la opción de Imprimir el Nombre del Profesor o ninguna imagen de firma con excepción de la imagen de línea.  Introduzca los nombres de los profesores en el campo de texto de la forma que quiera que aparezcan en su certificado.  Por omisión, este texto esta ubicado en la esquina inferior izquierda del certificado. Usted puede cambiar su posición en el archivo certificate/type/&quot;type name&quot;/certificate.php </p>
+<p>En ese archivo, encuentre la línea de código similar a esta, en la parte final de la página:</p>
+<p>cert_printtext(150, 450, '', '', '', '', ''); </p>
+<p>Los dos números reflejan la posición X (a partir de la izquierda hacia la derecha) y la posición Y (a partir de arriba hacia abajo) del texto. Usted puede cambiar estos valores si lo desea. </p>
+<p>Usted también puede usar este campo de texto para introducir código HTML. Por ejemplo, puede agregar un enlace o una imagen.</p>
+
+<div style="border: 1px solid black;font-size: 12px">
+Las siguientes etiquetas HTML están disponibles:
+<ul type="square">
+<li>&lt;br&gt; y &lt;p&gt;</li>
+<li>&lt;b&gt;, &lt;i&gt; y &lt;u&gt;</li>
+<li>&lt;img&gt; (src y width (o height) son obligatorias)</li>
+<li>&lt;a&gt; (href es obligatoria)</li>
+<li>&lt;font&gt;: posibles atributos son:<br />
+  color: código de color hex<br />
+  face: arial, times, courier, helvetica, symbol </li></ul></div>
+<p>Ejemplo HTML:</p>
+<p>Mr. James Salesman, Manager&lt;br&gt;&lt;br&gt;Sales Department&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#0000CC&quot;&gt;&lt;b&gt;Your Company&lt;font face=&quot;Symbol&quot;&gt;&amp;Ograve;&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;&lt;img src=&quot;http://yourmoodle.com/mod/certificate/pix/seals/Logo.png&quot; width=&quot;100&quot;&gt;&lt;p&gt;&lt;a href=&quot;http://www.site.com target=&quot;_blank&quot;&gt;Click here&lt;/a&gt;&lt;/p&gt;</p>
