@@ -164,9 +164,9 @@ function view_header($course, $certificate, $cm) {
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     if (has_capability('mod/certificate:manage', $context)) {
-   //     $numusers = certificate_count_issues($certificate);
+        $numusers = certificate_count_issues($certificate);
         echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'">'.
-              get_string('viewcertificateviews', 'certificate').'</a></div>';
+              get_string('viewcertificateviews', 'certificate', $numusers).'</a></div>';
     }
 
     if (!empty($certificate->intro)) {
@@ -1242,4 +1242,27 @@ function certificate_generate_date($certificate, $course) {
 function certificate_generate_code() {
     return (random_string(10));
 }
-?>
+
+/**
+ * @uses FEATURE_GROUPS
+ * @uses FEATURE_GROUPINGS
+ * @uses FEATURE_GROUPMEMBERSONLY
+ * @uses FEATURE_MOD_INTRO
+ * @uses FEATURE_COMPLETION_TRACKS_VIEWS
+ * @uses FEATURE_GRADE_HAS_GRADE
+ * @uses FEATURE_GRADE_OUTCOMES
+ * @param string $feature FEATURE_xx constant for requested feature
+ * @return mixed True if module supports feature, null if doesn't know
+ */
+function certificate_supports($feature) {
+    switch($feature) {
+        case FEATURE_GROUPS:                  return true;
+        case FEATURE_GROUPINGS:               return true;
+        case FEATURE_GROUPMEMBERSONLY:        return true;
+        case FEATURE_MOD_INTRO:               return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
+        case FEATURE_BACKUP_MOODLE2:          return true;
+
+        default: return null;
+    }
+}

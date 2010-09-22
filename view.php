@@ -27,9 +27,9 @@ include '../../lib/pdflib.php';
     add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
 
 // Initialize $PAGE, compute blocks
-    $PAGE->set_url('mod/certificate/view.php', array('id' => $cm->id));
+    $PAGE->set_url('/mod/certificate/view.php', array('id' => $cm->id));
     $PAGE->set_context($context);
-
+    $PAGE->set_cm($cm);
     if (($edit != -1) and $PAGE->user_allowed_editing()) {
         $USER->editing = $edit;
     }
@@ -72,7 +72,11 @@ include '../../lib/pdflib.php';
             }
 
             echo '<center>';
-            link_to_popup_window ('/mod/certificate/view.php?id='.$cm->id.'&action=get', '', $strgetcertificate, 600, 800, $strgetcertificate);
+            $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
+            $linkname = $strreviewcertificate;
+            $action = new popup_action('click', $link, array('height' => 600, 'width' => 800));
+            $popup = $OUTPUT->action_link($link, $linkname, $action, array('title'=>$linkname));
+            echo $popup;
             echo '</center>';
             add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
             echo $OUTPUT->footer($course);
@@ -84,12 +88,6 @@ include '../../lib/pdflib.php';
             view_header($course, $certificate, $cm);
             echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
             echo '<center>';
-            $url = '/mod/certificate/view.php?id='.$cm->id.'&action=get';
-            $linkname = $strreviewcertificate;
-            $name = 'popup';
-            $options= array('width' => 600, 'height' => 800);
-            $link = html_link::make($url, $linkname);
-            $link->add_action(new popup_action('click', $link->url, $name, $options));
             echo $OUTPUT->link($link);
             echo '</center>';
 
@@ -106,15 +104,12 @@ include '../../lib/pdflib.php';
             } elseif ($certificate->delivery == 2)    {
                 echo '<p align="center">'.get_string('openemail', 'certificate').'</p>';
             }
-
             echo '<center>';
-            $url = '/mod/certificate/view.php?id='.$cm->id.'&action=get';
+            $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
             $linkname = $strgetcertificate;
-            $name = 'popup';
-            $options= array('width' => 600, 'height' => 800);
-            $link = html_link::make($url, $linkname);
-            $link->add_action(new popup_action('click', $link->url, $name, $options));
-            echo $OUTPUT->link($link);
+            $action = new popup_action('click', $link, array('height' => 600, 'width' => 800));
+            $popup = $OUTPUT->action_link($link, $linkname, $action, array('title'=>$linkname));
+            echo $popup;
             echo '</center>';
             add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
             echo $OUTPUT->footer($course);
@@ -122,7 +117,7 @@ include '../../lib/pdflib.php';
         }
         certificate_issue($course, $certificate, $certrecord, $cm); // update certrecord as issued
     }
-// Output to pdf
+// Output to pdf this needs to be fixed
  //   certificate_file_area($USER->id);
   //  $file = $CFG->dataroot.'/'.$course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/'.$filename;
 
@@ -138,4 +133,3 @@ include '../../lib/pdflib.php';
         $pdf->Output($filename, 'I');// open in browser
         $pdf->Output('', 'S');// send
     }
-?>
