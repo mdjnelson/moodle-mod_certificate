@@ -8,6 +8,15 @@
     $id   = required_param('id', PARAM_INT);          // Course module ID
     $sort = optional_param('sort', '', PARAM_RAW);
     $download = optional_param('download', '', PARAM_ALPHA);
+    $action = optional_param('action', '', PARAM_ALPHA);
+    $url = new moodle_url('/mod/certificate/report.php', array('id'=>$id));
+    if ($download !== '') {
+        $url->param('download', $download);
+    }
+    if ($action !== '') {
+        $url->param('action', $action);
+    }
+    $PAGE->set_url($url);
 
     if (! $cm = get_coursemodule_from_id('certificate', $id)) {
             error('Course Module ID was incorrect');
@@ -17,13 +26,14 @@
         error('Course is misconfigured');
     }
 
+    require_login($course->id, false);
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    require_capability('mod/certificate:manage', $context);
+
     if (! $certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
         error('Certificate ID was incorrect');
     }
 
-    require_login($course->id, false);
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    require_capability('mod/certificate:manage', $context);
 
     $strcertificates = get_string('modulenameplural', 'certificate');
     $strcertificate  = get_string('modulename', 'certificate');
@@ -33,11 +43,10 @@
     $strcode = get_string('code', 'certificate');
     $strreport= get_string('report', 'certificate');
 
-// Initialize $PAGE, compute blocks
-    $PAGE->set_url('mod/certificate/view.php', array('id' => $cm->id));
-    $PAGE->set_context($context);
+// Initialize $PAGE, the nav bar needs fixed
+    $PAGE->set_url('/mod/certificate/report.php', array('id' => $cm->id));
     $PAGE->set_title(format_string($certificate->name).": $strreport");
-    $PAGE->set_heading(format_string($course->fullname));
+    $PAGE->set_heading($course->fullname);
     $PAGE->navbar->add($strreport);
 
     add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
@@ -230,7 +239,7 @@
     $table->align = array ("LEFT", "LEFT", "CENTER", "CENTER");
 
     foreach ($users as $user) {
-        $name = $OUTPUT->user_picture($user, $course->id).$user->studentname;
+        $name = $OUTPUT->user_picture($user).$user->studentname;
         $date = userdate($user->certdate).certificate_print_user_files($user->id);
         if ($user->reportgrade != null) {
             $grade = $user->reportgrade;
@@ -242,21 +251,25 @@
     }
 
     echo '<br />';
-    echo $OUTPUT->table($table);
+    echo html_writer::table($table);
 
    //now give links for downloading spreadsheets.
     echo "<br />\n";
-    echo "<table class=\"downloadreport\"><tr>\n";
+    echo "<center><table class=\"downloadreport\"><tr>\n";
     echo "<td>";
-    echo $OUTPUT->button(html_form::make_button('report.php', array('id' => $cm->id, 'download' => 'ods',),
-                         get_string("downloadods")));
+        $downloadoptions = array();
+        $options = array();
+        $options["id"] = "$cm->id";
+        $options["download"] = "ods";
+    echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadods"));
+
     echo "</td><td>";
-    echo $OUTPUT->button(html_form::make_button('report.php', array('id' => $cm->id, 'download' => 'xls',),
-                         get_string("downloadexcel")));
+        $options["download"] = "xls";
+    echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadexcel"));
     echo "</td><td>";
-    echo $OUTPUT->button(html_form::make_button('report.php', array('id' => $cm->id, 'download' => 'txt',),
-                         get_string("downloadtext")));
-    echo "</td></tr></table>";
+        $options["download"] = "txt";
+    echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadtext"));
+    echo "</td></tr></table></center>";
 
     echo $OUTPUT->footer($course);
  ?>
