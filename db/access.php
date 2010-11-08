@@ -31,18 +31,17 @@
 // For the core capabilities, the variable is $moodle_capabilities.
 
 
-$mod_certificate_capabilities = array(
+$capabilities = array(
 
     'mod/certificate:view' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'manager' => CAP_ALLOW
         )
     ),
 
@@ -50,11 +49,10 @@ $mod_certificate_capabilities = array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'manager' => CAP_ALLOW
         )
     ),
     
@@ -62,14 +60,11 @@ $mod_certificate_capabilities = array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
-            'teacher' => CAP_PREVENT,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'coursecreator' => CAP_PREVENT,
-            'admin' => CAP_PREVENT
+            'manager' => CAP_ALLOW
         )
     ),
     
 );
-
-?>
