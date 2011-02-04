@@ -57,15 +57,4 @@
       </KEYS>
     </TABLE>
   </TABLES>
-  <STATEMENTS>
-    <STATEMENT NAME="insert log_display" TYPE="insert" TABLE="log_display" COMMENT="Initial insert of records on table log_display">
-      <SENTENCES>
-        <SENTENCE TEXT="(module, action, mtable, field) VALUES ('certificate', 'view', 'certificate', 'name')" />
-        <SENTENCE TEXT="(module, action, mtable, field) VALUES ('certificate', 'add', 'certificate', 'name')" />
-        <SENTENCE TEXT="(module, action, mtable, field) VALUES ('certificate', 'update', 'certificate', 'name')" />
-        <SENTENCE TEXT="(module, action, mtable, field) VALUES ('certificate', 'report', 'certificate', 'name')" />
-        <SENTENCE TEXT="(module, action, mtable, field) VALUES ('certificate', 'received', 'certificate', 'name')" />
-      </SENTENCES>
-    </STATEMENT>
-  </STATEMENTS>
 </XMLDB>
