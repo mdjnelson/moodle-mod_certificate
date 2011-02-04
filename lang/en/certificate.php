@@ -121,6 +121,7 @@ $string['grade'] = 'Grade';
 $string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.'activities. Please return to the course to complete your coursework.';
 $string['awardedto'] = 'Awarded To';
 $string['issued'] = 'Issued';
+$string['lastviewed'] = 'You last received this certificate on:';
 $string['notissued'] = 'Not Issued';
 $string['notissuedyet'] = 'Not issued yet';
 $string['notreceived'] = 'You have not received this certificate';
@@ -134,6 +135,7 @@ $string['openwindow'] = 'Click the button below to open your certificate
 in a new browser window.';
 $string['opendownload'] = 'Click the button below to save your certificate
 to your computer.';
+$string['or'] = 'or';
 $string['openemail'] = 'Click the button below and your certificate
 will be sent to you as an email attachment.';
 $string['receivedcerts'] = 'Received certificates';
