@@ -60,7 +60,7 @@
     $sqlsort = 's.studentname ASC';
     //or to sort by date:
     // $sqlsort = 's.certdate ASC';
-    if (!$users = certificate_get_issues($certificate->id, $USER, $sqlsort, $groupmode, $cm)) {
+    if (!$users = certificate_get_issues($certificate->id, '', $sqlsort, $groupmode, $cm)) {
         echo $OUTPUT->header();
         notify('There are no issued certificates');
         echo $OUTPUT->footer();

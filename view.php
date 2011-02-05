@@ -6,8 +6,6 @@ include '../../lib/pdflib.php';
 
     $id = required_param('id', PARAM_INT);    // Course Module ID
     $action = optional_param('action', '', PARAM_ALPHA);
-    $edit = optional_param('edit', -1, PARAM_BOOL);
-    $page = optional_param('page', 0, PARAM_INT);
 
     if (! $cm = get_coursemodule_from_id('certificate', $id)) {
         error('Course Module ID was incorrect');
@@ -19,20 +17,19 @@ include '../../lib/pdflib.php';
         error('course module is incorrect');
     }
 
-    require_login($course->id);
+    require_login($course->id, true, $cm);
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     require_capability('mod/certificate:view', $context);
 
 // log update
     add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
+    $completion=new completion_info($course);
+    $completion->set_module_viewed($cm);
 
 // Initialize $PAGE, compute blocks
     $PAGE->set_url('/mod/certificate/view.php', array('id' => $cm->id));
     $PAGE->set_context($context);
     $PAGE->set_cm($cm);
-    if (($edit != -1) and $PAGE->user_allowed_editing()) {
-        $USER->editing = $edit;
-    }
 
 /// Create new certrecord
     certificate_prepare_issue($course, $USER, $certificate);
@@ -40,11 +37,12 @@ include '../../lib/pdflib.php';
 /// Get previous certrecord
     $certificateid = $certificate->id;
     $sql = 'SELECT MAX(timecreated) AS latest FROM {certificate_issues} '.
-                           'WHERE userid = '.$USER->id.' and certificateid = '.$certificate->id.'';
+                           'WHERE userid = '.$USER->id.' and certificateid = '.$certificate->id.' and certdate > 0';
             if ($record = $DB->get_record_sql($sql)) {
                 $latest = $record->latest;
             }
-    $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificateid, 'userid'=>$USER->id, 'timecreated'=>$latest));
+    $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificateid, 'userid'=>$USER->id, 'certdate'=>'0'));
+    $lastcertrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificateid, 'userid'=>$USER->id, 'timecreated'=>$latest));
 
 /// Load custom type
     $type = $certificate->certificatetype;
@@ -63,6 +61,18 @@ include '../../lib/pdflib.php';
     if($certificate->reissuecert) { ///Reissue certificate every time
         if(empty($action)) {
             view_header($course, $certificate, $cm);
+			if ($lastcertrecord){
+            echo '<p align="center">'.get_string('lastviewed', 'certificate').'<br />'.userdate($lastcertrecord->certdate).'</p>';
+            echo '<center>';
+            $link = new moodle_url('/mod/certificate/review.php?id='.$cm->id.'&action=review');
+            $linkname = $strreviewcertificate;
+            $button = new single_button($link, $linkname);
+            $button->add_action(new popup_action('click', $link, array('height' => 600, 'width' => 800)));
+            echo $OUTPUT->render($button);
+            echo '</center>';
+			}
+            echo '<p align="center">'.get_string('or', 'certificate').'<br /></p>';
+
             if ($certificate->delivery == 0)    {
                 echo '<p align="center">'.get_string('openwindow', 'certificate').'</p>';
             } elseif ($certificate->delivery == 1)    {
@@ -73,28 +83,32 @@ include '../../lib/pdflib.php';
 
             echo '<center>';
             $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
-            $linkname = $strreviewcertificate;
-            $action = new popup_action('click', $link, array('height' => 600, 'width' => 800));
-            $popup = $OUTPUT->action_link($link, $linkname, $action, array('title'=>$linkname));
-            echo $popup;
+			$linkname = $strgetcertificate;
+            $button = new single_button($link, $linkname);
+            $button->add_action(new popup_action('click', $link, array('height' => 600, 'width' => 800)));
+            echo $OUTPUT->render($button);
             echo '</center>';
             add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
             echo $OUTPUT->footer($course);
             exit;
         }
         certificate_issue($course, $USER, $certificate, $certrecord, $cm); // update certrecord as issued
-    } else if ($certrecord->certdate > 0) { ///Review certificate
+} else if ($lastcertrecord) { ///Review certificate
         if (empty($action)) {
             view_header($course, $certificate, $cm);
-            echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
+            $link = new moodle_url('/mod/certificate/review.php?id='.$cm->id.'&action=review');
+            echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($lastcertrecord->certdate).'</p>';
             echo '<center>';
-            echo $OUTPUT->link($link);
+			$linkname = $strreviewcertificate;
+            $button = new single_button($link, $linkname);
+            $button->add_action(new popup_action('click', $link, array('height' => 600, 'width' => 800)));
+            echo $OUTPUT->render($button);
             echo '</center>';
 
             echo $OUTPUT->footer($course);
             exit;
         }
-    } else if ($certrecord->certdate == 0) { ///Create certificate
+	} else { ///Create certificate
         if(empty($action)) {
             view_header($course, $certificate, $cm);
             if ($certificate->delivery == 0)    {
@@ -115,8 +129,9 @@ include '../../lib/pdflib.php';
             echo $OUTPUT->footer($course);
             exit;
         }
+		}
         certificate_issue($course, $certificate, $certrecord, $cm); // update certrecord as issued
-    }
+
 // Output to pdf this needs to be fixed
  //   certificate_file_area($USER->id);
   //  $file = $CFG->dataroot.'/'.$course->id.'/moddata/certificate/'.$certificate->id.'/'.$USER->id.'/'.$filename;

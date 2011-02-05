@@ -164,7 +164,7 @@ function view_header($course, $certificate, $cm) {
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     if (has_capability('mod/certificate:manage', $context)) {
-        $numusers = certificate_count_issues($certificate);
+        $numusers = count(certificate_count_issues($certificate->id, '', '', $cm));
         echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'">'.
               get_string('viewcertificateviews', 'certificate', $numusers).'</a></div>';
     }
@@ -391,27 +391,54 @@ function certificate_email_students($user, $course, $certificate, $certrecord) {
 /************************************************************************
  * Count certificates issued. Used for report link.                     *
  ************************************************************************/
-function certificate_count_issues($certificate) {
+function certificate_count_issues($certificate, $user, $groupmode, $cm) {
     global $CFG, $DB;
 
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
-	    $cm = get_coursemodule_from_instance('certificate', $certificate->id);
-        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-        if ($users = get_users_by_capability($context, 'mod/certificate:view')) {
-            foreach ($users as $user) {
+    //get all the users that have certificates issued.
+    $users = $DB->get_records_sql("SELECT u.*,u.picture, s.code, s.timecreated, s.certdate, s.studentname, s.reportgrade
+                              FROM {$CFG->prefix}certificate_issues s,
+                                   {$CFG->prefix}user u
+                             WHERE s.certificateid = '$certificate'
+                               AND s.userid = u.id
+                               AND s.certdate > 0
+                            GROUP BY u.id");
+    //now exclude all the certmanagers.
+    if (!empty($users)) {
+    foreach ($users as $id=>$user) {
         if (isset($certmanagers[$id])) { //exclude certmanagers.
             unset($users[$id]);
-		    $array[] = $user->id;
+        }
+    }
+    }
+
+    // if groupmembersonly used, remove users who are not in any group
+    if (!empty($users) and !empty($CFG->enablegroupings) and $cm->groupmembersonly) {
+        if ($groupingusers = groups_get_grouping_members($cm->groupingid, 'u.id', 'u.id')) {
+            $users = array_intersect($users, array_keys($groupingusers));
+        }
+    }
+
+    if (!$groupmode) {
+        return $users;
+    } else {
+        $currentgroup = groups_get_activity_group($cm);
+        if ($currentgroup) {
+            $groupusers = groups_get_members($currentgroup, 'u.*');
+            if (empty($groupusers)) {
+                return array();
+            }
+            foreach($groupusers as $id => $gpuser) {
+                if (!isset($users[$id])) {
+                    //remove this user as it isn't in the group!
+                    unset($users[$id]);
+                }
             }
         }
 
-            return $DB->count_records_sql("SELECT COUNT(*)
-                                      FROM {$CFG->prefix}certificate_issues
-                                     WHERE certificateid = '$certificate->id'
-                                       AND certdate > 0
-                                       AND userid IN $userlists ");
-        } else {
-            return 0; // no users enroled in course
+        return $users;
     }
 }
 
@@ -461,19 +488,21 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC", 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
-    //get all the users that have certificates issued.
-    $users = $DB->get_records_sql("SELECT u.*,u.picture, s.code, s.timecreated, s.certdate, s.studentname, s.reportgrade
+    //get all the users that have certificates issued--needs to get latest issue--isn't.
+    $users = $DB->get_records_sql("SELECT u.*,u.picture, s.code, MAX(s.timecreated) AS latest, s.certdate, s.studentname, s.reportgrade
                               FROM {$CFG->prefix}certificate_issues s,
                                    {$CFG->prefix}user u
                              WHERE s.certificateid = '$certificate'
                                AND s.userid = u.id
-                               AND s.certdate > 0
+                              AND s.certdate > 0
                             GROUP BY u.id");
     //now exclude all the certmanagers.
+    if (!empty($users)) {
     foreach ($users as $id=>$user) {
         if (isset($certmanagers[$id])) { //exclude certmanagers.
             unset($users[$id]);
         }
+    }
     }
 
     // if groupmembersonly used, remove users who are not in any group
@@ -511,24 +540,17 @@ function certificate_get_issues($certificate, $user, $sort="u.studentname ASC", 
 function certificate_prepare_issue($course, $user, $certificate) {
    global $DB;
 
-    if($certificate->reissuecert == 0) {
-   if ($DB->record_exists('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id))) {
-        return;
-		}
-	} else if ($DB->record_exists('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id, 'certdate'=>'0'))) {
+if ($DB->record_exists('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id, 'certdate'=>'0'))) {
         return;
     }
 
     $timecreated = time();
     $code = certificate_generate_code();
-    $studentname = fullname($user);
     $newrec = new Object();
     $newrec->certificateid = $certificate->id;
     $newrec->userid = $user->id;
     $newrec->timecreated = $timecreated;
-    $newrec->studentname = $studentname;
     $newrec->code = $code;
-    $newrec->classname = $course->fullname;
 
     $DB->insert_record('certificate_issues', $newrec, false);
 }
@@ -545,6 +567,7 @@ global $USER, $DB, $certificate;
                 $latest = $record->latest;
             }
     $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
+ //   $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'certdate'=>'0'));
 
     if($certificate->printgrade) {
         if($certificate->printgrade == 1) {
@@ -563,7 +586,10 @@ global $USER, $DB, $certificate;
         }
     }
     $date = certificate_generate_date($certificate, $course);
+    $studentname = fullname($USER);
     $certrecord->certdate = $date;
+    $certrecord->studentname = $studentname;
+    $certrecord->classname = $course->fullname;
     $DB->update_record('certificate_issues', $certrecord);
     certificate_email_teachers($course, $certificate, $certrecord, $cm);
     certificate_email_others($course, $certificate, $certrecord, $cm);
@@ -813,7 +839,6 @@ function certificate_get_date() {
     }
         $dateoptions['0'] = get_string('no');
         $dateoptions['1'] = get_string('issueddate', 'certificate');
-        $dateoptions['2'] = get_string('courseenddate', 'certificate');
         foreach ($printgrade as $key => $value) {
             $dateoptions[$key] = $value;
     }
@@ -1224,12 +1249,7 @@ function certificate_generate_date($certificate, $course) {
         if ($certificate->printdate == '1') {
             $certdate = $timecreated;
         }
-        if ($certificate->printdate == '2') {
-            if ($course->enrolenddate) {
-            $certdate = $course->enrolenddate;
-        } else $certdate = $timecreated;
-        }
-		if ($certificate->printdate > 2) {
+		if ($certificate->printdate > 1) {
         $modinfo = certificate_print_mod_grade($course, $certificate->printdate);
             $certdate = $modinfo->dategraded;
     }
