@@ -38,12 +38,11 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
 
         // Define each element separated
         $certificate = new backup_nested_element('certificate', array('id'), array(
-            'name', 'intro', 'introformat', 'emailteachers',
-            'emailothers', 'savecert', 'reportcert', 'reissuecert',
-            'delivery', 'certificatetype', 'orientation', 'borderstyle',
-            'bordercolor', 'printwmark', 'printdate', 'datefmt', 'printnumber',
-            'printgrade', 'gradefmt', 'printoutcome', 'printhours', 'printteacher',
-            'customtext', 'printsignature', 'printseal', 'timemodified'));
+            'name', 'intro', 'introformat', 'emailteachers', 'emailothers',
+            'savecert', 'reportcert', 'reissuecert', 'delivery', 'certificatetype', 'orientation',
+            'borderstyle', 'bordercolor', 'printwmark', 'printdate', 'datefmt', 'printnumber',
+            'printgrade', 'gradefmt', 'printoutcome', 'printhours', 'printteacher', 'customtext',
+            'printsignature', 'printseal', 'timemodified'));
 
         $issues = new backup_nested_element('issues');
 
@@ -60,10 +59,10 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
 
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {
-            $answer->set_source_table('choice_answers', array('choiceid' => '../../id'));
+           $issue->set_source_table('certificate_issues', array('certificateid' => backup::VAR_PARENTID));
         }
 
-        // Define id annotations
+        // Annotate the user id's where required.
         $issue->annotate_ids('user', 'userid');
 
         // Define file annotations

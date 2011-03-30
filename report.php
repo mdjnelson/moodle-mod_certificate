@@ -26,7 +26,7 @@
         error('Course is misconfigured');
     }
 
-    require_login($course->id, false);
+    require_login($course->id, false, $cm);
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     require_capability('mod/certificate:manage', $context);
 
@@ -43,33 +43,30 @@
     $strcode = get_string('code', 'certificate');
     $strreport= get_string('report', 'certificate');
 
-// Initialize $PAGE, the nav bar needs fixed
-    $PAGE->set_url('/mod/certificate/report.php', array('id' => $cm->id));
-    $PAGE->set_title(format_string($certificate->name).": $strreport");
-    $PAGE->set_heading($course->fullname);
-    $PAGE->navbar->add($strreport);
-
     add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
-   /// Check to see if groups are being used
-    $groupmode = groups_get_activity_groupmode($cm, $course);
-    if ($groupmode) {
-        groups_get_activity_group($cm, true);
+    if (!$download) {
+        $PAGE->navbar->add($strreport);
+        $PAGE->set_title(format_string($certificate->name).": $strreport");
+        $PAGE->set_heading($course->fullname);
+        echo $OUTPUT->header();
+        /// Check to see if groups are being used in this choice
+        $groupmode = groups_get_activity_groupmode($cm);
+        if ($groupmode) {
+            groups_get_activity_group($cm, true);
+            groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
+        }
+    } else {
+        $groupmode = groups_get_activity_groupmode($cm);
     }
-
     $sqlsort = 's.studentname ASC';
     //or to sort by date:
     // $sqlsort = 's.certdate ASC';
-    if (!$users = certificate_get_issues($certificate->id, '', $sqlsort, $groupmode, $cm)) {
-        echo $OUTPUT->header();
+    if (!$users = certificate_get_issues($certificate->id, $sqlsort, $groupmode, $cm)) {
         notify('There are no issued certificates');
-        echo $OUTPUT->footer();
         die;
     }
 
-    if (!$download) {
-        echo $OUTPUT->header();
-    }
 
     if ($download == "ods") {
         require_once("$CFG->libdir/odslib.class.php");
@@ -231,16 +228,14 @@
 
     echo '<br />';
     echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
-
     $table = new html_table();
     $table->width = "95%";
     $table->tablealign = "center";
     $table->head  = array ($strto, $strdate, $strgrade, $strcode);
     $table->align = array ("LEFT", "LEFT", "CENTER", "CENTER");
-
     foreach ($users as $user) {
         $name = $OUTPUT->user_picture($user).$user->studentname;
-        $date = userdate($user->certdate).certificate_print_user_files($user->id);
+        $date = userdate($user->certdate).certificate_print_user_files($certificate, $user->id, $context->id);
         if ($user->reportgrade != null) {
             $grade = $user->reportgrade;
         } else {
@@ -272,4 +267,3 @@
     echo "</td></tr></table></center>";
 
     echo $OUTPUT->footer($course);
- ?>

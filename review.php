@@ -22,7 +22,7 @@ include '../../lib/pdflib.php';
     require_capability('mod/certificate:view', $context);
 
 // Initialize $PAGE, compute blocks
-    $PAGE->set_url('/mod/certificate/view.php', array('id' => $cm->id));
+    $PAGE->set_url('/mod/certificate/review.php', array('id' => $cm->id));
     $PAGE->set_context($context);
     $PAGE->set_cm($cm);
 
@@ -54,7 +54,7 @@ include '../../lib/pdflib.php';
         if ($certrecord->certdate > 0) { ///Review certificate
         if (empty($action)) {
             view_header($course, $certificate, $cm);
-            $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
+            $link = new moodle_url('/mod/certificate/review.php?id='.$cm->id.'&action=get');
             echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
             echo '<center>';
 			$linkname = $strreviewcertificate;

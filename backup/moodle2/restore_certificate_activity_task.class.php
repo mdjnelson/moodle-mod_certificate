@@ -52,7 +52,7 @@ class restore_certificate_activity_task extends restore_activity_task {
      * processed by the link decoder
      */
     static public function define_decode_contents() {
-        $contents = array();
+       $contents = array();
 
         $contents[] = new restore_decode_content('certificate', array('intro'), 'certificate');
 
@@ -85,7 +85,8 @@ class restore_certificate_activity_task extends restore_activity_task {
         $rules[] = new restore_log_rule('certificate', 'add', 'view.php?id={course_module}', '{certificate}');
         $rules[] = new restore_log_rule('certificate', 'update', 'view.php?id={course_module}', '{certificate}');
         $rules[] = new restore_log_rule('certificate', 'view', 'view.php?id={course_module}', '{certificate}');
-        $rules[] = new restore_log_rule('certificate', 'received', 'view.php?id={course_module}', '{certificate}');
+        $rules[] = new restore_log_rule('certificate', 'received', 'report.php?a={certificate}', '{certificate}');
+        $rules[] = new restore_log_rule('certificate', 'view report', 'report.php?id={certificate}', '{certificate}');
 
         return $rules;
     }
@@ -104,8 +105,6 @@ class restore_certificate_activity_task extends restore_activity_task {
         $rules = array();
 
         // Fix old wrong uses (missing extension)
-        $rules[] = new restore_log_rule('certificate', 'view all', 'index?id={course}', null,
-                                        null, null, 'index.php?id={course}');
         $rules[] = new restore_log_rule('certificate', 'view all', 'index.php?id={course}', null);
 
         return $rules;

@@ -44,7 +44,7 @@ $reportgrade = $certrecord->reportgrade;
 } else {
 //Print the mod grade
 $modinfo = certificate_print_mod_grade($course, $certificate->printgrade);
-if ($certrecord->reportgrade == !null) {
+if ($certrecord) {
 $modgrade = $certrecord->reportgrade;
     $grade = $modinfo->name.' '.$strgrade.': '.$modgrade;
 }else
@@ -76,9 +76,9 @@ $code = $certrecord->code;
 
 //Print the student name
 $studentname = '';
-$studentname = $certrecord->studentname;
+$studentname = fullname($USER);
 $classname = '';
-$classname = $certrecord->classname;
+$classname = $course->fullname;
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;

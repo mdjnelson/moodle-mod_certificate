@@ -37,8 +37,9 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('certificate', '/activity/certificate');
+
         if ($userinfo) {
-            $paths[] = new restore_path_element('certificate_issues', '/activity/certificate/issues/issue');
+            $paths[] = new restore_path_element('certificate_issue', '/activity/certificate/issues/issue');
         }
 
         // Return the paths wrapped into standard activity structure
@@ -73,8 +74,9 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $this->set_mapping('certificate_issue', $oldid, $newitemid);
     }
 
+
     protected function after_execute() {
         // Add certificate related files, no need to match by itemname (just internally handled context)
-        $this->add_related_files('mod_certificate', 'intro', null);
+        $this->add_related_files('mod_certificate', 'issue', 'certificate_issue');
     }
 }

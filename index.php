@@ -13,20 +13,19 @@
     }
 
     require_course_login($course);
+    $PAGE->set_pagelayout('incourse');
     add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, '');
-
 
 /// Get all required strings
     $strcertificates = get_string('modulenameplural', 'certificate');
     $strcertificate  = get_string('modulename', 'certificate');
 
-
 /// Print the header
-    $navlinks = array();
-    $navlinks[] = array('name' => $strcertificates, 'link' => "index.php?id=$course->id", 'type' => 'activity');
-    $navigation = build_navigation($navlinks);
-
-    print_header_simple($strcertificates, '', $navigation, '', '', true, '', navmenu($course));
+$PAGE->set_url('/mod/certificate/index.php', array('id'=>$course->id));
+$PAGE->navbar->add($strcertificates);
+$PAGE->set_title($strcertificates);
+$PAGE->set_heading($course->fullname);
+echo $OUTPUT->header();
 
 /// Get all the appropriate data
 if (! $certificates = get_all_instances_in_course('certificate', $course)) {
@@ -34,34 +33,26 @@ if (! $certificates = get_all_instances_in_course('certificate', $course)) {
     die;
 }
 
-/// Print the list of instances
-$timenow = time();
-$strname  = get_string('name');
-$strweek  = get_string('week');
-$strtopic  = get_string('topic');
-$strissued  = get_string('issued', 'certificate');
-
-if ($course->format == 'weeks') {
-    $table->head  = array ($strweek, $strname, $strissued);
-    $table->align = array ('CENTER', 'LEFT');
-} else if ($course->format == 'topics') {
-    $table->head  = array ($strtopic, $strname, $strissued);
-    $table->align = array ('CENTER', 'LEFT', 'LEFT', 'LEFT');
-} else {
-    $table->head  = array ($strname, $strissued);
-    $table->align = array ('LEFT', 'LEFT', 'LEFT');
+$usesections = course_format_uses_sections($course->format);
+if ($usesections) {
+    $sections = get_all_sections($course->id);
 }
 
-$currentgroup = get_current_group($course->id);
-    if ($currentgroup and has_capability('moodle/site:accessallgroups', get_context_instance(CONTEXT_COURSE, $id))) {
-        $group = $DB->get_record('groups', array('id'=> $currentgroup));
-        $groupname = " ($group->name)";
-    } else {
-        $groupname = "";
-    }
+/// Print the list of instances
+$timenow = time();
+$strname  = get_string("name");
+$strsectionname = get_string('sectionname', 'format_'.$course->format);
+$strissued  = get_string('issued', 'certificate');
 
-    $currentsection = "";
+$table = new html_table();
 
+if ($usesections) {
+    $table->head  = array ($strsectionname, $strname, $strissued);
+} else {
+    $table->head  = array ($strname, $strissued);
+}
+
+$currentsection = "";
 
 foreach ($certificates as $certificate) {
     if (!$certificate->visible) {
@@ -106,10 +97,8 @@ foreach ($certificates as $certificate) {
 }
 echo '<br />';
 
-print_table($table);
+echo html_writer::table($table);
 
 /// Finish the page
 
-print_footer($course);
-
-?>
+echo $OUTPUT->footer();

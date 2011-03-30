@@ -159,6 +159,22 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint($result, 2009062900, 'certificate');
     }
 
+    if ($oldversion < 2011030105) {
+
+        // Define field id to be added to certificate
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'intro');
+
+        // Conditionally launch add field id
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2011030105, 'certificate');
+    }
+
+
     return $result;
 }
 

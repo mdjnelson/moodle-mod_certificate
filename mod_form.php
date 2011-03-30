@@ -144,4 +144,3 @@ class mod_certificate_mod_form extends moodleform_mod {
 
     }
 }
-?>

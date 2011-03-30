@@ -281,4 +281,3 @@ function certificate_issues_restore_mods($old_certificate_id, $new_certificate_i
         }
         return $status;
     }
-?>
