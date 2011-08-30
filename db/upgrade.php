@@ -24,11 +24,9 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
     $result = true;
 
-//===== 1.9.0 or older upgrade line ======//
-
+    //===== 1.9.0 or older upgrade line ======//
     if ($result && $oldversion < 2007102806) {
-    /// Add new fields to certificate table
-
+        // Add new fields to certificate table
         $table = new XMLDBTable('certificate');
         $field = new XMLDBField('printoutcome');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'gradefmt');
@@ -36,8 +34,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
     }
 
     if ($result && $oldversion < 2007102800) {
-    /// Add new fields to certificate table
-
+        // Add new fields to certificate table
         $table = new XMLDBTable('certificate');
         $field = new XMLDBField('reportcert');
         $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'savecert');
@@ -50,8 +47,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
     }
 
     if ($result && $oldversion < 2007061300) {
-    /// Add new fields to certificate table
-
+        // Add new fields to certificate table
         $table = new XMLDBTable('certificate');
         $field = new XMLDBField('emailothers');
         $field->setAttributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, null, null, 'emailteachers');
@@ -72,12 +68,11 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field->setAttributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'lockgrade');
         $result = $result && add_field($table, $field);
 
-    /// Rename field save to savecert
+        // Rename field save to savecert
         $field = new XMLDBField('save');
         if (field_exists($table, $field)) {
             $field->setAttributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'emailothers');
-
-        /// Launch rename field savecert
+            // Launch rename field savecert
             $result = $result && rename_field($table, $field, 'savecert');
         } else {
             $field = new XMLDBField('savecert');
@@ -114,7 +109,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
     }
 
     if ($result && $oldversion < 2008080904) {
-    /// Add new fields to certificate table if they dont already exist
+        // Add new fields to certificate table if they dont already exist
 
         $table = new XMLDBTable('certificate');
         $field = new XMLDBField('intro');
@@ -124,11 +119,11 @@ function xmldb_certificate_upgrade($oldversion=0) {
         }
     }
 
-//===== 2.0 or older upgrade line ======//
+    //===== 2.0 or older upgrade line ======//
 
     if ($result && $oldversion < 2009062900) {
 
-    /// Add new field to certificate table
+        // Add new field to certificate table
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
         $dbman->add_field($table, $field);
@@ -139,7 +134,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
         $dbman->add_field($table, $field);
 
-    /// Set default orientation accordingly
+        // Set default orientation accordingly
         $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'portrait'));
         $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'letter_portrait'));
         $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'unicode_portrait'));
@@ -155,7 +150,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
 
-    /// savepoint reached
+        // savepoint reached
         upgrade_mod_savepoint($result, 2009062900, 'certificate');
     }
 
@@ -172,6 +167,88 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011030105, 'certificate');
+    }
+    
+    if ($oldversion < 2011110101) {
+        require_once($CFG->libdir.'/conditionlib.php');
+        
+        $table = new xmldb_table('certificate');
+        
+        // It is possible for these fields not to be added, ever, it is included in the upgrade 
+        // process but NOT the Moodle 19 stable install.xml, so fresh installs miss them !!
+        $reissuefield = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
+        $orientationfield = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
+        
+        // Have to check, may be added during earlier upgrade, or may be missing due to not being included in install.xml
+        if (!$dbman->field_exists($table, $reissuefield)) {
+            $dbman->add_field($table, $reissuefield);
+        }
+        
+        if (!$dbman->field_exists($table, $orientationfield)) {
+            $dbman->add_field($table, $orientationfield);
+        }
+        
+        // No longer need lock grade, or required grade, but first need to
+        // convert so that the restrictions are still in place for Moodle 2.0
+        if ($certs = $DB->get_records('certificate')) {
+            foreach ($certs as $cert) {
+                if ($cert->lockgrade == 0) {
+                    // Can skip this certificate, no course grade required
+                    continue;
+                }
+                if (!$cm = get_coursemodule_from_instance('certificate', $cert->id)) {
+                    // Not valid skip it
+                    continue;
+                }
+                if (!$gradeitem = $DB->get_record('grade_items', array('courseid' => $cm->course, 'itemtype' => 'course'))) {
+                    // Not valid skip it
+                    continue;
+                }
+                $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
+                $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '100');
+            }
+        }
+        // Lock grade and required grade field are not needed anymore
+        $field = new xmldb_field('lockgrade');
+        $dbman->drop_field($table, $field);
+        $field = new xmldb_field('requiredgrade');
+        $dbman->drop_field($table, $field);
+        
+        // Now we need to loop through the restrictions in the certificate_linked_modules 
+        // table and convert it into the new Moodle 2.0 restrictions
+        if ($certlinks = $DB->get_records('certificate_linked_modules')) {
+            foreach ($certlinks as $link) {
+                // Get the course module
+                if (!$cm = get_coursemodule_from_instance('certificate', $link->certificate_id)) {
+                    // Not valid skip it
+                    continue;
+                }
+                // Get grade item for module specified - is there an API function for this ??
+                $sql = "SELECT gi.id " .
+                       "FROM {course_modules} cm " .
+                       "INNER JOIN {modules} m " .
+                       "ON cm.module = m.id " .
+                       "INNER JOIN {grade_items} gi " .
+                       "ON m.name = gi.itemmodule " .
+                       "WHERE cm.id = '$link->linkid' " .
+                       "AND cm.course = '$cm->course' " .
+                       "AND cm.instance = gi.iteminstance";
+                if (!$gradeitem = $DB->get_record_sql($sql)) {
+                    // Not valid skip it
+                    continue;
+                }
+                $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
+                $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100');
+            }
+        }
+        // Need to do this so the new conditions are shown when viewing a course
+        rebuild_course_cache();
+        // Table no longer needed
+        $table = new xmldb_table('certificate_linked_modules');
+        $dbman->drop_table($table);
+        
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2011110101, 'certificate');
     }
 
 
