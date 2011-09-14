@@ -1,6 +1,6 @@
 <?PHP // $Id: certificate.php,v 2.0 2010/09/20
 
-//General functions
+// General functions
 $string['pluginname'] = 'Certificate';
 $string['pluginadministration'] = 'Certificate administration';
 $string['modulename'] = 'Certificate';
@@ -11,7 +11,7 @@ $string['certificate:manage'] = 'Manage Certificate';
 $string['certificate:printteacher'] = 'Print Teacher';
 $string['certificate:student'] = 'Get Certificate';
 
-//Adding an instance
+// Adding an instance
 $string['intro'] = 'Introduction';
 $string['areaintro'] = 'Certificate introduction';
 $string['addlinklabel'] = 'Add another linked activity option';
@@ -65,7 +65,11 @@ $string['customtext'] = 'Custom Text';
 $string['printdate'] = 'Print Date';
 $string['printseal'] = 'Seal or Logo Image';
 
-//Help strings
+// Reset certificates
+$string['deletissuedcertificates'] = 'Delete issued certificates';
+$string['removecert'] = 'Issued certificates removed';
+
+// Help strings
 $string['emailteachers_help'] = 'If enabled, then teachers are alerted with an email whenever students receive a certificate.';
 $string['emailothers_help'] = 'Enter the email addresses here, separated by a comma, of those who should be alerted with an email whenever students receive a certificate.';
 $string['delivery_help'] = 'Choose here how you would like your students to get their certificate.
@@ -105,7 +109,8 @@ $string['bordercolor_help'] = 'Since images can substantially increase the size 
 $string['printwmark_help'] = 'A watermark file can be placed in the background of the certificate. A watermark is a faded graphic. A watermark could be a logo, seal, crest, wording, or whatever you want to use as a graphic background.';
 $string['printsignature_help'] = 'This option allows you to print a signature image from the certificate/pix/signatures folder.  You can print a graphic representation of a signature, or print a line for a written signature. By default, this image is placed in the lower left of the certificate.';
 $string['printseal_help'] = 'This option allows you to select a seal or logo to print on the certificate from the certificate/pix/seals folder. By default, this image is placed in the lower right corner of the certificate.';
-//Strings for verification block
+
+// Strings for verification block
 $string['entercode'] = 'Enter certificate code to verify:';
 $string['validate'] = 'Verify';
 $string['certificate'] = 'Verification for certificate code:';
@@ -117,7 +122,7 @@ $string['course'] = 'For';
 $string['date'] = 'On';
 $string['grade'] = 'Grade';
 
-//Certificate view, index, report strings
+// Certificate view, index, report strings
 $string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.'activities. Please return to the course to complete your coursework.';
 $string['awardedto'] = 'Awarded To';
 $string['issued'] = 'Issued';
@@ -140,7 +145,7 @@ will be sent to you as an email attachment.';
 $string['receivedcerts'] = 'Received certificates';
 $string['summaryofattempts'] = 'Summary of Previously Received Certificates';
 
-//Email text
+// Email text
 $string['emailstudenttext'] = 'Attached is your certificate for {$a->course}.';
 $string['awarded'] = 'Awarded';
 $string['emailteachermail'] = '
@@ -158,13 +163,13 @@ You can review it here:
 
     <a href=\"{$a->url}\">Certificate Report</a>.';
 
-//Names of type folders
+// Names of type folders
 $string['typeA4_embedded'] = 'A4 Embedded';
 $string['typeletter_embedded'] = 'Letter Embedded';
 $string['typeA4_non_embedded'] = 'A4 Non-Embedded';
 $string['typeletter_non_embedded'] = 'Letter Non-Embedded';
 
-//Print to certificate strings
+// Print to certificate strings
 $string['grade'] = 'Grade';
 $string['coursegrade'] = 'Course Grade';
 $string['credithours'] = 'Credit Hours';
@@ -173,7 +178,7 @@ $string['title'] = 'CERTIFICATE of ACHIEVEMENT';
 $string['certify'] = 'This is to certify that';
 $string['statement'] = 'has completed the course';
 
-//Certificate transcript strings
+// Certificate transcript strings
 $string['notapplicable'] = 'N/A';
 $string['certificatesfor'] = 'Certificates for';
 $string['coursename'] = 'Course';
