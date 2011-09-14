@@ -251,6 +251,26 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011110101, 'certificate');
     }
 
+    // Note - the date has not changed as it has been set in the future, so I am incrementing last digits
+    // Actual date - 14/09/11
+    if ($oldversion < 2011110102) {
+        // New orientation field needs a value in order to view the cert, otherwise you get
+        // an issue with FPDF and invalid orientation. If the certificate type contains portrait 
+        // set to 'P', only if no orientation value present
+        $sql = "UPDATE {certificate} " .
+               "SET orientation = 'P' " .
+               "WHERE certificatetype LIKE '%portrait%' " .
+               "AND orientation = ''";
+        $DB->execute($sql);
+        // Set all other empty orientation values to 'L' - Landscape
+        $sql = "UPDATE {certificate} " .
+               "SET orientation = 'L' " .
+               "WHERE orientation = ''";
+        $DB->execute($sql);
+        
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2011110102, 'certificate');
+    }
 
     return $result;
 }
