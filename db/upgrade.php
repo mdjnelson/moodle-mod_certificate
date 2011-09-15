@@ -120,7 +120,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
     }
 
     //===== 2.0 or older upgrade line ======//
-    
+
     // Note, fresh 1.9 installs add the version 2009080900, so they miss this when upgrading from 1.9 -> 2.0.
     if ($result && $oldversion < 2009062900) {
         // Add new field to certificate table
@@ -168,23 +168,23 @@ function xmldb_certificate_upgrade($oldversion=0) {
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011030105, 'certificate');
     }
-    
+
     if ($oldversion < 2011110102) {
         require_once($CFG->libdir.'/conditionlib.php');
-        
+
         $table = new xmldb_table('certificate');
-        
+
         // It is possible for these fields not to be added, ever, it is included in the upgrade 
         // process but fresh certificate 1.9 install from CVS MOODLE_19_STABLE set the Moodle version 
         // to 2009080900, which means it missed all the earlier code written for upgrading to 2.0.
         $reissuefield = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
         $orientationfield = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
-        
+
         // Have to check, may be added during earlier upgrade, or may be missing due to not being included in install.xml
         if (!$dbman->field_exists($table, $reissuefield)) {
             $dbman->add_field($table, $reissuefield);
         }
-        
+
         if (!$dbman->field_exists($table, $orientationfield)) {
             $dbman->add_field($table, $orientationfield);
         }
@@ -271,6 +271,12 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'letter_landscape'));
         $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'unicode_landscape'));
 
+        // If the certificate type does not match any of the orientations in the above then set to 'L'
+        $sql = "UPDATE {certificate} " .
+               "SET orientation = 'L' " .
+               "WHERE orientation = ''";
+        $DB->execute($sql);
+
         // Update all the certificate types
         $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'landscape'));
         $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'portrait'));
@@ -278,13 +284,13 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_portrait'));
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
-        
+
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
     }
-    
+
     if ($oldversion <= 2011110104) {
-        
+
     }
 
     return $result;
