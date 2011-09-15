@@ -120,9 +120,9 @@ function xmldb_certificate_upgrade($oldversion=0) {
     }
 
     //===== 2.0 or older upgrade line ======//
-
+    
+    // Note, fresh 1.9 installs add the version 2009080900, so they miss this when upgrading from 1.9 -> 2.0.
     if ($result && $oldversion < 2009062900) {
-
         // Add new field to certificate table
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
@@ -151,7 +151,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
 
         // savepoint reached
-        upgrade_mod_savepoint($result, 2009062900, 'certificate');
+        upgrade_mod_savepoint($result, 2009081000, 'certificate');
     }
 
     if ($oldversion < 2011030105) {
@@ -169,13 +169,14 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011030105, 'certificate');
     }
     
-    if ($oldversion < 2011110101) {
+    if ($oldversion < 2011110102) {
         require_once($CFG->libdir.'/conditionlib.php');
         
         $table = new xmldb_table('certificate');
         
         // It is possible for these fields not to be added, ever, it is included in the upgrade 
-        // process but NOT the Moodle 19 stable install.xml, so fresh installs miss them !!
+        // process but fresh certificate 1.9 install from CVS MOODLE_19_STABLE set the Moodle version 
+        // to 2009080900, which means it missed all the earlier code written for upgrading to 2.0.
         $reissuefield = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
         $orientationfield = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
         
@@ -187,89 +188,103 @@ function xmldb_certificate_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $orientationfield)) {
             $dbman->add_field($table, $orientationfield);
         }
-        
-        // No longer need lock grade, or required grade, but first need to
-        // convert so that the restrictions are still in place for Moodle 2.0
-        if ($certs = $DB->get_records('certificate')) {
-            foreach ($certs as $cert) {
-                if ($cert->lockgrade == 0) {
-                    // Can skip this certificate, no course grade required
-                    continue;
+
+        // Fresh installs won't have this table, but upgrades will
+        if ($dbman->table_exists('certificate_linked_modules')) {
+            // No longer need lock grade, or required grade, but first need to
+            // convert so that the restrictions are still in place for Moodle 2.0
+            if ($certs = $DB->get_records('certificate')) {
+                foreach ($certs as $cert) {
+                    if ($cert->lockgrade == 0) {
+                        // Can skip this certificate, no course grade required
+                        continue;
+                    }
+                    if (!$cm = get_coursemodule_from_instance('certificate', $cert->id)) {
+                        // Not valid skip it
+                        continue;
+                    }
+                    if (!$gradeitem = $DB->get_record('grade_items', array('courseid' => $cm->course, 'itemtype' => 'course'))) {
+                        // Not valid skip it
+                        continue;
+                    }
+                    $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
+                    $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '100');
                 }
-                if (!$cm = get_coursemodule_from_instance('certificate', $cert->id)) {
-                    // Not valid skip it
-                    continue;
-                }
-                if (!$gradeitem = $DB->get_record('grade_items', array('courseid' => $cm->course, 'itemtype' => 'course'))) {
-                    // Not valid skip it
-                    continue;
-                }
-                $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '100');
             }
-        }
-        // Lock grade and required grade field are not needed anymore
-        $field = new xmldb_field('lockgrade');
-        $dbman->drop_field($table, $field);
-        $field = new xmldb_field('requiredgrade');
-        $dbman->drop_field($table, $field);
-        
-        // Now we need to loop through the restrictions in the certificate_linked_modules 
-        // table and convert it into the new Moodle 2.0 restrictions
-        if ($certlinks = $DB->get_records('certificate_linked_modules')) {
-            foreach ($certlinks as $link) {
-                // Get the course module
-                if (!$cm = get_coursemodule_from_instance('certificate', $link->certificate_id)) {
-                    // Not valid skip it
-                    continue;
-                }
-                // Get grade item for module specified - is there an API function for this ??
-                $sql = "SELECT gi.id " .
-                       "FROM {course_modules} cm " .
-                       "INNER JOIN {modules} m " .
-                       "ON cm.module = m.id " .
-                       "INNER JOIN {grade_items} gi " .
-                       "ON m.name = gi.itemmodule " .
-                       "WHERE cm.id = '$link->linkid' " .
-                       "AND cm.course = '$cm->course' " .
-                       "AND cm.instance = gi.iteminstance";
-                if (!$gradeitem = $DB->get_record_sql($sql)) {
-                    // Not valid skip it
-                    continue;
-                }
-                $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100');
+            // Fresh installs won't have this table, but upgrades will
+            // Lock grade and required grade field are not needed anymore
+            if ($dbman->field_exists($table, 'lockgrade')) {
+                $field = new xmldb_field('lockgrade');
+                $dbman->drop_field($table, $field);
             }
-        }
-        // Need to do this so the new conditions are shown when viewing a course
-        rebuild_course_cache();
-        // Table no longer needed
-        $table = new xmldb_table('certificate_linked_modules');
-        $dbman->drop_table($table);
-        
+            if ($dbman->field_exists($table, 'requiredgrade')) {
+                $field = new xmldb_field('requiredgrade');
+                $dbman->drop_field($table, $field);
+            }
+            // Now we need to loop through the restrictions in the certificate_linked_modules 
+            // table and convert it into the new Moodle 2.0 restrictions
+            if ($certlinks = $DB->get_records('certificate_linked_modules')) {
+                foreach ($certlinks as $link) {
+                    // Get the course module
+                    if (!$cm = get_coursemodule_from_instance('certificate', $link->certificate_id)) {
+                        // Not valid skip it
+                        continue;
+                    }
+                    // Get grade item for module specified - is there an API function for this ??
+                    $sql = "SELECT gi.id " .
+                           "FROM {course_modules} cm " .
+                           "INNER JOIN {modules} m " .
+                           "ON cm.module = m.id " .
+                           "INNER JOIN {grade_items} gi " .
+                           "ON m.name = gi.itemmodule " .
+                           "WHERE cm.id = '$link->linkid' " .
+                           "AND cm.course = '$cm->course' " .
+                           "AND cm.instance = gi.iteminstance";
+                    if (!$gradeitem = $DB->get_record_sql($sql)) {
+                        // Not valid skip it
+                        continue;
+                    }
+                    $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
+                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100');
+                }
+            }
+            // Need to do this so the new conditions are shown when viewing a course
+            rebuild_course_cache();
+            // Table no longer needed
+            $table = new xmldb_table('certificate_linked_modules');
+            $dbman->drop_table($table);
+        }   
         // certificate savepoint reached
-        upgrade_mod_savepoint(true, 2011110101, 'certificate');
+        upgrade_mod_savepoint(true, 2011110102, 'certificate');
     }
 
     // Note - the date has not changed as it has been set in the future, so I am incrementing last digits
     // Actual date - 14/09/11
-    if ($oldversion < 2011110102) {
+    if ($oldversion < 2011110103) {
         // New orientation field needs a value in order to view the cert, otherwise you get
-        // an issue with FPDF and invalid orientation. If the certificate type contains portrait 
-        // set to 'P', only if no orientation value present
-        $sql = "UPDATE {certificate} " .
-               "SET orientation = 'P' " .
-               "WHERE certificatetype LIKE '%portrait%' " .
-               "AND orientation = ''";
-        $DB->execute($sql);
-        // Set all other empty orientation values to 'L' - Landscape
-        $sql = "UPDATE {certificate} " .
-               "SET orientation = 'L' " .
-               "WHERE orientation = ''";
-        $DB->execute($sql);
+        // an issue with FPDF and invalid orientation. This should be done during the upgrade,
+        // but due to version number issues it is possible it was not executed, so do it now.
+        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'portrait'));
+        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'letter_portrait'));
+        $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'unicode_portrait'));
+        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'landscape'));
+        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'letter_landscape'));
+        $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'unicode_landscape'));
+
+        // Update all the certificate types
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'landscape'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_non_embedded', array('certificatetype' => 'portrait'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_landscape'));
+        $DB->set_field('certificate', 'certificatetype', 'A4_embedded', array('certificatetype' => 'unicode_portrait'));
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
+        $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
         
         // certificate savepoint reached
-        upgrade_mod_savepoint(true, 2011110102, 'certificate');
+        upgrade_mod_savepoint(true, 2011110103, 'certificate');
+    }
+    
+    if ($oldversion <= 2011110104) {
+        
     }
 
     return $result;
