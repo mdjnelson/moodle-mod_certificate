@@ -251,14 +251,15 @@ function xmldb_certificate_upgrade($oldversion=0) {
                 }
             }
             // Need to do this so the new conditions are shown when viewing a course, but
-            // only when we the initial install has finished, else errors prevail.
+            // only when we are not executing an initial install, else building course
+            // cache prematurely.
             if (!during_initial_install()) {
                 rebuild_course_cache();
             }
             // Table no longer needed
             $table = new xmldb_table('certificate_linked_modules');
             $dbman->drop_table($table);
-        }   
+        }
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110102, 'certificate');
     }
@@ -292,10 +293,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
-    }
-
-    if ($oldversion <= 2011110104) {
-
     }
 
     return $result;
