@@ -169,6 +169,8 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011030105, 'certificate');
     }
 
+    // The Moodle 2.0 CVS certificate version sets it to 2011110101, if the user performed an upgrade
+    // then this upgrade will take care of several issues, if it's a fresh install then nothing is done.
     if ($oldversion < 2011110102) {
         require_once($CFG->libdir.'/conditionlib.php');
 
@@ -189,7 +191,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->add_field($table, $orientationfield);
         }
 
-        // Fresh installs won't have this table, but upgrades will
+        // Fresh 2.0 installs won't have this table, but upgrades from 1.9 will
         if ($dbman->table_exists('certificate_linked_modules')) {
             // No longer need lock grade, or required grade, but first need to
             // convert so that the restrictions are still in place for Moodle 2.0
@@ -248,8 +250,11 @@ function xmldb_certificate_upgrade($oldversion=0) {
                     $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100');
                 }
             }
-            // Need to do this so the new conditions are shown when viewing a course
-            rebuild_course_cache();
+            // Need to do this so the new conditions are shown when viewing a course, but
+            // only when we the initial install has finished, else errors prevail.
+            if (!during_initial_install()) {
+                rebuild_course_cache();
+            }
             // Table no longer needed
             $table = new xmldb_table('certificate_linked_modules');
             $dbman->drop_table($table);
@@ -258,8 +263,8 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011110102, 'certificate');
     }
 
-    // Note - the date has not changed as it has been set in the future, so I am incrementing last digits
-    // Actual date - 14/09/11
+    // Note - the date has not changed as it has been set in the future, so I am incrementing 
+    // last digits. Actual date - 15/09/11
     if ($oldversion < 2011110103) {
         // New orientation field needs a value in order to view the cert, otherwise you get
         // an issue with FPDF and invalid orientation. This should be done during the upgrade,
