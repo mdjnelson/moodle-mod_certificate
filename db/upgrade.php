@@ -247,18 +247,9 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         continue;
                     }
                     $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100');
+                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100', true);
                 }
             }
-            // Need to do this so the new conditions are shown when viewing a course, but
-            // only when we are not executing an initial install, else building course
-            // cache prematurely.
-            if (!during_initial_install()) {
-                rebuild_course_cache();
-            }
-            // Table no longer needed
-            $table = new xmldb_table('certificate_linked_modules');
-            $dbman->drop_table($table);
         }
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110102, 'certificate');
