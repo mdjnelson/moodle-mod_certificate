@@ -694,7 +694,7 @@ function certificate_get_issues($certificate, $sort="u.studentname ASC", $groupm
                              WHERE s.certificateid = '$certificate'
                                AND s.userid = u.id
                                AND s.certdate > 0
-                            GROUP BY u.id");
+                            ORDER BY u.id");
     //now exclude all the certmanagers.
     foreach ($users as $id=>$user) {
         if (isset($certmanagers[$id])) { //exclude certmanagers.
