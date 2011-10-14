@@ -609,7 +609,7 @@ function certificate_save_pdf($pdf, $certificateid, $filename, $contextid) {
     }
 
     if (empty($pdf)) {
-        return true;   // Nothing to do
+        return true; // Nothing to do
     }
 
     $fs = get_file_storage();
@@ -947,7 +947,12 @@ function certificate_get_mod_grades() {
  */
 function certificate_get_date() {
     global $course, $DB;
+
+    // Strings used
     $strgradedate = get_string('gradedate', 'certificate');
+    $strtopic = get_string("topic");
+    $strweek = get_string("week");
+    $strsection = get_string("section");
 
     // Collect modules data
     get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
@@ -961,13 +966,13 @@ function certificate_get_date() {
             if ($section->sequence) {
                 switch ($course->format) {
                     case "topics":
-                    $sectionlabel = get_string("topic");
+                    $sectionlabel = $strtopic;
                     break;
                     case "weeks":
-                    $sectionlabel = get_string("week");
+                    $sectionlabel = $strweek;
                     break;
                     default:
-                    $sectionlabel = get_string("section");
+                    $sectionlabel = $strsection;
                 }
 
                 $sectionmods = explode(",", $section->sequence);
@@ -977,7 +982,7 @@ function certificate_get_date() {
                     }
                     $mod = $mods[$sectionmod];
                     $mod->courseid = $course->id;
-                    $instance = $DB->get_record($mod->modname, array('id'=> $mod->instance));
+                    $instance = $DB->get_record($mod->modname, array('id' => $mod->instance));
                     if ($grade_items = grade_get_grade_items_for_activity($mod)) {
                         $mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
                         $item = reset($mod_item->items);
@@ -991,7 +996,7 @@ function certificate_get_date() {
     }
     $dateoptions['0'] = get_string('no');
     $dateoptions['1'] = get_string('issueddate', 'certificate');
-    $dateoptions['2'] = get_string('courseenddate', 'certificate');
+    $dateoptions['2'] = get_string('completiondate', 'certificate');
     foreach ($printgrade as $key => $value) {
         $dateoptions[$key] = $value;
     }
@@ -1590,12 +1595,12 @@ function print_seal($seal, $orientation, $x, $y, $w, $h) {
         default:
         switch ($orientation) {
             case 'L':
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/seals/$seal")) {
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/seals/$seal")) {
                 $pdf->Image("$CFG->dirroot/mod/certificate/pix/seals/$seal", $x, $y, $w, $h);
             }
             break;
             case 'P':
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/seals/$seal")) {
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/seals/$seal")) {
                 $pdf->Image("$CFG->dirroot/mod/certificate/pix/seals/$seal", $x, $y, $w, $h);
             }
             break;
@@ -1612,14 +1617,26 @@ function print_seal($seal, $orientation, $x, $y, $w, $h) {
  * @return string the date
  */
 function certificate_generate_date($certificate, $course) {
-    $timecreated = time();
+    global $DB, $USER;
+
+    // Set default date, in case no options are valid
+    $certdate = time();
     if ($certificate->printdate == '0') {
-        $certdate = $timecreated;
+        $certdate = '';
     }
-    if ($certificate->printdate == '1') {
-        $certdate = $timecreated;
+    if ($certificate->printdate == '2') {
+        // Get the enrolment end date
+        $sql = "SELECT MAX(c.timecompleted) as timecompleted " .
+               "FROM {course_completions} c " .
+               "WHERE c.userid = '$USER->id' " .
+               "AND c.course = '$course->id'";
+        if ($timecompleted = $DB->get_record_sql($sql)) {
+            if ($timecompleted->timecompleted) {
+                $certdate = $timecompleted->timecompleted;
+            }
+        }
     }
-    if ($certificate->printdate > 1) {
+    if ($certificate->printdate > 2) {
         $modinfo = certificate_print_mod_grade($course, $certificate->printdate);
         $certdate = $modinfo->dategraded;
     }
