@@ -59,7 +59,8 @@ class mod_certificate_mod_form extends moodleform_mod {
         // Text Options
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));
 
-        $dateoptions = certificate_get_date();
+        $modules = certificate_get_mods();
+        $dateoptions = certificate_get_date() + $modules;
         $mform->addElement('select', 'printdate', get_string('printdate', 'certificate'), $dateoptions);
         $mform->setDefault('printdate', 'N');
 	$mform->addHelpButton('printdate', 'printdate', 'certificate');
@@ -73,7 +74,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('printnumber', 0);
         $mform->addHelpButton('printnumber', 'printnumber', 'certificate');
 
-        $gradeoptions = certificate_get_mod_grades();
+        $gradeoptions = certificate_get_mod_grades($modules) + $modules;
         $mform->addElement('select', 'printgrade', get_string('printgrade', 'certificate'),$gradeoptions);
         $mform->setDefault('printgrade', 0);
         $mform->addHelpButton('printgrade', 'printgrade', 'certificate');

@@ -880,84 +880,21 @@ function certificate_issue($course, $certrecord, $cm) {
 }
 
 /**
- * Search through all the modules for grade data for mod_form.
+ * Get all the modules
  * 
  * @return array
  */
-function certificate_get_mod_grades() {
+function certificate_get_mods() {
     global $course, $CFG, $DB;
 
-    $strgrade = get_string('grade', 'certificate');
-    // Collect modules data
-    get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
-
-    $printgrade = array();
-    $sections = get_all_sections($course->id); // Sort everything the same as the course
-    for ($i=0; $i<=$course->numsections; $i++) {
-        // should always be true
-        if (isset($sections[$i])) {
-            $section = $sections[$i];
-            if ($section->sequence) {
-                switch ($course->format) {
-                    case 'topics':
-                    $sectionlabel = get_string('topic');
-                    break;
-                    case 'weeks':
-                    $sectionlabel = get_string('week');
-                    break;
-                    default:
-                    $sectionlabel = get_string('section');
-                }
-
-                $sectionmods = explode(",", $section->sequence);
-                foreach ($sectionmods as $sectionmod) {
-                    if (empty($mods[$sectionmod])) {
-                        continue;
-                    }
-                    $mod = $mods[$sectionmod];
-                    $mod->courseid = $course->id;
-                    $instance = $DB->get_record($mod->modname, array('id'=> $mod->instance));
-                    if ($grade_items = grade_get_grade_items_for_activity($mod)) {
-                        $mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
-                        $item = reset($mod_item->items);
-                        if (isset($item->grademax)) {
-                            $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name.' '.$strgrade;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (isset($printgrade)) {
-        $gradeoptions['0'] = get_string('no');
-        $gradeoptions['1'] = get_string('coursegrade', 'certificate');
-        foreach ($printgrade as $key => $value) {
-            $gradeoptions[$key] = $value;
-        }
-    } else {
-        $gradeoptions['0'] = get_string('nogrades', 'certificate');
-    }
-    return ($gradeoptions);
-}
-
-/**
- * Search through all the modules for grade dates for mod_form.
- * 
- * @return array
- */
-function certificate_get_date() {
-    global $course, $DB;
-
-    // Strings used
-    $strgradedate = get_string('gradedate', 'certificate');
     $strtopic = get_string("topic");
     $strweek = get_string("week");
     $strsection = get_string("section");
-
+    
     // Collect modules data
     get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
 
-    $printgrade = array();
+    $modules = array();
     $sections = get_all_sections($course->id); // Sort everything the same as the course
     for ($i=0; $i<=$course->numsections; $i++) {
         // should always be true
@@ -987,21 +924,43 @@ function certificate_get_date() {
                         $mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
                         $item = reset($mod_item->items);
                         if (isset($item->grademax)){
-                            $printgrade[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name.' '.$strgradedate;
+                            $modules[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name;
                         }
                     }
                 }
             }
         }
     }
+
+    return $modules;
+}
+
+/**
+ * Search through all the modules for grade data for mod_form.
+ * 
+ * @return array
+ */
+function certificate_get_mod_grades($modules) {
+    if (!empty($modules)) {
+        $gradeoptions['0'] = get_string('no');
+        $gradeoptions['1'] = get_string('coursegrade', 'certificate');
+    } else {
+        $gradeoptions['0'] = get_string('nogrades', 'certificate');
+    }
+    return $gradeoptions;
+}
+
+/**
+ * Search through all the modules for grade dates for mod_form.
+ * 
+ * @return array
+ */
+function certificate_get_date() {
     $dateoptions['0'] = get_string('no');
     $dateoptions['1'] = get_string('issueddate', 'certificate');
     $dateoptions['2'] = get_string('completiondate', 'certificate');
-    foreach ($printgrade as $key => $value) {
-        $dateoptions[$key] = $value;
-    }
 
-    return ($dateoptions);
+    return $dateoptions;
 }
 
 /**
