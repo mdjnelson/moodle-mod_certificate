@@ -1629,7 +1629,8 @@ function certificate_generate_date($certificate, $course) {
         $sql = "SELECT MAX(c.timecompleted) as timecompleted " .
                "FROM {course_completions} c " .
                "WHERE c.userid = '$USER->id' " .
-               "AND c.course = '$course->id'";
+               "AND c.course = '$course->id' " .
+               "AND c.deleted = 0";
         if ($timecompleted = $DB->get_record_sql($sql)) {
             if ($timecompleted->timecompleted) {
                 $certdate = $timecompleted->timecompleted;
