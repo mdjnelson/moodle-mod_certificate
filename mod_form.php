@@ -9,10 +9,10 @@ require_once($CFG->dirroot.'/mod/certificate/lib.php');
 class mod_certificate_mod_form extends moodleform_mod {
 
     function definition() {
-        global $CFG, $COURSE;
-        $mform    =& $this->_form;
+        global $CFG;
 
-//-------------------------------------------------------------------------------
+        $mform =& $this->_form;
+
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         $mform->addElement('text', 'name', get_string('certificatename', 'certificate'), array('size'=>'64'));
@@ -25,7 +25,7 @@ class mod_certificate_mod_form extends moodleform_mod {
 
         $this->add_intro_editor(false, get_string('intro', 'certificate'));
 
-//-------------------------------------------------------------------------------
+        // Issue options
         $mform->addElement('header', 'issueoptions', get_string('issueoptions', 'certificate'));
         $ynoptions = array( 0 => get_string('no'), 1 => get_string('yes'));
         $mform->addElement('select', 'emailteachers', get_string('emailteachers', 'certificate'), $ynoptions);
@@ -47,22 +47,22 @@ class mod_certificate_mod_form extends moodleform_mod {
 
         $reportfile = "$CFG->dirroot/certificates/index.php";
         if (file_exists($reportfile)) {
-        $mform->addElement('select', 'reportcert', get_string('reportcert', 'certificate'), $ynoptions);
-        $mform->setDefault('reportcert', 0);
-        $mform->addHelpButton('reportcert', 'reportcert', 'certificate');
+            $mform->addElement('select', 'reportcert', get_string('reportcert', 'certificate'), $ynoptions);
+            $mform->setDefault('reportcert', 0);
+            $mform->addHelpButton('reportcert', 'reportcert', 'certificate');
         }
 
         $mform->addElement('select', 'reissuecert', get_string('reissuecert', 'certificate'), $ynoptions);
         $mform->setDefault('reissuecert', 0);
 	    $mform->addHelpButton('reissuecert', 'reissuecert', 'certificate');
         
-//-------------------------------------------------------------------------------
+        // Text Options
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));
 
-        $dateoptions = certificate_get_date($COURSE);
+        $dateoptions = certificate_get_date();
         $mform->addElement('select', 'printdate', get_string('printdate', 'certificate'), $dateoptions);
         $mform->setDefault('printdate', 'N');
-	    $mform->addHelpButton('printdate', 'printdate', 'certificate');
+	$mform->addHelpButton('printdate', 'printdate', 'certificate');
 
         $dateformatoptions = array( 1 => 'January 1, 2000', 2 => 'January 1st, 2000', 3 => '1 January 2000', 4 => 'January 2000', 5 => get_string('userdateformat', 'certificate'));
         $mform->addElement('select', 'datefmt', get_string('datefmt', 'certificate'), $dateformatoptions);
@@ -73,7 +73,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('printnumber', 0);
         $mform->addHelpButton('printnumber', 'printnumber', 'certificate');
 
-        $gradeoptions = certificate_get_mod_grades($COURSE);
+        $gradeoptions = certificate_get_mod_grades();
         $mform->addElement('select', 'printgrade', get_string('printgrade', 'certificate'),$gradeoptions);
         $mform->setDefault('printgrade', 0);
         $mform->addHelpButton('printgrade', 'printgrade', 'certificate');
@@ -83,7 +83,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('gradefmt', 0);
         $mform->addHelpButton('gradefmt', 'gradefmt', 'certificate');
 
-        $outcomeoptions = certificate_get_outcomes($COURSE);
+        $outcomeoptions = certificate_get_outcomes();
         $mform->addElement('select', 'printoutcome', get_string('printoutcome', 'certificate'),$outcomeoptions);
         $mform->setDefault('printoutcome', 0);
         $mform->addHelpButton('printoutcome', 'printoutcome', 'certificate');
@@ -100,8 +100,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setType('customtext', PARAM_RAW);
         $mform->addHelpButton('customtext', 'customtext', 'certificate');
 
-
-//-------------------------------------------------------------------------------
+        // Design Options
         $mform->addElement('header', 'designoptions', get_string('designoptions', 'certificate'));
         $CERTIFICATE_TYPES = certificate_types();
         $mform->addElement('select', 'certificatetype', get_string('certificatetype', 'certificate'),$CERTIFICATE_TYPES);
@@ -113,7 +112,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('orientation', 'landscape');
         $mform->addHelpButton('orientation', 'orientation', 'certificate');
 
-		$borderstyleoptions = certificate_get_borders();
+	$borderstyleoptions = certificate_get_borders();
         $mform->addElement('select', 'borderstyle', get_string('borderstyle', 'certificate'), $borderstyleoptions);
         $mform->setDefault('borderstyle', 0);
         $mform->addHelpButton('borderstyle', 'borderstyle', 'certificate');
@@ -137,7 +136,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addElement('select', 'printseal', get_string('printseal', 'certificate'),$sealoptions);
         $mform->setDefault('printseal', 0);
         $mform->addHelpButton('printseal', 'printseal', 'certificate');
-//-------------------------------------------------------------------------------
+
         $this->standard_coursemodule_elements();
 
         $this->add_action_buttons();
