@@ -1157,7 +1157,11 @@ function certificate_print_mod_grade($course, $moduleid) {
     $module = $DB->get_record('modules', array('id'=> $cm->module));
 
     if ($grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $USER->id)) {
-        $item = reset($grade_item->items);
+        $item = new grade_item();
+        $itemproperties = reset($grade_item->items);
+        foreach ($itemproperties as $key => $value) {
+            $item->$key = $value;
+        }
         $modinfo->name = utf8_decode($DB->get_field($module->name, 'name', array('id'=> $cm->instance)));
         $grade = $item->grades[$USER->id]->grade;
         $item->gradetype = GRADE_TYPE_VALUE;
