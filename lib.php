@@ -92,7 +92,6 @@ function certificate_update_instance($certificate) {
 }
 
 /**
- *
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
  * and any data that depends on it.
@@ -200,11 +199,10 @@ function certificate_reset_course_form_defaults($course) {
  */
 function certificate_user_outline($course, $user, $mod, $certificate) {
     global $DB;
-    if ($issue = $DB->get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+    if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
         $result->info = get_string('issued', 'certificate');
         $result->time = $issue->certdate;
-    }
-    if (!$issue = $DB->get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+    } else {
         $result->info = get_string('notissued', 'certificate');
     }
     return $result;
@@ -222,7 +220,7 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
  */
 function certificate_user_complete($course, $user, $mod, $certificate) {
    global $DB;
-   if ($issue = $DB->get_record('certificate_issues', 'certificateid', $certificate->id, 'userid', $user->id)) {
+   if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
         print_simple_box_start();
         echo get_string('issued', 'certificate').": ";
         echo userdate($issue->certdate);
@@ -248,10 +246,10 @@ function certificate_get_participants($certificateid) {
 
     //Get students
     $participants = $DB->get_records_sql("SELECT DISTINCT u.id, u.id
-                                 FROM {user} u,
-                                      {certificate_issues} a
-                                 WHERE a.certificateid = '$certificateid' and
-                                       u.id = a.userid");
+                                          FROM {user} u,
+                                               {certificate_issues} a
+                                          WHERE a.certificateid = '$certificateid' and
+                                                u.id = a.userid");
     return $participants;
 }
 
