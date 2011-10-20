@@ -844,10 +844,11 @@ function certificate_prepare_issue($course, $user, $certificate) {
  * Inserts final user data when a certificate is created.
  * 
  * @param stdClass $course
+ * @param stdClass $certificate
  * @param stdClass $certrecord
  * @param stdClass $cm
  */
-function certificate_issue($course, $certrecord, $cm) {
+function certificate_issue($course, $certificate, $certrecord, $cm) {
     global $USER, $DB, $certificate;
 
     $sql = 'SELECT MAX(timecreated) AS latest FROM {certificate_issues} ' .
