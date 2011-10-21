@@ -84,9 +84,7 @@ if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;
 } else $credithours = '';
 
-    $customtext = $certificate->customtext;
-    $orientation = $certificate->orientation;
-    $pdf = new TCPDF($orientation, 'pt', 'Letter', true, 'UTF-8', false);
+    $pdf = new TCPDF($certificate->orientation, 'pt', 'Letter', true, 'UTF-8', false);
     $pdf->SetProtection(array('print'));
     $pdf->SetTitle($certificate->name);
     $pdf->setPrintHeader(false);
@@ -97,7 +95,7 @@ $credithours =  $strcredithours.': '.$certificate->printhours;
 //Define variables
 
 //Landscape
-	if ($orientation == 'L') {
+	if ($certificate->orientation == 'L') {
 	$x = 28;
 	$y = 125;
 	$sealx = 590;
@@ -137,36 +135,36 @@ $credithours =  $strcredithours.': '.$certificate->printhours;
 	}
 
 // Add images and lines
-    print_border($certificate->borderstyle, $orientation, $brdrx, $brdry, $brdrw, $brdrh);
-    draw_frame_letter($certificate->bordercolor, $orientation);
+    print_border($pdf, $certificate, $brdrx, $brdry, $brdrw, $brdrh);
+    draw_frame_letter($pdf, $certificate);
 // Set alpha to semi-transparency
     $pdf->SetAlpha(0.1);
-    print_watermark($certificate->printwmark, $orientation, $wmarkx, $wmarky, $wmarkw, $wmarkh);
+    print_watermark($pdf, $certificate, $wmarkx, $wmarky, $wmarkw, $wmarkh);
     $pdf->SetAlpha(1);
-    print_seal($certificate->printseal, $orientation, $sealx, $sealy, '', '');
-    print_signature($certificate->printsignature, $orientation, $sigx, $sigy, '', '');
+    print_seal($pdf, $certificate, $sealx, $sealy, '', '');
+    print_signature($pdf, $certificate, $sigx, $sigy, '', '');
     
 // Add text
     $pdf->SetTextColor(0,0,120);
-    cert_printtext($x, $y, 'C', 'freesans', '', 30, get_string('title', 'certificate'));
+    cert_printtext($pdf, $x, $y, 'C', 'freesans', '', 30, get_string('title', 'certificate'));
     $pdf->SetTextColor(0,0,0);
-    cert_printtext($x, $y+55, 'C', 'freeserif', '', 20, get_string('certify', 'certificate'));
-    cert_printtext($x, $y+105, 'C', 'freeserif', '', 30, $studentname);
-    cert_printtext($x, $y+155, 'C', 'freeserif', '', 20, get_string('statement', 'certificate'));
-    cert_printtext($x, $y+205, 'C', 'freeserif', '', 20, $classname);
-    cert_printtext($x, $y+255, 'C', 'freeserif', '', 14, $certificatedate);
-    cert_printtext($x, $y+283, 'C', 'freeserif', '', 10, $grade);
-    cert_printtext($x, $y+311, 'C', 'freeserif', '', 10, $outcome);
-    cert_printtext($x, $y+339, 'C', 'freeserif', '', 10, $credithours);
-    cert_printtext($x, $codey, 'C', 'freeserif', '', 10, $code);
+    cert_printtext($pdf, $x, $y+55, 'C', 'freeserif', '', 20, get_string('certify', 'certificate'));
+    cert_printtext($pdf, $x, $y+105, 'C', 'freeserif', '', 30, $studentname);
+    cert_printtext($pdf, $x, $y+155, 'C', 'freeserif', '', 20, get_string('statement', 'certificate'));
+    cert_printtext($pdf, $x, $y+205, 'C', 'freeserif', '', 20, $classname);
+    cert_printtext($pdf, $x, $y+255, 'C', 'freeserif', '', 14, $certificatedate);
+    cert_printtext($pdf, $x, $y+283, 'C', 'freeserif', '', 10, $grade);
+    cert_printtext($pdf, $x, $y+311, 'C', 'freeserif', '', 10, $outcome);
+    cert_printtext($pdf, $x, $y+339, 'C', 'freeserif', '', 10, $credithours);
+    cert_printtext($pdf, $x, $codey, 'C', 'freeserif', '', 10, $code);
     $i = 0 ;
     if($certificate->printteacher){
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort='u.lastname ASC','','','','',false)) {
         foreach ($teachers as $teacher) {
             $i++;
-    cert_printtext($sigx, $sigy+($i *12) , 'L', 'freeserif', '', 12, fullname($teacher));
+    cert_printtext($pdf, $sigx, $sigy+($i *12) , 'L', 'freeserif', '', 12, fullname($teacher));
 }}}
 
-    cert_printtext($custx, $custy, 'L', '', '', '', $customtext);
+    cert_printtext($pdf, $custx, $custy, 'L', '', '', '', $certificate->customtext);
 ?>
