@@ -71,7 +71,6 @@ function certificate_update_instance($certificate) {
     $certificate->id = $certificate->instance;
 
     if ($returnid = $DB->update_record('certificate', $certificate)) {
-
         if ($event->id = $DB->get_field('event', 'id', array('modulename'=> 'certificate', 'instance'=> $certificate->id))) {
             $event->name        = $certificate->name;
             update_event($event);
@@ -269,7 +268,7 @@ function certificate_get_participants($certificateid) {
  * @return mixed True if module supports feature, null if doesn't know
  */
 function certificate_supports($feature) {
-    switch($feature) {
+    switch ($feature) {
         case FEATURE_GROUPS:                  return true;
         case FEATURE_GROUPINGS:               return true;
         case FEATURE_GROUPMEMBERSONLY:        return true;
@@ -304,8 +303,6 @@ function view_header($course, $certificate, $cm) {
     }
 
     if (!empty($certificate->intro)) {
-        global $OUTPUT;
-
         echo $OUTPUT->box(format_text($certificate->intro), 'generalbox', 'intro');
     }
 }
@@ -484,6 +481,7 @@ function certificate_email_teachers_html($info) {
  */
 function certificate_email_students($user, $course, $certificate, $certrecord, $context) {
     global $DB, $USER;
+
     if ($certrecord->mailed > 0)    {
         return;
     }
@@ -688,6 +686,7 @@ function certificate_print_user_files($certificate, $userid=0, $context) {
  */
 function certificate_get_issues($certificate, $sort="u.studentname ASC", $groupmode, $cm) {
     global $CFG, $DB;
+
     // get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
@@ -849,7 +848,7 @@ function certificate_prepare_issue($course, $user, $certificate) {
  * @param stdClass $cm
  */
 function certificate_issue($course, $certificate, $certrecord, $cm) {
-    global $USER, $DB, $certificate;
+    global $USER, $DB;
 
     $sql = 'SELECT MAX(timecreated) AS latest FROM {certificate_issues} ' .
            'WHERE userid = '.$USER->id.' and certificateid = '.$certificate->id.'';
@@ -860,7 +859,7 @@ function certificate_issue($course, $certificate, $certrecord, $cm) {
     if ($certificate->printgrade) {
         if ($certificate->printgrade == 1) {
             $grade = certificate_print_course_grade($course);
-        } else if($certificate->printgrade > 1) {
+        } else if ($certificate->printgrade > 1) {
             $grade = certificate_print_mod_grade($course, $certificate->printgrade);
         }
         if ($certificate->gradefmt == 1) {
@@ -886,23 +885,23 @@ function certificate_issue($course, $certificate, $certrecord, $cm) {
  * @return array
  */
 function certificate_get_mods() {
-    global $course, $CFG, $DB;
+    global $COURSE, $CFG, $DB;
 
     $strtopic = get_string("topic");
     $strweek = get_string("week");
     $strsection = get_string("section");
-    
+
     // Collect modules data
-    get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
+    get_all_mods($COURSE->id, $mods, $modnames, $modnamesplural, $modnamesused);
 
     $modules = array();
-    $sections = get_all_sections($course->id); // Sort everything the same as the course
-    for ($i=0; $i<=$course->numsections; $i++) {
+    $sections = get_all_sections($COURSE->id); // Sort everything the same as the course
+    for ($i=0; $i<=$COURSE->numsections; $i++) {
         // should always be true
         if (isset($sections[$i])) {
             $section = $sections[$i];
             if ($section->sequence) {
-                switch ($course->format) {
+                switch ($COURSE->format) {
                     case "topics":
                     $sectionlabel = $strtopic;
                     break;
@@ -919,10 +918,10 @@ function certificate_get_mods() {
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                    $mod->courseid = $course->id;
+                    $mod->courseid = $COURSE->id;
                     $instance = $DB->get_record($mod->modname, array('id' => $mod->instance));
                     if ($grade_items = grade_get_grade_items_for_activity($mod)) {
-                        $mod_item = grade_get_grades($course->id, 'mod', $mod->modname, $mod->instance);
+                        $mod_item = grade_get_grades($COURSE->id, 'mod', $mod->modname, $mod->instance);
                         $item = reset($mod_item->items);
                         if (isset($item->grademax)){
                             $modules[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name;
@@ -970,15 +969,15 @@ function certificate_get_date() {
  * @return array
  */
 function certificate_get_outcomes() {
-    global $course, $DB;
+    global $COURSE, $DB;
 
     // get all outcomes in course
-    $grade_seq = new grade_tree($course->id, false, true, '', false);
+    $grade_seq = new grade_tree($COURSE->id, false, true, '', false);
     if ($grade_items = $grade_seq->items) {
         // list of item for menu
         $printoutcome = array();
         foreach ($grade_items as $grade_item) {
-            if(isset($grade_item->outcomeid)){
+            if (isset($grade_item->outcomeid)){
                 $itemmodule = $grade_item->itemmodule;
                 $printoutcome[$grade_item->id] = $itemmodule.': '.$grade_item->get_name();
             }
@@ -1035,6 +1034,7 @@ function certificate_types() {
  */
 function certificate_get_borders () {
     global $CFG, $DB;
+
     // load border files
     $my_path = "$CFG->dirroot/mod/certificate/pix/borders";
     $borderstyleoptions = array();
@@ -1042,7 +1042,7 @@ function certificate_get_borders () {
         while (false !== ($file = readdir($handle))) {
         if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
                 $i = strpos($file, '.');
-                if($i > 1) {
+                if ($i > 1) {
                     // Set the style name
                     $borderstyleoptions[$file] = substr($file, 0, $i);
                 }
@@ -1094,6 +1094,7 @@ function certificate_get_seals () {
  */
 function certificate_get_watermarks () {
     global $CFG, $DB;
+
     // load watermark files
     $my_path = "$CFG->dirroot/mod/certificate/pix/watermarks";
     $wmarkoptions = array();
@@ -1103,7 +1104,6 @@ function certificate_get_watermarks () {
             $i = strpos($file, '.');
                 if ($i > 1) {
                     $wmarkoptions[$file] = substr($file, 0, $i);
-
                 }
             }
         }
@@ -1154,6 +1154,7 @@ function certificate_get_signatures () {
  */
 function certificate_print_mod_grade($course, $moduleid) {
     global $USER, $DB;
+
     $cm = $DB->get_record('course_modules', array('id'=> $moduleid));
     $module = $DB->get_record('modules', array('id'=> $cm->module));
 
@@ -1191,9 +1192,7 @@ function certificate_print_mod_grade($course, $moduleid) {
  * @return mixed
  */
 function certificate_print_outcome($course, $id) {
-    global $USER, $DB, $certificate;
-
-    $id = $certificate->printoutcome;
+    global $USER, $DB;
 
     if ($grade_item = new grade_item(array('id'=>$id))) {
         $outcomeinfo->name = $grade_item->get_name();
@@ -1230,6 +1229,8 @@ function certificate_print_course_grade($course){
 
 /**
  * Sends text to output given the following params.
+ * 
+ * @param stdClass $pdf
  * @param int $x horizontal position
  * @param int $y vertical position
  * @param char $align L=left, C=center, R=right
@@ -1239,9 +1240,7 @@ function certificate_print_course_grade($course){
  * @param string $text the text to print
  * @return null
  */
-function cert_printtext($x, $y, $align, $font, $style, $size, $text) {
-    global $pdf;
-
+function cert_printtext($pdf, $x, $y, $align, $font, $style, $size, $text) {
     $pdf->setFont($font, $style, $size);
     $pdf->SetXY($x, $y);
     $pdf->writeHTMLCell(0, 0, '', '', $text, 0, 0, 0, true, $align);
@@ -1250,54 +1249,46 @@ function cert_printtext($x, $y, $align, $font, $style, $size, $text) {
 /**
  * Creates rectangles for line border for A4 size paper.
  * 
+ * @param stdClass $pdf
  * @param stdClass $certificate
- * @param string $orientation
  * @return null
  */
-function draw_frame($certificate, $orientation) {
-    global $pdf, $certificate;
-
+function draw_frame($pdf, $certificate) {
     if ($certificate->bordercolor > 0) {
         if ($certificate->bordercolor == 1) {
-            $color = array(0, 0, 0); //black
+            $color = array(0, 0, 0); // black
         }
         if ($certificate->bordercolor == 2) {
-            $color = array(153, 102, 51); //brown
+            $color = array(153, 102, 51); // brown
         }
         if ($certificate->bordercolor == 3) {
-            $color = array(0, 51, 204); //blue
+            $color = array(0, 51, 204); // blue
         }
         if ($certificate->bordercolor == 4) {
-            $color = array(0, 180, 0); //green
+            $color = array(0, 180, 0); // green
         }
-        switch ($orientation) {
+        switch ($certificate->orientation) {
             case 'L':
-
-            // create outer line border in selected color
-            $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
-            $pdf->Rect(10, 10, 277, 190);
-
-            // create middle line border in selected color
-            $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
-            $pdf->Rect(13, 13, 271, 184);
-
-            // create inner line border in selected color
-            $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
-            $pdf->Rect(16, 16, 265, 178);
+                // create outer line border in selected color
+                $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
+                $pdf->Rect(10, 10, 277, 190);
+                // create middle line border in selected color
+                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->Rect(13, 13, 271, 184);
+                // create inner line border in selected color
+                $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
+                $pdf->Rect(16, 16, 265, 178);
             break;
-
             case 'P':
-            // create outer line border in selected color
-            $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
-            $pdf->Rect(10, 10, 190, 277);
-
-            // create middle line border in selected color
-            $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
-            $pdf->Rect(13, 13, 184, 271);
-
-            // create inner line border in selected color
-            $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
-            $pdf->Rect(16, 16, 178, 265);
+                // create outer line border in selected color
+                $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
+                $pdf->Rect(10, 10, 190, 277);
+                // create middle line border in selected color
+                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->Rect(13, 13, 184, 271);
+                // create inner line border in selected color
+                $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
+                $pdf->Rect(16, 16, 178, 265);
             break;
         }
     }
@@ -1306,29 +1297,25 @@ function draw_frame($certificate, $orientation) {
 /**
  * Creates rectangles for line border for letter size paper.
  * 
- * @param stdclass $certificate
- * @param string $orientation
+ * @param stdClass $pdf
+ * @param stdClass $certificate
  * @return null
  */
-function draw_frame_letter($certificate, $orientation) {
-    global $pdf, $certificate;
-
-    if($certificate->bordercolor > 0) {
-
-         if ($certificate->bordercolor == 1)    {
+function draw_frame_letter($pdf, $certificate) {
+    if ($certificate->bordercolor > 0) {
+        if ($certificate->bordercolor == 1)    {
             $color = array(0, 0, 0); //black
         }
-            if ($certificate->bordercolor == 2)    {
+        if ($certificate->bordercolor == 2)    {
             $color = array(153, 102, 51); //brown
         }
-            if ($certificate->bordercolor == 3)    {
+        if ($certificate->bordercolor == 3)    {
             $color = array(0, 51, 204); //blue
         }
-            if ($certificate->bordercolor == 4)    {
+        if ($certificate->bordercolor == 4)    {
             $color = array(0, 180, 0); //green
         }
-
-        switch ($orientation) {
+        switch ($certificate->orientation) {
             case 'L':
             // create outer line border in selected color
             $pdf->SetLineStyle(array('width' => 4.25, 'color' => $color));
@@ -1363,63 +1350,32 @@ function draw_frame_letter($certificate, $orientation) {
 /**
  * Prints border images from the borders folder in PNG or JPG formats.
  * 
- * @param int $border
- * @param string $orientation
+ * @param stdClass $pdf;
+ * @param stdClass $certificate
  * @param int $x x position
  * @param int $y y position
  * @param int $w the width
  * @param int $h the height
  * @return null
  */
-function print_border($border, $orientation, $x, $y, $w, $h) {
-    global $CFG, $DB, $pdf;
+function print_border($pdf, $certificate, $x, $y, $w, $h) {
+    global $CFG, $DB;
 
-    switch($border) {
+    switch ($certificate->borderstyle) {
         case '0':
         case '':
         break;
         default:
-        switch ($orientation) {
+        switch ($certificate->orientation) {
             case 'L':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
-            $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$border", $x, $y, $w, $h);
-        }
-        break;
-            case 'P':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
-            $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$border", $x, $y, $w, $h);
-           }
+                if (file_exists("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle")) {
+                    $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle", $x, $y, $w, $h);
+                }
             break;
-        }
-        break;
-    }
-}
-
-/**
- * Prints border images for letter size paper.
- * 
- * @param int $border
- * @param string $orientation
- * @return null
- */
-function print_border_letter($border, $orientation) {
-    global $CFG, $DB, $pdf;
-
-    switch($border) {
-        case '0':
-        case '':
-        break;
-        default:
-        switch ($orientation) {
-            case 'L':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
-            $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$border", 12, 10, 771, 594);
-        }
-        break;
             case 'P':
-        if(file_exists("$CFG->dirroot/mod/certificate/pix/borders/$border")) {
-            $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$border", 10, 10, 594, 771);
-            }
+                if (file_exists("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle")) {
+                    $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle", $x, $y, $w, $h);
+                }
             break;
         }
         break;
@@ -1429,67 +1385,32 @@ function print_border_letter($border, $orientation) {
 /**
  * Prints watermark images.
  * 
- * @param int $border
- * @param string $orientation
+ * @param stdClass $pdf;
+ * @param stdClass $certificate
  * @param int $x x position
  * @param int $y y position
  * @param int $w the width
  * @param int $h the height
  * @return null                        
  */
-function print_watermark($wmark, $orientation, $x, $y, $w, $h) {
-    global $CFG, $DB, $pdf;
+function print_watermark($pdf, $certificate, $x, $y, $w, $h) {
+    global $CFG, $DB;
 
-    switch($wmark) {
+    switch ($certificate->printwmark) {
         case '0':
         case '':
         break;
         default:
-        switch ($orientation) {
+        switch ($certificate->orientation) {
             case 'L':
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark", $x, $y, $w, $h);
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark")) {
+                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark", $x, $y, $w, $h);
             }
             break;
             case 'P':
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark", $x, $y, $w, $h);
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark")) {
+                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark", $x, $y, $w, $h);
            }
-            break;
-        }
-        break;
-    }
-}
-
-/**
- * Prints watermark images for letter size paper.
- * 
- * @param int $wmark
- * @param string $orientation
- * @param int $x x position
- * @param int $y y position
- * @param int $w the width
- * @param int $h the height
- * @return null
- */
-function print_watermark_letter($wmark, $orientation, $x, $y, $w, $h) {
-    global $CFG, $DB, $pdf;
-
-    switch($wmark) {
-        case '0':
-        case '':
-        break;
-        default:
-        switch ($orientation) {
-            case 'L':
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark", 160, 110, 500, 400);
-            }
-            break;
-            case 'P':
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$wmark", 83, 130, 450, 480);
-            }
             break;
         }
         break;
@@ -1499,41 +1420,25 @@ function print_watermark_letter($wmark, $orientation, $x, $y, $w, $h) {
 /**
  * Prints signature images or a line.
  * 
- * @param int $sig
- * @param string $orientation
+ * @param stdClass $pdf
+ * @param stdClass $certificate
  * @param int $x x position
  * @param int $y y position
  * @param int $w the width
  * @param int $h the height
  * @return null
  */
-function print_signature($sig, $orientation, $x, $y, $w, $h) {
-    global $CFG, $DB, $pdf;
+function print_signature($pdf, $certificate, $x, $y, $w, $h) {
+    global $CFG, $DB;
 
-    switch ($orientation) {
-        case 'L':
-        switch($sig) {
-            case '0':
-            case '':
-            break;
-            default:
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/signatures/$sig")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/signatures/$sig", $x, $y, $w, $h);
-            }
-            break;
-        }
+    switch ($certificate->printsignature) {
+        case '0':
+        case '':
         break;
-        case 'P':
-        switch($sig) {
-            case '0':
-            case '':
-            break;
-            default:
-            if(file_exists("$CFG->dirroot/mod/certificate/pix/signatures/$sig")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/signatures/$sig", $x, $y, $w, $h);
+        default:
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/signatures/$certificate->printsignature")) {
+                $pdf->Image("$CFG->dirroot/mod/certificate/pix/signatures/$certificate->printsignature", $x, $y, $w, $h);
             }
-            break;
-        }
         break;
     }
 }
@@ -1541,34 +1446,25 @@ function print_signature($sig, $orientation, $x, $y, $w, $h) {
 /**
  * Prints seal images.
  * 
- * @param int $seal
- * @param string $orientation
+ * @param stdClass $pdf;
+ * @param stdClass $certificate
  * @param int $x x position
  * @param int $y y position
  * @param int $w the width
  * @param int $h the height
  * @return null
  */
-function print_seal($seal, $orientation, $x, $y, $w, $h) {
-    global $CFG, $DB, $pdf;
+function print_seal($pdf, $certificate, $x, $y, $w, $h) {
+    global $CFG, $DB;
 
-    switch($seal) {
+    switch ($certificate->printseal) {
         case '0':
         case '':
         break;
         default:
-        switch ($orientation) {
-            case 'L':
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/seals/$seal")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/seals/$seal", $x, $y, $w, $h);
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/seals/$certificate->printseal")) {
+                $pdf->Image("$CFG->dirroot/mod/certificate/pix/seals/$certificate->printseal", $x, $y, $w, $h);
             }
-            break;
-            case 'P':
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/seals/$seal")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/seals/$seal", $x, $y, $w, $h);
-            }
-            break;
-        }
         break;
     }
 }
