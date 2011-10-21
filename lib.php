@@ -1317,31 +1317,26 @@ function draw_frame_letter($pdf, $certificate) {
         }
         switch ($certificate->orientation) {
             case 'L':
-            // create outer line border in selected color
-            $pdf->SetLineStyle(array('width' => 4.25, 'color' => $color));
-            $pdf->Rect(28, 28, 736, 556);
-
-            // create middle line border in selected color
-            $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
-            $pdf->Rect(37, 37, 718, 538);
-
-            // create inner line border in selected color
-            $pdf->SetLineStyle(array('width' => 2.8, 'color' => $color));
-            $pdf->Rect(46, 46, 700, 520);
-            break;
-
+                // create outer line border in selected color
+                $pdf->SetLineStyle(array('width' => 4.25, 'color' => $color));
+                $pdf->Rect(28, 28, 736, 556);
+                // create middle line border in selected color
+                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->Rect(37, 37, 718, 538);
+                // create inner line border in selected color
+                $pdf->SetLineStyle(array('width' => 2.8, 'color' => $color));
+                $pdf->Rect(46, 46, 700, 520);
+                break;
             case 'P':
-            // create outer line border in selected color
-            $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
-            $pdf->Rect( 25, 20, 561, 751);
-
-            // create middle line border in selected color
-            $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
-            $pdf->Rect( 40, 35, 531, 721);
-
-            // create inner line border in selected color
-            $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
-            $pdf->Rect( 51, 46, 509, 699);
+                // create outer line border in selected color
+                $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
+                $pdf->Rect( 25, 20, 561, 751);
+                // create middle line border in selected color
+                $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
+                $pdf->Rect( 40, 35, 531, 721);
+                // create inner line border in selected color
+                $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
+                $pdf->Rect( 51, 46, 509, 699);
             break;
         }
     }
@@ -1366,18 +1361,9 @@ function print_border($pdf, $certificate, $x, $y, $w, $h) {
         case '':
         break;
         default:
-        switch ($certificate->orientation) {
-            case 'L':
-                if (file_exists("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle")) {
-                    $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle", $x, $y, $w, $h);
-                }
-            break;
-            case 'P':
-                if (file_exists("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle")) {
-                    $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle", $x, $y, $w, $h);
-                }
-            break;
-        }
+            if (file_exists("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle")) {
+                $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle", $x, $y, $w, $h);
+            }
         break;
     }
 }
@@ -1401,18 +1387,9 @@ function print_watermark($pdf, $certificate, $x, $y, $w, $h) {
         case '':
         break;
         default:
-        switch ($certificate->orientation) {
-            case 'L':
             if (file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark")) {
                 $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark", $x, $y, $w, $h);
             }
-            break;
-            case 'P':
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark", $x, $y, $w, $h);
-           }
-            break;
-        }
         break;
     }
 }
