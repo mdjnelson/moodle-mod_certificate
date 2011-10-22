@@ -59,7 +59,7 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
 
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {
-           $issue->set_source_table('certificate_issues', array('certificateid' => backup::VAR_PARENTID));
+            $issue->set_source_table('certificate_issues', array('certificateid' => backup::VAR_PARENTID));
         }
 
         // Annotate the user id's where required.

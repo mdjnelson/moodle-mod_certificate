@@ -52,7 +52,7 @@ class restore_certificate_activity_task extends restore_activity_task {
      * processed by the link decoder
      */
     static public function define_decode_contents() {
-       $contents = array();
+        $contents = array();
 
         $contents[] = new restore_decode_content('certificate', array('intro'), 'certificate');
 
