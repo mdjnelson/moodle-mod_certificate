@@ -53,6 +53,16 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $oldid = $data->id;
         $data->course = $this->get_courseid();
 
+        if ($data->printdate > 2) { // If greater than 2, then it is a grade item value
+            if ($newgi = $this->get_mappingid('course_module', $data->printdate)) {
+                $data->printdate = $newgi;
+            }
+        }
+        if ($data->printgrade > 2) {
+            if ($newgi = $this->get_mappingid('course_module', $data->printgrade)) {
+                $data->printgrade = $newgi;
+            }
+        }
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
         // insert the certificate record
@@ -73,7 +83,6 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $newitemid = $DB->insert_record('certificate_issues', $data);
         $this->set_mapping('certificate_issue', $oldid, $newitemid);
     }
-
 
     protected function after_execute() {
         // Add certificate related files, no need to match by itemname (just internally handled context)
