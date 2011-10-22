@@ -1129,7 +1129,7 @@ function certificate_get_signatures () {
     $signatureoptions = array();
     if ($handle = opendir($my_path)) {
         while (false !== ($file = readdir($handle))) {
-            if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+            if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1)) {
                 $i = strpos($file, '.');
                 if ($i > 1) {
                     $signatureoptions[$file] = substr($file, 0, $i);
