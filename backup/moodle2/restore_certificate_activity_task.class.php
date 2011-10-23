@@ -109,4 +109,40 @@ class restore_certificate_activity_task extends restore_activity_task {
 
         return $rules;
     }
+
+    /*
+     * This function is called after all the activities in the backup have been restored.
+     * This allows us to get the new course module ids, as they may have been restored
+     * after the certificate module, meaning no id was available at the time.
+     */
+    public function after_restore() {
+        global $DB;
+
+        // Get the new module
+        $sql = "SELECT c.* " .
+               "FROM {certificate} c " .
+               "INNER JOIN {course_modules} cm " .
+               "ON c.id = cm.instance " .
+               "WHERE cm.id = ?";
+        if ($certificate = $DB->get_record_sql($sql, (array($this->get_moduleid())))) {
+            // A flag to check if we need to update the database or not
+            $update = false;
+            if ($certificate->printdate > 2) { // If greater than 2, then it is a grade item value
+                if ($newitem = restore_dbops::get_backup_ids_record($this->get_restoreid(), 'course_module', $certificate->printdate)) {
+                    $update = true;
+                    $certificate->printdate = $newitem->newitemid;
+                }
+            }
+            if ($certificate->printgrade > 2) {
+                if ($newitem = restore_dbops::get_backup_ids_record($this->get_restoreid(), 'course_module', $certificate->printgrade)) {
+                    $update = true;
+                    $certificate->printgrade = $newitem->newitemid;
+                }
+            }
+            if ($update) {
+                // Update the certificate
+                $DB->update_record('certificate', $certificate);
+            }
+        }
+    }
 }
