@@ -63,20 +63,20 @@ if ($certificate->reissuecert) { // Reissue certificate every time
             echo certificate_print_attempts($certificate->id, $USER->id);
         }
         if ($certificate->delivery == 0)    {
-            echo '<p align="center">'.get_string('openwindow', 'certificate').'</p>';
+            echo '<p style="text-align:center">'.get_string('openwindow', 'certificate').'</p>';
         } elseif ($certificate->delivery == 1)    {
-            echo '<p align="center">'.get_string('opendownload', 'certificate').'</p>';
+            echo '<p style="text-align:center">'.get_string('opendownload', 'certificate').'</p>';
         } elseif ($certificate->delivery == 2)    {
-            echo '<p align="center">'.get_string('openemail', 'certificate').'</p>';
+            echo '<p style="text-align:center">'.get_string('openemail', 'certificate').'</p>';
         }
 
-        echo '<center>';
+        echo '<div style="text-align:center">';
         $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
                     $linkname = $strgetcertificate;
         $button = new single_button($link, $linkname);
         $button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
         echo $OUTPUT->render($button);
-        echo '</center>';
+        echo '</div>';
         add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
         echo $OUTPUT->footer($course);
         exit;
@@ -86,13 +86,13 @@ if ($certificate->reissuecert) { // Reissue certificate every time
     if (empty($action)) {
         view_header($course, $certificate, $cm);
         $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
-        echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
-        echo '<center>';
+        echo '<p style="text-align:center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
+        echo '<div style="text-align:center">';
         $linkname = $strreviewcertificate;
         $button = new single_button($link, $linkname);
         $button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
         echo $OUTPUT->render($button);
-        echo '</center>';
+        echo '</div>';
         echo $OUTPUT->footer($course);
         exit;
     }
@@ -100,20 +100,20 @@ if ($certificate->reissuecert) { // Reissue certificate every time
     if (empty($action)) {
         view_header($course, $certificate, $cm);
         if ($certificate->delivery == 0)    {
-            echo '<p align="center">'.get_string('openwindow', 'certificate').'</p>';
+            echo '<p style="text-align:center">'.get_string('openwindow', 'certificate').'</p>';
         } elseif ($certificate->delivery == 1)    {
-            echo '<p align="center">'.get_string('opendownload', 'certificate').'</p>';
+            echo '<p style="text-align:center">'.get_string('opendownload', 'certificate').'</p>';
         } elseif ($certificate->delivery == 2)    {
-            echo '<p align="center">'.get_string('openemail', 'certificate').'</p>';
+            echo '<p style="text-align:center">'.get_string('openemail', 'certificate').'</p>';
         }
 
         $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
-        echo '<center>';
+        echo '<div style="text-align:center">';
         $linkname = $strgetcertificate;
         $button = new single_button($link, $linkname);
         $button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
         echo $OUTPUT->render($button);
-        echo '</center>';
+        echo '</div>';
         add_to_log($course->id, 'certificate', 'received', "view.php?id=$cm->id", $certificate->id, $cm->id);
         echo $OUTPUT->footer($course);
         exit;

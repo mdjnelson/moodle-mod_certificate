@@ -297,7 +297,7 @@ function view_header($course, $certificate, $cm) {
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     if (has_capability('mod/certificate:manage', $context)) {
-        $numusers = count(certificate_get_issues($certificate->id, '', '', $cm));
+        $numusers = count(certificate_get_issues($certificate->id, 'ci.certdate ASC', '', $cm));
         echo '<div class="reportlink"><a href="report.php?id='.$cm->id.'">'.
               get_string('viewcertificateviews', 'certificate', $numusers).'</a></div>';
     }
@@ -684,21 +684,31 @@ function certificate_print_user_files($certificate, $userid=0, $context) {
  * @param boolean $groupmode are we in group mode ?
  * @param stdClass $cm the course module
  */
-function certificate_get_issues($certificate, $sort="u.studentname ASC", $groupmode, $cm) {
+function certificate_get_issues($certificate, $sort="s.certdate ASC", $groupmode, $cm) {
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
-    // get all the users that have certificates issued.
-    $users = $DB->get_records_sql("SELECT u.*,u.picture, s.code, s.timecreated, s.certdate, s.studentname, s.reportgrade
-                                   FROM {$CFG->prefix}certificate_issues s,
-                                        {$CFG->prefix}user u
-                                   WHERE s.certificateid = '$certificate'
-                                   AND s.userid = u.id
-                                   AND s.certdate > 0
-                                   GROUP BY u.id");
+    // Get all the users that have certificates issued, first, create subsql 
+    // used in the main sql query, this is used so that we don't get an error
+    // about the same u.id being returned multiple times due to being in the 
+    // certificate issues table multiple times.
+    $subsql = "SELECT MAX(ci2.timecreated) as timecreated " .
+              "FROM {certificate_issues} ci2 " .
+              "WHERE ci2.certificateid = '$certificate' " .
+              "AND ci2.certdate > 0 " .
+              "AND ci2.userid = u.id";
+    $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated, ci.certdate, ci.studentname, ci.reportgrade
+                                   FROM {user} u
+                                   INNER JOIN {certificate_issues} ci
+                                   ON u.id = ci.userid
+                                   WHERE u.deleted = 0
+                                   AND ci.certificateid = '$certificate'
+                                   AND ci.certdate > 0
+                                   AND ci.timecreated = ($subsql)
+                                   ORDER BY {$sort}");
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
         if (isset($certmanagers[$id])) { //exclude certmanagers.
@@ -772,7 +782,8 @@ function certificate_print_attempts($certificateid, $userid) {
     $table = new html_table();
     $table->class = 'generaltable';
     $table->head = array(get_string('issued', 'certificate'));
-    $table->align = array('left', 'left');
+    $table->align = array('left');
+    $table->attributes = array("style" => "width:20%; margin:auto");
     $gradecolumn = $certificate->printgrade;
     if ($gradecolumn) {
         $table->head[] = get_string('grade');
@@ -793,7 +804,7 @@ function certificate_print_attempts($certificateid, $userid) {
 
         // Ouside the if because we may be showing feedback but not grades.
         if ($gradecolumn) {
-        $attemptgrade = ($attempt->reportgrade);
+            $attemptgrade = $attempt->reportgrade;
             $row[] = $attemptgrade;
         } else {
             $row[] = '';
