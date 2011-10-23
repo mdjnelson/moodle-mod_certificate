@@ -684,7 +684,7 @@ function certificate_print_user_files($certificate, $userid=0, $context) {
  * @param boolean $groupmode are we in group mode ?
  * @param stdClass $cm the course module
  */
-function certificate_get_issues($certificate, $sort="s.certdate ASC", $groupmode, $cm) {
+function certificate_get_issues($certificate, $sort="ci.certdate ASC", $groupmode, $cm) {
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
