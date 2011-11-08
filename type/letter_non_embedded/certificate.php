@@ -136,9 +136,9 @@ $credithours =  $strcredithours.': '.$certificate->printhours;
     print_border($pdf, $certificate, $brdrx, $brdry, $brdrw, $brdrh);
     draw_frame_letter($pdf, $certificate);
 // Set alpha to semi-transparency
-//    $pdf->SetAlpha(0.1);
+    $pdf->SetAlpha(0.1);
     print_watermark($pdf, $certificate, $wmarkx, $wmarky, $wmarkw, $wmarkh);
-//    $pdf->SetAlpha(1);
+    $pdf->SetAlpha(1);
     print_seal($pdf, $certificate, $sealx, $sealy, '', '');
     print_signature($pdf, $certificate, $sigx, $sigy, '', '');
     
