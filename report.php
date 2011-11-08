@@ -19,11 +19,11 @@ if ($action !== '') {
 $PAGE->set_url($url);
 
 if (!$cm = get_coursemodule_from_id('certificate', $id)) {
-    error('Course Module ID was incorrect');
+    print_error('Course Module ID was incorrect');
 }
 
 if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
-    error('Course is misconfigured');
+    print_error('Course is misconfigured');
 }
 
 require_login($course->id, false, $cm);
@@ -31,7 +31,7 @@ $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 require_capability('mod/certificate:manage', $context);
 
 if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
-    error('Certificate ID was incorrect');
+    print_error('Certificate ID was incorrect');
 }
 
 $strcertificates = get_string('modulenameplural', 'certificate');
