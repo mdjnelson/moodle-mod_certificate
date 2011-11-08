@@ -9,7 +9,7 @@
     $id = required_param('id', PARAM_INT);           // Course Module ID
 
     if (! $course = $DB->get_record('course', array('id'=> $id))) {
-        error('Course ID is incorrect');
+        print_error('Course ID is incorrect');
     }
 
     require_course_login($course);
