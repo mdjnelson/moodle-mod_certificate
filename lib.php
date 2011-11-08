@@ -226,12 +226,12 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
    global $DB;
 
    if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
-        print_simple_box_start();
+        echo $OUTPUT->box_start();
         echo get_string('issued', 'certificate').": ";
         echo userdate($issue->certdate);
         certificate_print_user_files($certificate->id, $user->id);
         echo '<br />';
-        print_simple_box_end();
+        echo $OUTPUT->box_end();
     } else {
         print_string('notissuedyet', 'certificate');
     }
