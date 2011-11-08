@@ -52,7 +52,6 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $data = (object)$data;
         $oldid = $data->id;
         $data->course = $this->get_courseid();
-
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
         // insert the certificate record
@@ -73,7 +72,6 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $newitemid = $DB->insert_record('certificate_issues', $data);
         $this->set_mapping('certificate_issue', $oldid, $newitemid);
     }
-
 
     protected function after_execute() {
         // Add certificate related files, no need to match by itemname (just internally handled context)
