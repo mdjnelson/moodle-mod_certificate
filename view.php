@@ -8,13 +8,13 @@ $id = required_param('id', PARAM_INT);    // Course Module ID
 $action = optional_param('action', '', PARAM_ALPHA);
 
 if (! $cm = get_coursemodule_from_id('certificate', $id)) {
-    error('Course Module ID was incorrect');
+    print_error('Course Module ID was incorrect');
 }
 if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
-    error('course is misconfigured');
+    print_error('course is misconfigured');
 }
 if (! $certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
-    error('course module is incorrect');
+    print_error('course module is incorrect');
 }
 
 require_login($course->id, true, $cm);
