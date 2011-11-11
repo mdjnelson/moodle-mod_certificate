@@ -1,65 +1,39 @@
-TEST PUSH
+QUICK INSTALL
+=============
 
-Certificate 3.0 for Moodle 
+There are two installation methods that are available. Follow one of these, then
+log into your Moodle site as an administrator and visit the notifications page
+to complete the install.
 
-Version 3.1.8 20070613
-This version has been updated to work in Moodle 1.8. 
-Added options: email to entered addresses; lock a certificate based on a course grade, activity grades, taking a survey, questionnaire or feedback or any combination; print credit hours; save/download pdf name is now certificate name
-Updated mod.html to mod_form.php
-Updated help files
-All images can be either JPEG or PNG 8
-Fixed so will not show certificate as issued until button is clicked
+==================== MOST RECOMMENDED METHOD - Git ====================
 
-Version 3.1.7 20061012
-This version has been updated to work in Moodle 1.7. 
-Added custom html text option
-Added unicode types using lib/tcpdf
+If you do not have git installed, please see the below link. Please note, it is 
+not necessary to set up the SSH Keys. This is only needed if you are going to 
+create a repository of your own on github.com.
 
-Version 3.1.6.1 2006081700
-Increased length of course name record
-General debugging and code fixes
-Fixed symbol printing in course name, mod name and student name for non-unicode pdfs
+Information on installing git - http://help.github.com/set-up-git-redirect/
 
-Version 3.1.6 2006080100
-The certificate module has been re-written to better comply with standard Moodle coding and to add
-new features:
+Once you have git installed, simply visit the Moodle mod directory and clone 
+git://github.com/PukunuiAustralia/moodle-mod_certificate.git, remember to 
+rename the folder to certificate if you do not specify this in the clone command
 
-Added backup/restore.
-Added teacher reporting.
-Added student certificate review.
-Added email teachers.
-Added print functions for letter size paper for border and watermark images.  Fixed (hopefully) all certificate alignment.
-Reformatted border images to jpeg to make them smaller.
-Created the type folder.  New types can be added without having to change the core code.
-New/changed certificate options:
-Save: Can choose to save students' certificates in moddata.
-Delivery:  Open in browser, Force download, email (Thanks Marion DeGroot).
-Print Date: Added course end date, more can be added.
-Date Format:  Updated for unicode.
-Print Code: Updated.
-Grade Format: Added three formats
+Eg. Linux command line would be as follow -
+
+git clone git://github.com/PukunuiAustralia/moodle-mod_certificate.git certificate
+
+Once cloned, checkout the branch that is specific to your Moodle version.
+eg, MOODLE_20_STABLE is for Moodle 2.0, MOODLE_21_STABLE is for 2.1
+
+Use git pull to update this branch periodically to ensure you have the latest version.
+
+==================== Download the certificate module. ====================
+
+Visit https://github.com/PukunuiAustralia/moodle-mod_certificate and 
+download the zip, uncompress this zip and extract the folder. The
+folder will have a name similar to PukunuiAustralia-moodle-mod_certificate-c9fbadb, 
+you MUST rename this to certificate. Place this folder in your mod folder in your
+Moodle directory. The reason this is not the recommended method is due to the fact
+you have to over-write the contents of this folder when an update occurs for the certificate
+module. In the above method there is a simple command to update the files.
 
 
-To do:
-
-Needs a cron function/updated email features.
-Groups not working in report???
-Add more date options?
-Add download report to Excel
-
-************************************
-Version 3.0 updated for 1.6 by Chardelle Busch.  
-Added new fpdf security feature so that downloaded certificates can 
-only be printed, not edited.
-Added mod grade name (Thanks Mike Churchward)
-
-************************************
-Prior Versions:
-
-Updated by David T. Cannon, July, 2005
-Updated to fpdf class
-Added mod grades.
-Course grade added by Patrick Jeitler
-
-************************************
-Created by Hugo Salgado, July, 2004
