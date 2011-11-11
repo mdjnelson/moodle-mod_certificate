@@ -28,12 +28,11 @@ Use git pull to update this branch periodically to ensure you have the latest ve
 
 ==================== Download the certificate module. ====================
 
-Visit https://github.com/PukunuiAustralia/moodle-mod_certificate and 
-download the zip, uncompress this zip and extract the folder. The
-folder will have a name similar to PukunuiAustralia-moodle-mod_certificate-c9fbadb, 
-you MUST rename this to certificate. Place this folder in your mod folder in your
-Moodle directory. The reason this is not the recommended method is due to the fact
-you have to over-write the contents of this folder when an update occurs for the certificate
+Visit https://github.com/PukunuiAustralia/moodle-mod_certificate, choose the branch 
+that matches your Moodle version (eg. MOODLE_20_STABLE is for Moodle 2.0, MOODLE_21_STABLE 
+is for 2.1) and download the zip, uncompress this zip and extract the folder. The 
+folder will have a name similar to PukunuiAustralia-moodle-mod_certificate-c9fbadb, you 
+MUST rename this to certificate. Place this folder in your mod folder in your Moodle 
+directory. nb. The reason this is not the recommended method is due to the fact you have 
+to  over-write the contents of this folder to apply any future updates to the certificate 
 module. In the above method there is a simple command to update the files.
-
-
