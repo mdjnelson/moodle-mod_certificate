@@ -955,15 +955,13 @@ function certificate_get_mods() {
 /**
  * Search through all the modules for grade data for mod_form.
  * 
+ * @param boolean $course include course
  * @return array
  */
-function certificate_get_mod_grades($modules) {
-    if (!empty($modules)) {
-        $gradeoptions['0'] = get_string('no');
-        $gradeoptions['1'] = get_string('coursegrade', 'certificate');
-    } else {
-        $gradeoptions['0'] = get_string('nogrades', 'certificate');
-    }
+function certificate_get_mod_grades() {
+    $gradeoptions['0'] = get_string('no');
+    $gradeoptions['1'] = get_string('coursegrade', 'certificate');
+
     return $gradeoptions;
 }
 

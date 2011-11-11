@@ -74,7 +74,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('printnumber', 0);
         $mform->addHelpButton('printnumber', 'printnumber', 'certificate');
 
-        $gradeoptions = certificate_get_mod_grades($modules) + $modules;
+        $gradeoptions = certificate_get_mod_grades() + $modules;
         $mform->addElement('select', 'printgrade', get_string('printgrade', 'certificate'),$gradeoptions);
         $mform->setDefault('printgrade', 0);
         $mform->addHelpButton('printgrade', 'printgrade', 'certificate');
