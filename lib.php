@@ -958,7 +958,7 @@ function certificate_get_mods() {
  * @param boolean $course include course
  * @return array
  */
-function certificate_get_mod_grades() {
+function certificate_get_grade_options() {
     $gradeoptions['0'] = get_string('no');
     $gradeoptions['1'] = get_string('coursegrade', 'certificate');
 
@@ -970,7 +970,7 @@ function certificate_get_mod_grades() {
  * 
  * @return array
  */
-function certificate_get_date() {
+function certificate_get_date_options() {
     $dateoptions['0'] = get_string('no');
     $dateoptions['1'] = get_string('issueddate', 'certificate');
     $dateoptions['2'] = get_string('completiondate', 'certificate');

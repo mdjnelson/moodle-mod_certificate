@@ -54,13 +54,13 @@ class mod_certificate_mod_form extends moodleform_mod {
 
         $mform->addElement('select', 'reissuecert', get_string('reissuecert', 'certificate'), $ynoptions);
         $mform->setDefault('reissuecert', 0);
-	    $mform->addHelpButton('reissuecert', 'reissuecert', 'certificate');
+	$mform->addHelpButton('reissuecert', 'reissuecert', 'certificate');
         
         // Text Options
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));
 
         $modules = certificate_get_mods();
-        $dateoptions = certificate_get_date() + $modules;
+        $dateoptions = certificate_get_date_options() + $modules;
         $mform->addElement('select', 'printdate', get_string('printdate', 'certificate'), $dateoptions);
         $mform->setDefault('printdate', 'N');
 	$mform->addHelpButton('printdate', 'printdate', 'certificate');
@@ -74,7 +74,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('printnumber', 0);
         $mform->addHelpButton('printnumber', 'printnumber', 'certificate');
 
-        $gradeoptions = certificate_get_mod_grades() + $modules;
+        $gradeoptions = certificate_get_grade_options() + $modules;
         $mform->addElement('select', 'printgrade', get_string('printgrade', 'certificate'),$gradeoptions);
         $mform->setDefault('printgrade', 0);
         $mform->addHelpButton('printgrade', 'printgrade', 'certificate');
