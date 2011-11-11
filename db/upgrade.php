@@ -286,7 +286,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
     }
 
-    return $result;
+    //return $result;
+    return true;    /// Apparently, as of 2.0, this needs to always be true!
 }
-
-?>

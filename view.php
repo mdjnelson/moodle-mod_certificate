@@ -6,6 +6,7 @@ include '../../lib/pdflib.php';
 
 $id = required_param('id', PARAM_INT);    // Course Module ID
 $action = optional_param('action', '', PARAM_ALPHA);
+$edit = optional_param('edit', -1, PARAM_BOOL);
 
 if (! $cm = get_coursemodule_from_id('certificate', $id)) {
     print_error('Course Module ID was incorrect');
@@ -17,7 +18,7 @@ if (! $certificate = $DB->get_record('certificate', array('id'=> $cm->instance))
     print_error('course module is incorrect');
 }
 
-require_login($course->id, true, $cm);
+require_login($course->id, false, $cm);
 $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 require_capability('mod/certificate:view', $context);
 
@@ -31,15 +32,28 @@ $PAGE->set_url('/mod/certificate/view.php', array('id' => $cm->id));
 $PAGE->set_context($context);
 $PAGE->set_cm($cm);
 
+if (($edit != -1) and $PAGE->user_allowed_editing()) {
+     $USER->editing = $edit;
+}
+
+// Add block editing button
+if ($PAGE->user_allowed_editing()) {
+    $buttons = '<table><tr><td><form method="get" action="view.php"><div>'.
+        '<input type="hidden" name="id" value="'.$cm->id.'" />'.
+        '<input type="hidden" name="edit" value="'.($PAGE->user_is_editing()?'off':'on').'" />'.
+        '<input type="submit" value="'.get_string($PAGE->user_is_editing()?'blockseditoff':'blocksediton').'" /></div></form></td></tr></table>';
+    $PAGE->set_button($buttons);
+}
+
 // Create new certrecord
 certificate_prepare_issue($course, $USER, $certificate);
 
 // Get previous certrecord
 $sql = "SELECT MAX(timecreated) AS latest " .
        "FROM {certificate_issues} " .
-       "WHERE userid = '$USER->id' ".
-       "AND certificateid = '$certificate->id'";
-if ($record = $DB->get_record_sql($sql)) {
+       "WHERE userid = :userid ".
+       "AND certificateid = :certificateid";
+if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificate->id, 'userid'=>$USER->id))) {
     $latest = $record->latest;
 }
 $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));

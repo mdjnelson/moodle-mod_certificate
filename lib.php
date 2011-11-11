@@ -251,8 +251,8 @@ function certificate_get_participants($certificateid) {
     $participants = $DB->get_records_sql("SELECT DISTINCT u.id, u.id
                                           FROM {user} u,
                                                {certificate_issues} a
-                                          WHERE a.certificateid = '$certificateid' and
-                                                u.id = a.userid");
+                                          WHERE a.certificateid = ? and
+                                                u.id = a.userid", array($certificateid));
     return $participants;
 }
 
@@ -648,9 +648,15 @@ function certificate_print_user_files($certificate, $userid=0, $context) {
     $output = '';
     $sql = "SELECT MAX(timecreated) AS latest " .
            "FROM {certificate_issues} " .
-           "WHERE userid = '$userid' " .
-           "AND certificateid = '$certificate->id'";
-    if ($record = $DB->get_record_sql($sql)) {
+           "WHERE userid = :userid " .
+           "AND certificateid = :certificateid";
+
+    $params = array(
+        'userid'        => $userid,
+        'certificateid' => $certificate->id
+    );
+
+    if ($record = $DB->get_record_sql($sql, $params)) {
         $latest = $record->latest;
     }
 
@@ -697,7 +703,7 @@ function certificate_get_issues($certificate, $sort="ci.certdate ASC", $groupmod
     // certificate issues table multiple times.
     $subsql = "SELECT MAX(ci2.timecreated) as timecreated " .
               "FROM {certificate_issues} ci2 " .
-              "WHERE ci2.certificateid = '$certificate' " .
+              "WHERE ci2.certificateid = :certificateid " .
               "AND ci2.certdate > 0 " .
               "AND ci2.userid = u.id";
     $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated, ci.certdate, ci.studentname, ci.reportgrade
@@ -705,10 +711,10 @@ function certificate_get_issues($certificate, $sort="ci.certdate ASC", $groupmod
                                    INNER JOIN {certificate_issues} ci
                                    ON u.id = ci.userid
                                    WHERE u.deleted = 0
-                                   AND ci.certificateid = '$certificate'
+                                   AND ci.certificateid = :certificate
                                    AND ci.certdate > 0
                                    AND ci.timecreated = ($subsql)
-                                   ORDER BY {$sort}");
+                                   ORDER BY :sort", array('certificate'=>$certificate, 'certificateid'=>$certificate, 'sort'=>$sort));
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
         if (isset($certmanagers[$id])) { //exclude certmanagers.
@@ -862,8 +868,8 @@ function certificate_issue($course, $certificate, $certrecord, $cm) {
     global $USER, $DB;
 
     $sql = 'SELECT MAX(timecreated) AS latest FROM {certificate_issues} ' .
-           'WHERE userid = '.$USER->id.' and certificateid = '.$certificate->id.'';
-    if ($record = $DB->get_record_sql($sql)) {
+           'WHERE userid = :userid and certificateid = :certificateid';
+    if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificate->id, 'userid'=>$USER->id))) {
         $latest = $record->latest;
     }
     $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
@@ -1476,10 +1482,10 @@ function certificate_generate_date($certificate, $course) {
         // Get the enrolment end date
         $sql = "SELECT MAX(c.timecompleted) as timecompleted " .
                "FROM {course_completions} c " .
-               "WHERE c.userid = '$USER->id' " .
-               "AND c.course = '$course->id' " .
+               "WHERE c.userid = :userid " .
+               "AND c.course = :courseid " .
                "AND c.deleted = 0";
-        if ($timecompleted = $DB->get_record_sql($sql)) {
+        if ($timecompleted = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'courseid'=>$course->id))) {
             if ($timecompleted->timecompleted) {
                 $certdate = $timecompleted->timecompleted;
             }
