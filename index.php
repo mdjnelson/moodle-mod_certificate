@@ -1,33 +1,55 @@
-<?PHP // $Id: index.php
+<?PHP
 
-/// This page lists all the instances of certificate in a particular course
+// This file is part of Certificate module for Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-    require_once('../../config.php');
-    require_once('lib.php');
-    global $DB;
+/**
+ * This page lists all the instances of certificate in a particular course
+ *
+ * @package    mod
+ * @subpackage certificate
+ * @copyright  Chardelle Busch, Mark Nelson
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-    $id = required_param('id', PARAM_INT);           // Course Module ID
+require_once('../../config.php');
+require_once('lib.php');
+global $DB;
 
-    if (! $course = $DB->get_record('course', array('id'=> $id))) {
-        print_error('Course ID is incorrect');
-    }
+$id = required_param('id', PARAM_INT);           // Course Module ID
 
-    require_course_login($course);
-    $PAGE->set_pagelayout('incourse');
-    add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, '');
+if (! $course = $DB->get_record('course', array('id'=> $id))) {
+    print_error('Course ID is incorrect');
+}
 
-/// Get all required strings
-    $strcertificates = get_string('modulenameplural', 'certificate');
-    $strcertificate  = get_string('modulename', 'certificate');
+require_course_login($course);
+$PAGE->set_pagelayout('incourse');
+add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, '');
 
-/// Print the header
+// Get all required strings
+$strcertificates = get_string('modulenameplural', 'certificate');
+$strcertificate  = get_string('modulename', 'certificate');
+
+// Print the header
 $PAGE->set_url('/mod/certificate/index.php', array('id'=>$course->id));
 $PAGE->navbar->add($strcertificates);
 $PAGE->set_title($strcertificates);
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
-/// Get all the appropriate data
+// Get all the appropriate data
 if (! $certificates = get_all_instances_in_course('certificate', $course)) {
     notice('There are no certificates', "../../course/view.php?id=$course->id");
     die;
@@ -38,7 +60,7 @@ if ($usesections) {
     $sections = get_all_sections($course->id);
 }
 
-/// Print the list of instances
+// Print the list of instances
 $timenow = time();
 $strname  = get_string("name");
 $strsectionname = get_string('sectionname', 'format_'.$course->format);
@@ -96,9 +118,5 @@ foreach ($certificates as $certificate) {
     }
 }
 echo '<br />';
-
 echo html_writer::table($table);
-
-/// Finish the page
-
 echo $OUTPUT->footer();
