@@ -176,8 +176,8 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         $table = new xmldb_table('certificate');
 
-        // It is possible for these fields not to be added, ever, it is included in the upgrade 
-        // process but fresh certificate 1.9 install from CVS MOODLE_19_STABLE set the Moodle version 
+        // It is possible for these fields not to be added, ever, it is included in the upgrade
+        // process but fresh certificate 1.9 install from CVS MOODLE_19_STABLE set the Moodle version
         // to 2009080900, which means it missed all the earlier code written for upgrading to 2.0.
         $reissuefield = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
         $orientationfield = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
@@ -223,10 +223,13 @@ function xmldb_certificate_upgrade($oldversion=0) {
                 $field = new xmldb_field('requiredgrade');
                 $dbman->drop_field($table, $field);
             }
-            // Now we need to loop through the restrictions in the certificate_linked_modules 
+            // Now we need to loop through the restrictions in the certificate_linked_modules
             // table and convert it into the new Moodle 2.0 restrictions
             if ($certlinks = $DB->get_records('certificate_linked_modules')) {
                 foreach ($certlinks as $link) {
+                    if ($link->linkid == '-1') {
+                        continue;
+                    }
                     // Get the course module
                     if (!$cm = get_coursemodule_from_instance('certificate', $link->certificate_id)) {
                         // Not valid skip it
@@ -255,7 +258,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011110102, 'certificate');
     }
 
-    // Note - the date has not changed as it has been set in the future, so I am incrementing 
+    // Note - the date has not changed as it has been set in the future, so I am incrementing
     // last digits. Actual date - 15/09/11
     if ($oldversion < 2011110103) {
         // New orientation field needs a value in order to view the cert, otherwise you get
@@ -284,6 +287,57 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
+    }
+
+    if ($oldversion < 2011110108) {
+        // Create default alternate pix directory
+        require_once($CFG->dirroot.'/mod/certificate/certpixhandler.class.php');
+        mod_certificate_pix_handler::create_default_alternate_pixpath();
+
+        // Define field certtitle to be added to certificate
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('certtitle', XMLDB_TYPE_CHAR, '255', null, null, null, '', 'printseal');
+
+        // Conditionally launch add field certtitle
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field certnotify to be added to certificate
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('certnotify', XMLDB_TYPE_CHAR, '255', null, null, null, '', 'certtitle');
+
+        // Conditionally launch add field certnotify
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field certcompleted to be added to certificate
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('certcompleted', XMLDB_TYPE_CHAR, '255', null, null, null, '', 'certnotify');
+
+        // Conditionally launch add field certcompleted
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field courseformat to be added to certificate
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('courseformat', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, 'fullname', 'certcompleted');
+
+        // Conditionally launch add field courseformat
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Turn show availability on by default as this information was usually shown to the user
+        if ($moduleid = $DB->get_field('modules', 'id', array('name' => 'certificate'))) {
+            $DB->set_field('course_modules', 'showavailability', 1, array('module' => $moduleid, 'showavailability' => 0));
+            rebuild_course_cache(0, true);
+        }
+
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2011110108, 'certificate');
     }
 
     //return $result;

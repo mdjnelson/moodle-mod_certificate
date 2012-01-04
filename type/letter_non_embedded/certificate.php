@@ -77,8 +77,13 @@ $code = $certrecord->code;
 //Print the student name
 $studentname = '';
 $studentname = $certrecord->studentname;
-$classname = '';
-$classname = $certrecord->classname;
+
+// Get the custom/default classname, title, intro and statement to use on certificate
+$classname    = certificate_get_coursename($course, $certificate->courseformat);
+$titlestr     = certificate_get_certstring('title', $certificate->certtitle);
+$certifystr   = certificate_get_certstring('certify', $certificate->certnotify);
+$statementstr = certificate_get_certstring('statement', $certificate->certcompleted);
+
 //Print the credit hours
 if($certificate->printhours) {
 $credithours =  $strcredithours.': '.$certificate->printhours;
@@ -141,14 +146,14 @@ $credithours =  $strcredithours.': '.$certificate->printhours;
     $pdf->SetAlpha(1);
     print_seal($pdf, $certificate, $sealx, $sealy, '', '');
     print_signature($pdf, $certificate, $sigx, $sigy, '', '');
-    
+
 // Add text
     $pdf->SetTextColor(0,0,120);
-    cert_printtext($pdf, $x, $y, 'C', 'Helvetica', '', 30, get_string('title', 'certificate'));
+    cert_printtext($pdf, $x, $y, 'C', 'Helvetica', '', 30, $titlestr);
     $pdf->SetTextColor(0,0,0);
-    cert_printtext($pdf, $x, $y+55, 'C', 'Times', '', 20, get_string('certify', 'certificate'));
+    cert_printtext($pdf, $x, $y+55, 'C', 'Times', '', 20, $certifystr);
     cert_printtext($pdf, $x, $y+105, 'C', 'Helvetica', '', 30, $studentname);
-    cert_printtext($pdf, $x, $y+155, 'C', 'Helvetica', '', 20, get_string('statement', 'certificate'));
+    cert_printtext($pdf, $x, $y+155, 'C', 'Helvetica', '', 20, $statementstr);
     cert_printtext($pdf, $x, $y+205, 'C', 'Helvetica', '', 20, $classname);
     cert_printtext($pdf, $x, $y+255, 'C', 'Helvetica', '', 14, $certificatedate);
     cert_printtext($pdf, $x, $y+283, 'C', 'Times', '', 10, $grade);

@@ -32,8 +32,12 @@
         <FIELD NAME="printteacher" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printhours" NEXT="customtext"/>
         <FIELD NAME="customtext" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printteacher" NEXT="printsignature"/>
         <FIELD NAME="printsignature" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="customtext" NEXT="printseal"/>
-        <FIELD NAME="printseal" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printsignature" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printseal"/>
+        <FIELD NAME="printseal" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printsignature" NEXT="certtitle"/>
+        <FIELD NAME="certtitle" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="" SEQUENCE="false" ENUM="false" PREVIOUS="printseal" NEXT="certnotify"/>
+        <FIELD NAME="certnotify" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="" SEQUENCE="false" ENUM="false" PREVIOUS="certtitle" NEXT="certcompleted"/>
+        <FIELD NAME="certcompleted" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="" SEQUENCE="false" ENUM="false" PREVIOUS="certnotify" NEXT="courseformat"/>
+        <FIELD NAME="courseformat" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="fullname" SEQUENCE="false" ENUM="false" PREVIOUS="certcompleted" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="courseformat"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for certificate"/>

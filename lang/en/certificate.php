@@ -34,8 +34,8 @@ $string['letter'] = 'Letter';
 $string['orientation'] = 'Orientation';
 $string['landscape'] = 'Landscape';
 $string['portrait'] = 'Portrait';
-$string['border'] = 'Border';
-$string['borderstyle'] = 'Border Image';
+$string['border'] = 'Border/Background';
+$string['borderstyle'] = 'Border/Background Image';
 $string['borderlines'] = 'Lines';
 $string['bordercolor'] = 'Border Lines';
 $string['borderblack'] = 'Black';
@@ -109,6 +109,45 @@ $string['bordercolor_help'] = 'Since images can substantially increase the size 
 $string['printwmark_help'] = 'A watermark file can be placed in the background of the certificate. A watermark is a faded graphic. A watermark could be a logo, seal, crest, wording, or whatever you want to use as a graphic background.';
 $string['printsignature_help'] = 'This option allows you to print a signature image from the certificate/pix/signatures folder.  You can print a graphic representation of a signature, or print a line for a written signature. By default, this image is placed in the lower left of the certificate.';
 $string['printseal_help'] = 'This option allows you to select a seal or logo to print on the certificate from the certificate/pix/seals folder. By default, this image is placed in the lower right corner of the certificate.';
+
+$string['certtitle_help'] = 'You may leave this field blank to use the default heading.  Otherwise, you can type any string up to 40 characters. This string will appear in the same style and position as the default "CERTIFICATE of ACHIEVEMENT" string. Note that html is not allowed.';
+$string['certnotify_help'] = 'You may leave this field blank to use the default introduction.  Otherwise, you can type any string up to 65 characters. This string will appear in the same style and position as the default "This is to certify that" string. Note that html is not allowed.';
+$string['certcompleted_help'] = 'You may leave this field blank to use the default complete string.  Otherwise, you can type any string up to 65 characters. This string will appear in the same style and position as the default "has completed the course" string. Note that html is not allowed.';
+$string['courseformat_help'] = 'You can choose which course name to display on the certificate by selecting one of a couple options in the droplist:
+<ul>
+    <li>Full name</li>
+    <li>Short name</li>
+</ul>
+<p>The coursename will use the course field that matches the selected name.</p>';
+
+
+// Strings for global settings page, and added settings/features
+$string['certcompleted'] = 'Certificate Completed String';
+$string['certcompletedhelp'] = 'Certificate Completed';
+$string['certnotify'] = 'Certificate Introduction';
+$string['certnotifyhelp'] = 'Certificate Introduction';
+$string['certtitlehelp'] = 'Certificate Headings';
+$string['certtitle'] = 'Certificate Heading';
+$string['certtitledefault'] = 'CERTIFICATE of ACHIEVEMENT';
+$string['chooseuploadpix'] = 'Choose an Image to Upload';
+$string['courseformat'] = 'Course Format';
+$string['courseformathelp'] = 'Course Format(s)';
+$string['enabledirs'] = 'Enable Alternate Pixpath';
+$string['enabledirsdesc'] = 'If checked, the Certificate module will attempt to use the certificate_directory setting as the source for certificate images.';
+$string['errcertdir'] = 'Either directory does not exist or no access allowed';
+$string['nofileselected'] = 'Must choose a file to upload!';
+$string['pixdestination'] = 'Choose upload destination';
+$string['pixpath'] = 'Alternate Pix Path';
+$string['pixpath_borders'] = 'Default Border/Background';
+$string['pixpath_pathdesc'] = 'If valid images are found in <span style=\"font-style:italic;\">{$a}</span>, you may select the default image here.';
+$string['pixpath_seals'] = 'Default Seal or Logo';
+$string['pixpath_signatures'] = 'Default Signature';
+$string['pixpath_watermarks'] = 'Default Watermark';
+$string['pixpathdesc'] = 'This is the path from the moodle dataroot to the primary certificate pix path. NOTE: After filling this field out, you must save/submit this form to read that directory and continue setup.';
+$string['unsupportedfiletype'] = 'File must be a jpeg or png file';
+$string['uploadpic'] = 'Upload additional pictures';
+$string['uploadpicdesc'] = 'This button will take you to a new screen where you will be able to upload image(s) to any valid directory.';
+$string['uploadpixsform'] = 'Upload Images Form';
 
 // Strings for verification block
 $string['entercode'] = 'Enter certificate code to verify:';

@@ -12,6 +12,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         global $CFG;
 
         $mform =& $this->_form;
+        $defaults = get_config('mod_certificate');
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
@@ -55,9 +56,30 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addElement('select', 'reissuecert', get_string('reissuecert', 'certificate'), $ynoptions);
         $mform->setDefault('reissuecert', 0);
 	$mform->addHelpButton('reissuecert', 'reissuecert', 'certificate');
-        
+
         // Text Options
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));
+
+    /// Displays optional custom text for "Certificate of Achievement" field
+        $mform->addElement('text', 'certtitle', get_string('certtitle', 'certificate'), array('size' => '50', 'maxlength' => '40'));
+        $mform->setDefault('certtitle', '');
+        $mform->addHelpButton('certtitle', 'certtitle', 'certificate');
+        $mform->setType('certtitle', PARAM_TEXT);
+    /// Displays optional custom text for "This is to certify that" string in the certificate
+        $mform->addElement('text', 'certnotify', get_string('certnotify', 'certificate'), array('size' => '50', 'maxlength' => '65'));
+        $mform->setDefault('certnotify', '');
+        $mform->addHelpButton('certnotify', 'certnotify', 'certificate');
+        $mform->setType('certnotify', PARAM_TEXT);
+    /// Displays optional custom text for "has completed the course" string in the certificate
+        $mform->addElement('text', 'certcompleted', get_string('certcompleted', 'certificate'), array('size' => '50', 'maxlength' => '65'));
+        $mform->setDefault('certcompleted', '');
+        $mform->addHelpButton('certcompleted', 'certcompleted', 'certificate');
+        $mform->setType('certcompleted', PARAM_TEXT);
+    /// Gives display options for the course; eg: fullname, shortname...
+        $courseoptions = array('fullname' => get_string('fullname'), 'shortname' => get_string('shortname'));
+        $mform->addElement('select', 'courseformat', get_string('courseformat', 'certificate'), $courseoptions);
+        $mform->setDefault('courseformat', 'fullname');
+        $mform->addHelpButton('courseformat', 'courseformat', 'certificate');
 
         $modules = certificate_get_mods();
         $dateoptions = certificate_get_date_options() + $modules;
@@ -115,7 +137,7 @@ class mod_certificate_mod_form extends moodleform_mod {
 
 	$borderstyleoptions = certificate_get_borders();
         $mform->addElement('select', 'borderstyle', get_string('borderstyle', 'certificate'), $borderstyleoptions);
-        $mform->setDefault('borderstyle', 0);
+        $mform->setDefault('borderstyle', !empty($defaults->certificate_borders) ? $defaults->certificate_borders : 0);
         $mform->addHelpButton('borderstyle', 'borderstyle', 'certificate');
 
         $printframe = array( 0 => get_string('no'), 1 => get_string('borderblack', 'certificate'), 2 => get_string('borderbrown', 'certificate'), 3 => get_string('borderblue', 'certificate'), 4 => get_string('bordergreen', 'certificate'));
@@ -125,17 +147,17 @@ class mod_certificate_mod_form extends moodleform_mod {
 
         $wmarkoptions = certificate_get_watermarks();
         $mform->addElement('select', 'printwmark', get_string('printwmark', 'certificate'),$wmarkoptions);
-        $mform->setDefault('printwmark', 0);
+        $mform->setDefault('printwmark', !empty($defaults->certificate_watermarks) ? $defaults->certificate_watermarks : 0);
         $mform->addHelpButton('printwmark', 'printwmark', 'certificate');
 
         $signatureoptions = certificate_get_signatures ();
         $mform->addElement('select', 'printsignature', get_string('printsignature', 'certificate'), $signatureoptions);
-        $mform->setDefault('printsignature', 0);
+        $mform->setDefault('printsignature', !empty($defaults->certificate_signatures) ? $defaults->certificate_signatures : 0);
         $mform->addHelpButton('printsignature', 'printsignature', 'certificate');
 
         $sealoptions = certificate_get_seals();
         $mform->addElement('select', 'printseal', get_string('printseal', 'certificate'),$sealoptions);
-        $mform->setDefault('printseal', 0);
+        $mform->setDefault('printseal', !empty($defaults->certificate_seals) ? $defaults->certificate_seals : 0);
         $mform->addHelpButton('printseal', 'printseal', 'certificate');
 
         $this->standard_coursemodule_elements();

@@ -42,7 +42,7 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
             'savecert', 'reportcert', 'reissuecert', 'delivery', 'certificatetype', 'orientation',
             'borderstyle', 'bordercolor', 'printwmark', 'printdate', 'datefmt', 'printnumber',
             'printgrade', 'gradefmt', 'printoutcome', 'printhours', 'printteacher', 'customtext',
-            'printsignature', 'printseal', 'timemodified'));
+            'printsignature', 'printseal', 'certtitle', 'certnotify', 'certcompleted', 'courseformat', 'timemodified'));
 
         $issues = new backup_nested_element('issues');
 
