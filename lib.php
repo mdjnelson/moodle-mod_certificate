@@ -27,6 +27,7 @@
 require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/grade/lib.php');
 require_once($CFG->dirroot.'/grade/querylib.php');
+require_once($CFG->dirroot.'/mod/certificate/certpixhandler.class.php');
 
 /**
  * Add certificate instance.
@@ -1054,23 +1055,7 @@ function certificate_get_borders () {
     global $CFG, $DB;
 
     // load border files
-    $my_path = "$CFG->dirroot/mod/certificate/pix/borders";
-    $borderstyleoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-                $i = strpos($file, '.');
-                if ($i > 1) {
-                    // Set the style name
-                    $borderstyleoptions[$file] = substr($file, 0, $i);
-                }
-            }
-        }
-        closedir($handle);
-    }
-
-    // Sort borders
-    ksort($borderstyleoptions);
+    $borderstyleoptions = mod_certificate_pix_handler::get_all_valid_dir_contents('borders');
 
     // Add default borders
     $borderstyleoptions[0] = get_string('no');
@@ -1085,22 +1070,7 @@ function certificate_get_borders () {
 function certificate_get_seals () {
     global $CFG, $DB;
 
-    $my_path = "$CFG->dirroot/mod/certificate/pix/seals";
-    $sealoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-            if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-                    $i = strpos($file, '.');
-                    if ($i > 1) {
-                        $sealoptions[$file] = substr($file, 0, $i);
-                    }
-                }
-            }
-        closedir($handle);
-    }
-    // Order seals
-    ksort($sealoptions);
-
+    $sealoptions    = mod_certificate_pix_handler::get_all_valid_dir_contents('seals');
     $sealoptions[0] = get_string('no');
     return $sealoptions;
 }
@@ -1114,21 +1084,7 @@ function certificate_get_watermarks () {
     global $CFG, $DB;
 
     // load watermark files
-    $my_path = "$CFG->dirroot/mod/certificate/pix/watermarks";
-    $wmarkoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
-            $i = strpos($file, '.');
-                if ($i > 1) {
-                    $wmarkoptions[$file] = substr($file, 0, $i);
-                }
-            }
-        }
-        closedir($handle);
-    }
-    // Order watermarks
-    ksort($wmarkoptions);
+    $wmarkoptions   = mod_certificate_pix_handler::get_all_valid_dir_contents('watermarks');
 
     $wmarkoptions[0] = get_string('no');
     return $wmarkoptions;
@@ -1143,24 +1099,61 @@ function certificate_get_signatures () {
     global $CFG, $DB;
 
     // load signature files
-    $my_path = "$CFG->dirroot/mod/certificate/pix/signatures";
-    $signatureoptions = array();
-    if ($handle = opendir($my_path)) {
-        while (false !== ($file = readdir($handle))) {
-            if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1)) {
-                $i = strpos($file, '.');
-                if ($i > 1) {
-                    $signatureoptions[$file] = substr($file, 0, $i);
-                }
-            }
-        }
-        closedir($handle);
-    }
-    // Order signatures
-    ksort($signatureoptions);
+    $signatureoptions   = mod_certificate_pix_handler::get_all_valid_dir_contents('signatures');
 
     $signatureoptions[0] = get_string('no');
     return $signatureoptions;
+}
+
+/**
+ * Returns the desired coursename string in format.
+ *
+ * @param object    $course         Course object of (usually) current course
+ * @param string    $defaultvalue   Default coursename value
+ * @param string    $format         Format in which to return course string value
+ * @return string
+ */
+function certificate_get_coursename($course, $format = NULL) {
+    global $DB;
+
+    if (empty($format)) {
+        // default format
+        $format = 'fullname';
+    }
+    $retval = '';
+    if (empty($course) || !isset($course->id)) {
+        return $retval;
+    }
+
+    switch ($format) {
+        case 'shortname':
+            $retval = (isset($course->shortname) && !empty($course->shortname)) ? $course->shortname : $DB->get_field('course', 'shortname', array('id' => $course->id));
+            break;
+        case 'fullname':
+        default:
+            $retval = (isset($course->fullname) && !empty($course->fullname)) ? $course->fullname : $DB->get_field('course', 'fullname', array('id' => $course->id));
+            break;
+    }
+    return $retval; // Removed utf8_decode($retval)
+}
+
+/**
+ * Returns the desired certificate title string to be used in place of
+ * "Certificate of Achievement" string.
+ *
+ * @param string    $identifier  String to get if override is empty
+ * @param string    $overridestr String to replace default lang string
+ * @return string
+ */
+function certificate_get_certstring($identifier, $overridestr = '') {
+    if (empty($overridestr)) {
+        return get_string($identifier, 'certificate'); // Removed utf8_decode()
+    } else {
+        if(ini_get('magic_quotes_gpc')=='1') {
+            $overridestr = stripslashes($overridestr);
+        }
+        return $overridestr; // Removed utf8_decode()
+    }
 }
 
 /**
@@ -1377,14 +1370,18 @@ function draw_frame_letter($pdf, $certificate) {
 function print_border($pdf, $certificate, $x, $y, $w, $h) {
     global $CFG, $DB;
 
+    $type       = 'borders';
+    $my_path    = mod_certificate_pix_handler::get_selected_pic($type, $certificate->borderstyle);
+
+    if (is_null($my_path)) {
+        return;
+    }
     switch ($certificate->borderstyle) {
         case '0':
         case '':
         break;
         default:
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle", $x, $y, $w, $h);
-            }
+            $pdf->Image("$my_path/$type/$certificate->borderstyle", $x, $y, $w, $h);
         break;
     }
 }
@@ -1403,14 +1400,18 @@ function print_border($pdf, $certificate, $x, $y, $w, $h) {
 function print_watermark($pdf, $certificate, $x, $y, $w, $h) {
     global $CFG, $DB;
 
+    $type    = 'watermarks';
+    $my_path = mod_certificate_pix_handler::get_selected_pic($type, $certificate->printwmark);
+
+    if (is_null($my_path)) {
+        return;
+    }
     switch ($certificate->printwmark) {
         case '0':
         case '':
         break;
         default:
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark", $x, $y, $w, $h);
-            }
+            $pdf->Image("$my_path/$type/$certificate->printwmark", $x, $y, $w, $h);
         break;
     }
 }
@@ -1429,14 +1430,18 @@ function print_watermark($pdf, $certificate, $x, $y, $w, $h) {
 function print_signature($pdf, $certificate, $x, $y, $w, $h) {
     global $CFG, $DB;
 
+    $type       = 'signatures';
+    $my_path    = mod_certificate_pix_handler::get_selected_pic($type, $certificate->printsignature);
+
+    if (is_null($my_path)) {
+        return;
+    }
     switch ($certificate->printsignature) {
         case '0':
         case '':
         break;
         default:
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/signatures/$certificate->printsignature")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/signatures/$certificate->printsignature", $x, $y, $w, $h);
-            }
+            $pdf->Image("$my_path/$type/$certificate->printsignature", $x, $y, $w, $h);
         break;
     }
 }
@@ -1455,14 +1460,18 @@ function print_signature($pdf, $certificate, $x, $y, $w, $h) {
 function print_seal($pdf, $certificate, $x, $y, $w, $h) {
     global $CFG, $DB;
 
+    $type       = "seals";
+    $my_path    = mod_certificate_pix_handler::get_selected_pic($type, $certificate->printseal);
+
+    if (is_null($my_path)) {
+        return;
+    }
     switch ($certificate->printseal) {
         case '0':
         case '':
         break;
         default:
-            if (file_exists("$CFG->dirroot/mod/certificate/pix/seals/$certificate->printseal")) {
-                $pdf->Image("$CFG->dirroot/mod/certificate/pix/seals/$certificate->printseal", $x, $y, $w, $h);
-            }
+            $pdf->Image( "$my_path/$type/$certificate->printseal", $x, $y, $w, $h);
         break;
     }
 }
