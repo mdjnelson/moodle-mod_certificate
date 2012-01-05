@@ -1,26 +1,11 @@
-<?PHP
-
-// This file is part of Certificate module for Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+<?php
 
 /**
  * This page lists all the instances of certificate in a particular course
  *
  * @package    mod
  * @subpackage certificate
- * @copyright  Chardelle Busch, Mark Nelson
+ * @copyright Mark Nelson <mark@moodle.com.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,41 +15,46 @@ global $DB;
 
 $id = required_param('id', PARAM_INT);           // Course Module ID
 
-if (! $course = $DB->get_record('course', array('id'=> $id))) {
+// Ensure that the course specified is valid
+if (!$course = $DB->get_record('course', array('id'=> $id))) {
     print_error('Course ID is incorrect');
 }
 
+// Requires a login
 require_course_login($course);
-$PAGE->set_pagelayout('incourse');
-add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, '');
 
-// Get all required strings
+// Declare variables
+$currentsection = "";
+$printsection = "";
+$timenow = time();
+
+// Strings used multiple times
 $strcertificates = get_string('modulenameplural', 'certificate');
-$strcertificate  = get_string('modulename', 'certificate');
+$strissued  = get_string('issued', 'certificate');
+$strname  = get_string("name");
+$strsectionname = get_string('sectionname', 'format_'.$course->format);
 
 // Print the header
+$PAGE->set_pagelayout('incourse');
 $PAGE->set_url('/mod/certificate/index.php', array('id'=>$course->id));
 $PAGE->navbar->add($strcertificates);
 $PAGE->set_title($strcertificates);
 $PAGE->set_heading($course->fullname);
+
+// Add the page view to the Moodle log
+add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, '');
+
 echo $OUTPUT->header();
 
-// Get all the appropriate data
-if (! $certificates = get_all_instances_in_course('certificate', $course)) {
-    notice('There are no certificates', "../../course/view.php?id=$course->id");
+// Get the certificates, if there are none display a notice
+if ($certificates = get_all_instances_in_course('certificate', $course)) {
+    notice(get_string('nocertificates', 'certificate'), "../../course/view.php?id=$course->id");
     die;
 }
 
-$usesections = course_format_uses_sections($course->format);
-if ($usesections) {
+if ($usesections = course_format_uses_sections($course->format)) {
     $sections = get_all_sections($course->id);
 }
-
-// Print the list of instances
-$timenow = time();
-$strname  = get_string("name");
-$strsectionname = get_string('sectionname', 'format_'.$course->format);
-$strissued  = get_string('issued', 'certificate');
 
 $table = new html_table();
 
@@ -74,8 +64,6 @@ if ($usesections) {
     $table->head  = array ($strname, $strissued);
 }
 
-$currentsection = "";
-
 foreach ($certificates as $certificate) {
     if (!$certificate->visible) {
         //Show dimmed if the mod is hidden
@@ -84,8 +72,6 @@ foreach ($certificates as $certificate) {
         //Show normal if the mod is visible
         $link = "<a href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
     }
-
-    $printsection = "";
     if ($certificate->section !== $currentsection) {
         if ($certificate->section) {
             $printsection = $certificate->section;
@@ -96,14 +82,15 @@ foreach ($certificates as $certificate) {
         $currentsection = $certificate->section;
     }
 
-    $sql = 'SELECT MAX(timecreated) AS latest FROM {certificate_issues} '.
-                           'WHERE userid = '.$USER->id.' and certificateid = '.$certificate->id.'';
-            if ($record = $DB->get_record_sql($sql)) {
-                $latest = $record->latest;
-            }
-    $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
-    if($certrecord) {
-        if($certrecord->certdate > 0) {
+    $sql = "SELECT MAX(timecreated) AS latest
+                FROM {certificate_issues}
+                WHERE userid = :userid
+                AND certificateid = :certificateid";
+    if ($record = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'certificateid'=>$certificate->id))) {
+        $latest = $record->latest;
+        // Get the record with the max time created
+        $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
+        if ($certrecord->certdate > 0) {
             $issued = userdate($certrecord->certdate);
         } else {
             $issued = get_string('notreceived', 'certificate');

@@ -111,6 +111,7 @@ $string['lockingoptions'] = 'Locking Options';
 $string['modulename'] = 'Certificate';
 $string['modulenameplural'] = 'Certificates';
 $string['mycertificates'] = 'My Certificates';
+$string['nocertificates'] = 'There are no certificates';
 $string['nocertificatesreceived'] = 'has not received any course certificates.';
 $string['nogrades'] = 'No grades available';
 $string['notapplicable'] = 'N/A';
