@@ -5,7 +5,7 @@
  *
  * @package    mod
  * @subpackage certificate
- * @copyright  Chardelle Busch, Mark Nelson
+ * @copyright  Mark Nelson <mark@moodle.com.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -14,7 +14,6 @@ $string['addlinktitle'] = 'Click to add another linked activity option';
 $string['areaintro'] = 'Certificate introduction';
 $string['awarded'] = 'Awarded';
 $string['awardedto'] = 'Awarded To';
-
 $string['back'] = 'Back';
 $string['border'] = 'Border';
 $string['borderblack'] = 'Black';
@@ -26,14 +25,6 @@ $string['bordergreen'] = 'Green';
 $string['borderlines'] = 'Lines';
 $string['borderstyle'] = 'Border Image';
 $string['borderstyle_help'] = 'The Border Image option allows you to choose a border image from the certificate/pix/borders folder.  Select the border image that you want around the certificate edges or select no border.';
-
-
-
-
-
-
-
-
 $string['certificate:view'] = 'View Certificate';
 $string['certificate:manage'] = 'Manage Certificate';
 $string['certificate:printteacher'] = 'Print Teacher';
@@ -58,12 +49,10 @@ $string['completiondate'] = 'Course Completion';
 $string['course'] = 'For';
 $string['coursegrade'] = 'Course Grade';
 $string['coursename'] = 'Course';
+$string['credithours'] = 'Credit Hours';
 $string['customtext'] = 'Custom Text';
 $string['customtext_help'] = 'If you want the certificate to print different names for the teacher than those who are assigned
 the role of teacher, do not select Print Teacher or any signature image except for the line image.  Enter the teacher names in this text box as you would like them to appear.  By default, this text is placed in the lower left of the certificate. The following html tags are available: &lt;br&gt;, &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;img&gt; (src and width (or height) are mandatory), &lt;a&gt; (href is mandatory), &lt;font&gt; (possible attributes are: color, (hex color code), face, (arial, times, courier, helvetica, symbol)).';
-$string['credithours'] = 'Credit Hours';
-
-
 $string['date'] = 'On';
 $string['datefmt'] = 'Date Format';
 $string['datefmt_help'] = 'Choose a date format to print the date on the certificate. Or, choose the last option to have the date printed in the format of the user\'s chosen language.';
@@ -77,8 +66,6 @@ Email Certificate: Choosing this option sends the certificate to the student as 
 After a user receives their certificate, if they click on the certificate link from the course homepage, they will see the date they received their certificate and will be able to review their received certificate.';
 $string['designoptions'] = 'Design Options';
 $string['download'] = 'Force download';
-
-
 $string['emailcertificate'] = 'Email (Must also choose save!)';
 $string['emailothers'] = 'Email Others';
 $string['emailothers_help'] = 'Enter the email addresses here, separated by a comma, of those who should be alerted with an email whenever students receive a certificate.';
@@ -100,7 +87,6 @@ You can review it here:
 
     <a href=\"{$a->url}\">Certificate Report</a>.';
 $string['entercode'] = 'Enter certificate code to verify:';
-
 $string['getcertificate'] = 'Get your certificate';
 $string['grade'] = 'Grade';
 $string['gradedate'] = 'Grade Date';
@@ -110,28 +96,21 @@ $string['gradefmt_help'] = 'There are three available formats if you choose to p
 Percentage Grade: Prints the grade as a percentage.
 Points Grade: Prints the point value of the grade.
 Letter Grade: Prints the percentage grade as a letter.';
+$string['gradeletter'] = 'Letter Grade';
 $string['gradepercent'] = 'Percentage Grade';
 $string['gradepoints'] = 'Points Grade';
-$string['gradeletter'] = 'Letter Grade';
-
-
-
-
 $string['incompletemessage'] = 'In order to download your certificate, you must first complete all required '.'activities. Please return to the course to complete your coursework.';
 $string['intro'] = 'Introduction';
 $string['issueoptions'] = 'Issue Options';
 $string['issued'] = 'Issued';
 $string['issueddate'] = 'Date Issued';
-
 $string['landscape'] = 'Landscape';
 $string['lastviewed'] = 'You last received this certificate on:';
 $string['letter'] = 'Letter';
 $string['lockingoptions'] = 'Locking Options';
-
 $string['modulename'] = 'Certificate';
 $string['modulenameplural'] = 'Certificates';
 $string['mycertificates'] = 'My Certificates';
-
 $string['nocertificatesreceived'] = 'has not received any course certificates.';
 $string['nogrades'] = 'No grades available';
 $string['notapplicable'] = 'N/A';
@@ -139,8 +118,6 @@ $string['notfound'] = 'The certificate number could not be validated.';
 $string['notissued'] = 'Not Issued';
 $string['notissuedyet'] = 'Not issued yet';
 $string['notreceived'] = 'You have not received this certificate';
-
-
 $string['openbrowser'] = 'Open in new window';
 $string['opendownload'] = 'Click the button below to save your certificate to your computer.';
 $string['openemail'] = 'Click the button below and your certificate will be sent to you as an email attachment.';
@@ -148,67 +125,52 @@ $string['openwindow'] = 'Click the button below to open your certificate in a ne
 $string['or'] = 'Or';
 $string['orientation'] = 'Orientation';
 $string['orientation_help'] = 'Choose whether you want your certificate orientation to be portrait or landscape.';
-
-
-
 $string['pluginadministration'] = 'Certificate administration';
 $string['pluginname'] = 'Certificate';
 $string['portrait'] = 'Portrait';
+$string['printdate'] = 'Print Date';
+$string['printdate_help'] = 'This is the date that will be printed, if a print date is selected. If the course completion date is selected but the student has not completed the course, the date received will be printed. You can also choose to print the date based on when an activity was graded. If a certificate is issued before that activity is graded, the date received will be printed.';
+$string['printerfriendly'] = 'Printer-friendly page';
 $string['printhours'] = 'Print Credit Hours';
 $string['printhours_help'] = 'Enter here the number of credit hours to be printed on the certificate.';
 $string['printgrade'] = 'Print Grade';
+$string['printgrade_help'] = 'You can choose any available course grade items from the gradebook to print the user\'s grade received for that item on the certificate.  The grade items are listed in the order in which they appear in the gradebook. Choose the format of the grade below.';
 $string['printnumber'] = 'Print Code';
+$string['printnumber_help'] = 'A unique 10-digit code of random letters and numbers can be printed on the certificate. This number can then be verified by comparing it to the code number displayed in the certificates report.';
 $string['printoutcome'] = 'Print Outcome';
 $string['printoutcome_help'] = 'You can choose any course outcome to print the name of the outcome and the user\'s received outcome on the certificate.  An example might be: Assignment Outcome: Proficient.';
+$string['printseal'] = 'Seal or Logo Image';
+$string['printseal_help'] = 'This option allows you to select a seal or logo to print on the certificate from the certificate/pix/seals folder. By default, this image is placed in the lower right corner of the certificate.';
 $string['printsignature'] = 'Signature Image';
+$string['printsignature_help'] = 'This option allows you to print a signature image from the certificate/pix/signatures folder.  You can print a graphic representation of a signature, or print a line for a written signature. By default, this image is placed in the lower left of the certificate.';
 $string['printteacher'] = 'Print Teacher Name(s)';
 $string['printteacher_help'] = 'For printing the teacher name on the certificate, set the role of teacher at the module level.  Do this if, for example, you have more than one teacher for the course or you have more than one certificate in the course and you want to print different teacher names on each certificate.  Click to edit the certificate, then click on the Locally assigned roles tab.  Then assign the role of Teacher (editing teacher) to the certificate (they do not HAVE to be a teacher in the course--you can assign that role to anyone).  Those names will be printed on the certificate for teacher.';
-
 $string['printwmark'] = 'Watermark Image';
-
-
-
-
-
-$string['printdate'] = 'Print Date';
-$string['printdate_help'] = 'This is the date that will be printed, if a print date is selected. If the course completion date is selected but the student has not completed the course, the date received will be printed. You can also choose to print the date based on when an activity was graded. If a certificate is issued before that activity is graded, the date received will be printed.';
-$string['printseal'] = 'Seal or Logo Image';
 $string['printwmark_help'] = 'A watermark file can be placed in the background of the certificate. A watermark is a faded graphic. A watermark could be a logo, seal, crest, wording, or whatever you want to use as a graphic background.';
-$string['printsignature_help'] = 'This option allows you to print a signature image from the certificate/pix/signatures folder.  You can print a graphic representation of a signature, or print a line for a written signature. By default, this image is placed in the lower left of the certificate.';
-$string['printseal_help'] = 'This option allows you to select a seal or logo to print on the certificate from the certificate/pix/seals folder. By default, this image is placed in the lower right corner of the certificate.';
-$string['printerfriendly'] = 'Printer-friendly page';
-$string['printnumber_help'] = 'A unique 10-digit code of random letters and numbers can be printed on the certificate. This number can then be verified by comparing it to the code number displayed in the certificates report.';
-$string['printgrade_help'] = 'You can choose any available course grade items from the gradebook to print the user\'s grade received for that item on the certificate.  The grade items are listed in the order in which they appear in the gradebook. Choose the format of the grade below.';
-
-
 $string['receivedcerts'] = 'Received certificates';
 $string['receiveddate'] = 'Date Received';
 $string['reissuecert'] = 'Reissue Certificates';
 $string['reissuecert_help'] = 'If you choose yes here, then this certificate will be reissued with a new date, grade and code number every time a user clicks on the certificate link. Note:  Although a table will show their past received dates, no review button will be available to users.  Only the latest issued certificate will appear in the certificate report.';
+$string['removecert'] = 'Issued certificates removed';
+$string['report'] = 'Report';
 $string['reportcert'] = 'Report Certificates';
 $string['reportcert_help'] = 'If you choose yes here, then this certificate\'s date received, code number, and the course name will be shown on the user certificate reports.  If you choose to print a grade on this certificate, then that grade will also be shown on the certificate report.';
-$string['report'] = 'Report';
 $string['reviewcertificate'] = 'Review your certificate';
-$string['removecert'] = 'Issued certificates removed';
-
-$string['statement'] = 'has completed the course';
 $string['savecert'] = 'Save Certificates';
 $string['savecert_help'] = 'If you choose this option, then a copy of each user\'s certificate pdf file is saved in the course files moddata folder for that certificate. A link to each user\'s saved certificate will be displayed in the certificate report.';
 $string['sigline'] = 'line';
+$string['statement'] = 'has completed the course';
 $string['summaryofattempts'] = 'Summary of Previously Received Certificates';
-
-$string['to'] = 'Awarded to';
 $string['textoptions'] = 'Text Options';
-$string['typeA4_embedded'] = 'A4 Embedded';
-$string['typeletter_embedded'] = 'Letter Embedded';
-$string['typeA4_non_embedded'] = 'A4 Non-Embedded';
-$string['typeletter_non_embedded'] = 'Letter Non-Embedded';
 $string['title'] = 'CERTIFICATE of ACHIEVEMENT';
-
+$string['to'] = 'Awarded to';
+$string['typeA4_embedded'] = 'A4 Embedded';
+$string['typeA4_non_embedded'] = 'A4 Non-Embedded';
+$string['typeletter_embedded'] = 'Letter Embedded';
+$string['typeletter_non_embedded'] = 'Letter Non-Embedded';
 $string['userdateformat'] = 'User\'s Language Date Format';
-
 $string['validate'] = 'Verify';
-$string['viewtranscript'] = 'View Certificates';
+$string['verifycertificate'] = 'Verify Certificate';
 $string['viewcertificateviews'] = 'View {$a} issued certificates';
 $string['viewed'] = 'You received this certificate on:';
-$string['verifycertificate'] = 'Verify Certificate';
+$string['viewtranscript'] = 'View Certificates';
