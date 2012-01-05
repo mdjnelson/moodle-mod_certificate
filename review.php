@@ -41,17 +41,8 @@ $PAGE->set_url('/mod/certificate/review.php', array('id' => $cm->id));
 $PAGE->set_context($context);
 $PAGE->set_cm($cm);
 
-// Get previous certrecord
-$certificateid = $certificate->id;
-$sql = "SELECT MAX(timecreated) AS latest
-            FROM {certificate_issues}
-            WHERE userid = :userid
-            AND certificateid = :certificateid
-            AND certdate > 0";
-if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificateid, 'userid'=>$USER->id))) {
-    $latest = $record->latest;
-}
-$certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificateid, 'userid'=>$USER->id, 'timecreated'=>$latest));
+// Get previous cert record
+$certrecord = certificate_get_latest_issue($certificate->id, $USER->id);
 
 // Load some strings
 $strreviewcertificate = get_string('reviewcertificate', 'certificate');

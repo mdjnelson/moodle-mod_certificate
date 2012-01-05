@@ -81,15 +81,8 @@ foreach ($certificates as $certificate) {
         }
         $currentsection = $certificate->section;
     }
-
-    $sql = "SELECT MAX(timecreated) AS latest
-                FROM {certificate_issues}
-                WHERE userid = :userid
-                AND certificateid = :certificateid";
-    if ($record = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'certificateid'=>$certificate->id))) {
-        $latest = $record->latest;
-        // Get the record with the max time created
-        $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
+    // Get the latest certificate issue
+    if ($certrecord = certificate_get_latest_issue($certificate->id, $USER->id)) {
         if ($certrecord->certdate > 0) {
             $issued = userdate($certrecord->certdate);
         } else {

@@ -631,23 +631,16 @@ function certificate_save_pdf($pdf, $certificateid, $filename, $contextid) {
  * Produces a list of links to the issued certificates.  Used for report.
  *
  * @param stdClass $certificate
- * @param int $userid optional id of the user. If 0 then $USER->id is used.
+ * @param int $userid
  * @param stdClass $context
  * @return boolean, true if success printing
  */
-function certificate_print_user_files($certificate, $userid=0, $context) {
+function certificate_print_user_files($certificate, $userid, $context) {
     global $CFG, $DB, $OUTPUT;
 
     $output = '';
-    $sql = "SELECT MAX(timecreated) AS latest
-                FROM {certificate_issues}
-                WHERE userid = :userid
-                AND certificateid = :certificateid";
-    if ($record = $DB->get_record_sql($sql, array('userid'=>$userid, 'certificateid'=>$certificate->id))) {
-        $latest = $record->latest;
-    }
 
-    $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$userid, 'timecreated'=>$latest));
+    $certrecord = certificate_get_latest_issue($certificate->id, $userid);
     $fs = get_file_storage();
     $browser = get_file_browser();
 
@@ -817,29 +810,52 @@ function certificate_print_attempts($certificateid, $userid) {
  * @param stdClass $course
  * @param stdClass $user
  * @param stdClass $certificate
- * @return null
+ * @return stdClass the newly created certificate issue
  */
 function certificate_prepare_issue($course, $user, $certificate) {
     global $DB;
 
     if ($certificate->reissuecert == 0) {
-        if ($DB->record_exists('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id))) {
-            return;
+        if ($certissue = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id))) {
+            return $certissue;
         }
-    } else if ($DB->record_exists('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id, 'certdate'=>'0'))) {
-        return;
+    } else if ($certissue = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id, 'certdate'=>'0'))) {
+        return $certissue;
     }
 
     // Create new certificate issue record
-    $newrec = new stdClass();
-    $newrec->certificateid = $certificate->id;
-    $newrec->userid = $user->id;
-    $newrec->timecreated =  time();
-    $newrec->studentname = fullname($user);
-    $newrec->code = certificate_generate_code();
-    $newrec->classname = $course->fullname;
+    $certissue = new stdClass();
+    $certissue->certificateid = $certificate->id;
+    $certissue->userid = $user->id;
+    $certissue->timecreated =  time();
+    $certissue->studentname = fullname($user);
+    $certissue->code = certificate_generate_code();
+    $certissue->classname = $course->fullname;
+    $certissue->id = $DB->insert_record('certificate_issues', $certissue);
 
-    $DB->insert_record('certificate_issues', $newrec, false);
+    return $certissue;
+}
+
+/**
+ * Returns the latest certificate issue for a particular certificate
+ * and user, false if there is none
+ *
+ * @param int $certificateid
+ * @param int $userid
+ * @return stdClass|false
+ */
+function certificate_get_latest_issue($certificateid, $userid) {
+    global $DB;
+
+    $sql = "SELECT MAX(timecreated) AS latest
+                FROM {certificate_issues}
+                WHERE certificateid = :certificateid
+                AND userid = :userid";
+    if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificateid, 'userid'=>$userid))) {
+        $latest = $record->latest;
+    }
+
+    return $DB->get_record('certificate_issues', array('certificateid'=>$certificateid, 'userid'=>$userid, 'timecreated'=>$latest));
 }
 
 /**
