@@ -831,6 +831,8 @@ function certificate_prepare_issue($course, $user, $certificate) {
     $certissue->studentname = fullname($user);
     $certissue->code = certificate_generate_code();
     $certissue->classname = $course->fullname;
+    $certissue->certdate = 0;
+    $certissue->reportgrade = NULL;
     $certissue->id = $DB->insert_record('certificate_issues', $certissue);
 
     return $certissue;
