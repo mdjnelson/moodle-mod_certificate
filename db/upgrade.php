@@ -176,8 +176,8 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         $table = new xmldb_table('certificate');
 
-        // It is possible for these fields not to be added, ever, it is included in the upgrade 
-        // process but fresh certificate 1.9 install from CVS MOODLE_19_STABLE set the Moodle version 
+        // It is possible for these fields not to be added, ever, it is included in the upgrade
+        // process but fresh certificate 1.9 install from CVS MOODLE_19_STABLE set the Moodle version
         // to 2009080900, which means it missed all the earlier code written for upgrading to 2.0.
         $reissuefield = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
         $orientationfield = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
@@ -223,10 +223,15 @@ function xmldb_certificate_upgrade($oldversion=0) {
                 $field = new xmldb_field('requiredgrade');
                 $dbman->drop_field($table, $field);
             }
-            // Now we need to loop through the restrictions in the certificate_linked_modules 
+            // Now we need to loop through the restrictions in the certificate_linked_modules
             // table and convert it into the new Moodle 2.0 restrictions
             if ($certlinks = $DB->get_records('certificate_linked_modules')) {
                 foreach ($certlinks as $link) {
+                    // If the link id is '-1' then the setting applies to the time spent in the course and is not
+                    // related to a module, meaning we can skip it for this section
+                    if ($link->linkid == '-1') {
+                        continue;
+                    }
                     // Get the course module
                     if (!$cm = get_coursemodule_from_instance('certificate', $link->certificate_id)) {
                         // Not valid skip it
@@ -255,7 +260,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011110102, 'certificate');
     }
 
-    // Note - the date has not changed as it has been set in the future, so I am incrementing 
+    // Note - the date has not changed as it has been set in the future, so I am incrementing
     // last digits. Actual date - 15/09/11
     if ($oldversion < 2011110103) {
         // New orientation field needs a value in order to view the cert, otherwise you get
