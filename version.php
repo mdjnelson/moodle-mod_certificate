@@ -1,9 +1,13 @@
-<?PHP // $Id: version.php,v 2.0
+<?php
 
-///////////////////////////////////////////////////////////////////////////////
-///  Code fragment to define the version of certificate
-///  This fragment is called by moodle_needs_upgrading() and /admin/index.php
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * Code fragment to define the version of the certificate module
+ *
+ * @package mod
+ * @subpackage  certificate
+ * @copyright   Mark Nelson <mark@moodle.com.au>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
+ **/
 
 $module->version  = 2012010501;  // The current module version (Date: YYYYMMDDXX)
 $module->requires = 2010102600;  // Requires this Moodle version
