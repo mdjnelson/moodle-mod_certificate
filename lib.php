@@ -20,7 +20,7 @@
  *
  * @package    mod
  * @subpackage certificate
- * @copyright  Chardelle Busch, Mark Nelson
+ * @copyright  Chardelle Busch, Mark Nelson <mark@moodle.com.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -39,23 +39,21 @@ function certificate_add_instance($certificate) {
 
     $certificate->timemodified = time();
 
-    if ($returnid = $DB->insert_record('certificate', $certificate)) {
-        $certificate->id = $returnid;
-
+    if ($certificateid = $DB->insert_record('certificate', $certificate)) {
         $event = new stdClass;
-        $event->name        = $certificate->name;
+        $event->name = $certificate->name;
         $event->description = '';
-        $event->courseid    = $certificate->course;
-        $event->groupid     = 0;
-        $event->userid      = 0;
-        $event->eventtype   = 'course';
+        $event->courseid = $certificate->course;
+        $event->groupid = 0;
+        $event->userid = 0;
+        $event->eventtype = 'course';
         $event->modulename  = 'certificate';
-        $event->instance    = $returnid;
+        $event->instance = $certificateid;
 
         add_event($event);
     }
 
-    return $returnid;
+    return $certificateid;
 }
 
 /**
@@ -67,31 +65,28 @@ function certificate_add_instance($certificate) {
 function certificate_update_instance($certificate) {
     global $DB;
 
+    // Update the certificate
     $certificate->timemodified = time();
     $certificate->id = $certificate->instance;
+    $DB->update_record('certificate', $certificate);
 
-    if ($returnid = $DB->update_record('certificate', $certificate)) {
-        $event = new stdClass;
-        if ($id = $DB->get_field('event', 'id', array('modulename'=> 'certificate', 'instance'=> $certificate->id))) {
-            $event->id   = $id;
-            $event->name = $certificate->name;
-            update_event($event);
-        } else {
-            $event->name        = $certificate->name;
-            $event->description = '';
-            $event->courseid    = $certificate->course;
-            $event->groupid     = 0;
-            $event->userid      = 0;
-            $event->modulename  = 'certificate';
-            $event->instance    = $certificate->id;
-
-            add_event($event);
-        }
+    // Update the event if it exists, else create
+    if ($event= $DB->get_record('event', array('modulename'=>'certificate', 'instance'=>$certificate->id))) {
+        $event->name = $certificate->name;
+        update_event($event);
     } else {
-        $DB->delete_records('event', array('modulename'=>'certificate', 'instance'=> $certificate->id));
+        $event = new stdClass;
+        $event->name = $certificate->name;
+        $event->description = '';
+        $event->courseid = $certificate->course;
+        $event->groupid = 0;
+        $event->userid = 0;
+        $event->modulename  = 'certificate';
+        $event->instance = $certificate->id;
+        add_event($event);
     }
 
-    return $returnid;
+    return true;
 }
 
 /**
@@ -103,9 +98,10 @@ function certificate_update_instance($certificate) {
  * @return bool success
  */
 function certificate_delete_instance($id) {
-    global $CFG, $DB, $USER;
+    global $DB;
 
-    if (!$certificate = $DB->get_record('certificate', array('id'=> $id))) {
+    // Ensure the certificate exists
+    if (!$certificate = $DB->get_record('certificate', array('id'=>$id))) {
         return false;
     }
 
@@ -115,17 +111,14 @@ function certificate_delete_instance($id) {
     }
 
     $result = true;
-
     $DB->delete_records('certificate_issues', array('certificateid'=> $id));
-
     if (!$DB->delete_records('certificate', array('id'=> $id))) {
         $result = false;
     }
 
+    // Delete any files associated with the certificate
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-
     $fs = get_file_storage();
-
     $fs->delete_area_files($context->id);
 
     return $result;
@@ -148,11 +141,10 @@ function certificate_reset_userdata($data) {
     $status = array();
 
     if (!empty($data->reset_certificate)) {
-        $certificatessql = "SELECT cert.id " .
-                           "FROM {certificate} cert " .
-                           "WHERE cert.course = ?";
-
-        $DB->delete_records_select('certificate_issues', "certificateid IN ($certificatessql)", array($data->courseid));
+        $sql = "SELECT cert.id
+                    FROM {certificate} cert
+                    WHERE cert.course = :courseid";
+        $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", array('courseid'=>$data->courseid));
         $status[] = array('component'=>$componentstr, 'item'=>get_string('certificateremoved', 'certificate'), 'error'=>false);
     }
 
@@ -247,15 +239,13 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
  * @return object list of participants
  */
 function certificate_get_participants($certificateid) {
-    global $CFG, $DB;
+    global $DB;
 
-    //Get students
-    $participants = $DB->get_records_sql("SELECT DISTINCT u.id, u.id
-                                          FROM {user} u,
-                                               {certificate_issues} a
-                                          WHERE a.certificateid = ? and
-                                                u.id = a.userid", array($certificateid));
-    return $participants;
+    $sql = "SELECT DISTINCT u.id, u.id
+                FROM {user} u, {certificate_issues} a
+                WHERE a.certificateid = :certificateid
+                AND u.id = a.userid";
+    return  $DB->get_records_sql($sql, array('certificateid'=>$certificateid));
 }
 
 /**
@@ -649,17 +639,11 @@ function certificate_print_user_files($certificate, $userid=0, $context) {
     global $CFG, $DB, $OUTPUT;
 
     $output = '';
-    $sql = "SELECT MAX(timecreated) AS latest " .
-           "FROM {certificate_issues} " .
-           "WHERE userid = :userid " .
-           "AND certificateid = :certificateid";
-
-    $params = array(
-        'userid'        => $userid,
-        'certificateid' => $certificate->id
-    );
-
-    if ($record = $DB->get_record_sql($sql, $params)) {
+    $sql = "SELECT MAX(timecreated) AS latest
+                FROM {certificate_issues}
+                WHERE userid = :userid
+                AND certificateid = :certificateid";
+    if ($record = $DB->get_record_sql($sql, array('userid'=>$userid, 'certificateid'=>$certificate->id))) {
         $latest = $record->latest;
     }
 
@@ -688,12 +672,12 @@ function certificate_print_user_files($certificate, $userid=0, $context) {
 /**
  * Returns a list of issued certificates - sorted for report.
  *
- * @param stdClass $certificate
+ * @param int $certificateid
  * @param string $sort the sort order
  * @param boolean $groupmode are we in group mode ?
  * @param stdClass $cm the course module
  */
-function certificate_get_issues($certificate, $sort="ci.certdate ASC", $groupmode, $cm) {
+function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupmode, $cm) {
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
@@ -704,20 +688,20 @@ function certificate_get_issues($certificate, $sort="ci.certdate ASC", $groupmod
     // used in the main sql query, this is used so that we don't get an error
     // about the same u.id being returned multiple times due to being in the
     // certificate issues table multiple times.
-    $subsql = "SELECT MAX(ci2.timecreated) as timecreated " .
-              "FROM {certificate_issues} ci2 " .
-              "WHERE ci2.certificateid = '$certificate' " .
-              "AND ci2.certdate > 0 " .
-              "AND ci2.userid = u.id";
+    $subsql = "SELECT MAX(ci2.timecreated) as timecreated
+                      FROM {certificate_issues} ci2
+                      WHERE ci2.certificateid = :subsqlcertificateid
+                      AND ci2.certdate > 0
+                      AND ci2.userid = u.id";
     $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated, ci.certdate, ci.studentname, ci.reportgrade
-                                   FROM {user} u
-                                   INNER JOIN {certificate_issues} ci
-                                   ON u.id = ci.userid
-                                   WHERE u.deleted = 0
-                                   AND ci.certificateid = '$certificate'
-                                   AND ci.certdate > 0
-                                   AND ci.timecreated = ($subsql)
-                                   ORDER BY {$sort}");
+                                                        FROM {user} u
+                                                        INNER JOIN {certificate_issues} ci
+                                                        ON u.id = ci.userid
+                                                        WHERE u.deleted = 0
+                                                        AND ci.certificateid = :certificateid
+                                                        AND ci.certdate > 0
+                                                        AND ci.timecreated = ($subsql)
+                                                        ORDER BY {$sort}", array('certificateid'=>$certificateid, 'subsqlcertificateid'=>$certificateid));
 
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
@@ -871,9 +855,11 @@ function certificate_prepare_issue($course, $user, $certificate) {
 function certificate_issue($course, $certificate, $certrecord, $cm) {
     global $USER, $DB;
 
-    $sql = 'SELECT MAX(timecreated) AS latest FROM {certificate_issues} ' .
-           'WHERE userid = :userid and certificateid = :certificateid';
-    if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificate->id, 'userid'=>$USER->id))) {
+    $sql = "SELECT MAX(timecreated) AS latest
+                FROM {certificate_issues}
+                WHERE userid = :userid
+                AND certificateid = :certificateid";
+    if ($record = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'certificateid'=>$certificate->id))) {
         $latest = $record->latest;
     }
     $certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
@@ -1484,11 +1470,11 @@ function certificate_generate_date($certificate, $course) {
     }
     if ($certificate->printdate == '2') {
         // Get the enrolment end date
-        $sql = "SELECT MAX(c.timecompleted) as timecompleted " .
-               "FROM {course_completions} c " .
-               "WHERE c.userid = :userid " .
-               "AND c.course = :courseid " .
-               "AND c.deleted = 0";
+        $sql = "SELECT MAX(c.timecompleted) as timecompleted
+                    FROM {course_completions} c
+                    WHERE c.userid = :userid
+                    AND c.course = :courseid
+                    AND c.deleted = 0";
         if ($timecompleted = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'courseid'=>$course->id))) {
             if ($timecompleted->timecompleted) {
                 $certdate = $timecompleted->timecompleted;
