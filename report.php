@@ -18,10 +18,10 @@ $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
 
 $url = new moodle_url('/mod/certificate/report.php', array('id'=>$id));
-if ($download !== '') {
+if ($download) {
     $url->param('download', $download);
 }
-if ($action !== '') {
+if ($action) {
     $url->param('action', $action);
 }
 $PAGE->set_url($url);
@@ -42,6 +42,7 @@ if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance)))
     print_error('Certificate ID was incorrect');
 }
 
+// Declare some variables
 $strcertificates = get_string('modulenameplural', 'certificate');
 $strcertificate  = get_string('modulename', 'certificate');
 $strto = get_string('awardedto', 'certificate');
@@ -72,7 +73,6 @@ if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $gro
     die;
 }
 
-
 if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
 
@@ -94,8 +94,7 @@ if ($download == "ods") {
     $myxls->write_string(0,5,$strgrade);
     $myxls->write_string(0,6,$strcode);
 
-
-    // generate the data for the body of the spreadsheet
+    // Generate the data for the body of the spreadsheet
     $i=0;
     $row=1;
     if ($users) {
@@ -128,7 +127,7 @@ if ($download == "ods") {
     exit;
 }
 
-// print spreadsheet if one is asked for:
+// Print spreadsheet if one is asked for:
 if ($download == "xls") {
     require_once("$CFG->libdir/excellib.class.php");
 
@@ -150,7 +149,7 @@ if ($download == "xls") {
     $myxls->write_string(0,5,$strgrade);
     $myxls->write_string(0,6,$strcode);
 
-    // generate the data for the body of the spreadsheet
+    // Generate the data for the body of the spreadsheet
     $i=0;
     $row=1;
     if ($users) {
@@ -199,7 +198,7 @@ if ($download == "txt") {
     echo $strgrade. "\t";
     echo $strcode. "\n";
 
-    // generate the data for the body of the spreadsheet
+    // Generate the data for the body of the spreadsheet
     $i=0;
     $row=1;
     if ($users) foreach ($users as $user) {
@@ -252,21 +251,19 @@ foreach ($users as $user) {
 echo '<br />';
 echo html_writer::table($table);
 
-//now give links for downloading spreadsheets.
+// Now give links for downloading spreadsheets.
 echo "<br />\n";
 echo "<center><table class=\"downloadreport\"><tr>\n";
 echo "<td>";
-    $downloadoptions = array();
-    $options = array();
-    $options["id"] = "$cm->id";
-    $options["download"] = "ods";
+$options = array();
+$options["id"] = "$cm->id";
+$options["download"] = "ods";
 echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadods"));
-
 echo "</td><td>";
-    $options["download"] = "xls";
+$options["download"] = "xls";
 echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadexcel"));
 echo "</td><td>";
-    $options["download"] = "txt";
+$options["download"] = "txt";
 echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadtext"));
 echo "</td></tr></table></center>";
 
