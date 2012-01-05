@@ -1,20 +1,29 @@
-<?PHP // $Id: version.php
+<?php
+
+/**
+ * Handles viewing a certificate
+ *
+ * @package    mod
+ * @subpackage certificate
+ * @copyright  Chardelle Busch, Mark Nelson <mark@moodle.com.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once('../../config.php');
 require_once('lib.php');
-include '../../lib/pdflib.php';
+require_once("$CFG->libdir/pdflib.php");
 
 $id = required_param('id', PARAM_INT);    // Course Module ID
 $action = optional_param('action', '', PARAM_ALPHA);
 $edit = optional_param('edit', -1, PARAM_BOOL);
 
-if (! $cm = get_coursemodule_from_id('certificate', $id)) {
+if (!$cm = get_coursemodule_from_id('certificate', $id)) {
     print_error('Course Module ID was incorrect');
 }
-if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
+if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
     print_error('course is misconfigured');
 }
-if (! $certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
+if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
     print_error('course module is incorrect');
 }
 
@@ -45,19 +54,8 @@ if ($PAGE->user_allowed_editing()) {
     $PAGE->set_button($buttons);
 }
 
-// Create new certrecord
-certificate_prepare_issue($course, $USER, $certificate);
-
-// Get previous certrecord
-$sql = "SELECT MAX(timecreated) AS latest " .
-       "FROM {certificate_issues} " .
-       "WHERE userid = :userid ".
-       "AND certificateid = :certificateid";
-if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificate->id, 'userid'=>$USER->id))) {
-    $latest = $record->latest;
-}
-$certrecord = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$USER->id, 'timecreated'=>$latest));
-$type = $certificate->certificatetype;
+// Create new certificate record
+$certrecord = certificate_prepare_issue($course, $USER, $certificate);
 
 // Load some strings
 $strreviewcertificate = get_string('reviewcertificate', 'certificate');
@@ -86,7 +84,7 @@ if ($certificate->reissuecert) { // Reissue certificate every time
 
         echo '<div style="text-align:center">';
         $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
-                    $linkname = $strgetcertificate;
+        $linkname = $strgetcertificate;
         $button = new single_button($link, $linkname);
         $button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
         echo $OUTPUT->render($button);
@@ -137,17 +135,17 @@ if ($certificate->reissuecert) { // Reissue certificate every time
 
 if ($action) {
     // Output to pdf
-    if ($certificate->savecert == 1){
+    if ($certificate->savecert == 1) {
         //pdf contents are now in $file_contents as a string
        $file_contents = $pdf->Output('', 'S');
        $filename = clean_filename($certificate->name.'.pdf');
        certificate_save_pdf($file_contents, $certrecord->id, $filename, $context->id);
     }
-    if ($certificate->delivery == 0){
+    if ($certificate->delivery == 0) {
         $pdf->Output($filename, 'I');// open in browser
-    } elseif ($certificate->delivery == 1){
+    } elseif ($certificate->delivery == 1) {
         $pdf->Output($filename, 'D'); // force download when create
-    } elseif ($certificate->delivery == 2){
+    } elseif ($certificate->delivery == 2) {
         certificate_email_students($USER, $course, $certificate, $certrecord, $context);
         $pdf->Output($filename, 'I');// open in browser
         $pdf->Output('', 'S');// send
