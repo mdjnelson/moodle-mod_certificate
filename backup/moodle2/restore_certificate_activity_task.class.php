@@ -119,12 +119,12 @@ class restore_certificate_activity_task extends restore_activity_task {
         global $DB;
 
         // Get the new module
-        $sql = "SELECT c.* " .
-               "FROM {certificate} c " .
-               "INNER JOIN {course_modules} cm " .
-               "ON c.id = cm.instance " .
-               "WHERE cm.id = ?";
-        if ($certificate = $DB->get_record_sql($sql, (array($this->get_moduleid())))) {
+        $sql = "SELECT c.*
+                    FROM {certificate} c
+                    INNER JOIN {course_modules} cm
+                    ON c.id = cm.instance
+                    WHERE cm.id = :cmid";
+        if ($certificate = $DB->get_record_sql($sql, (array('cmid'=>$this->get_moduleid())))) {
             // A flag to check if we need to update the database or not
             $update = false;
             if ($certificate->printdate > 2) { // If greater than 2, then it is a grade item value
