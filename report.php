@@ -1,14 +1,22 @@
-<?php  // $Id: version.php,v 3.1.0
+<?php
+
+/**
+ * Handles viewing the report
+ *
+ * @package    mod
+ * @subpackage certificate
+ * @copyright  Mark Nelson <mark@moodle.com.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require_once('../../config.php');
 require_once('lib.php');
-
-global $DB;
 
 $id   = required_param('id', PARAM_INT); // Course module ID
 $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
+
 $url = new moodle_url('/mod/certificate/report.php', array('id'=>$id));
 if ($download !== '') {
     $url->param('download', $download);
