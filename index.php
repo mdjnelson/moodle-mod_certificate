@@ -47,8 +47,8 @@ add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, 
 echo $OUTPUT->header();
 
 // Get the certificates, if there are none display a notice
-if ($certificates = get_all_instances_in_course('certificate', $course)) {
-    notice(get_string('nocertificates', 'certificate'), "../../course/view.php?id=$course->id");
+if (!$certificates = get_all_instances_in_course('certificate', $course)) {
+    notice(get_string('nocertificates', 'certificate'), "$CFG->wwwroot/course/view.php?id=$course->id");
     die;
 }
 
