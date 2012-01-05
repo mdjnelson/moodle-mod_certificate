@@ -36,21 +36,24 @@ require_course_login($course->id, true, $cm);
 $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 require_capability('mod/certificate:view', $context);
 
-// Initialize $PAGE, compute blocks
-$PAGE->set_url('/mod/certificate/review.php', array('id' => $cm->id));
-$PAGE->set_context($context);
-$PAGE->set_cm($cm);
-
-// Get previous cert record
-$certrecord = certificate_get_latest_issue($certificate->id, $USER->id);
-
-// Load some strings
+// Declare some variables
 $strreviewcertificate = get_string('reviewcertificate', 'certificate');
 $strgetcertificate = get_string('getcertificate', 'certificate');
 $strgrade = get_string('grade', 'certificate');
 $strcoursegrade = get_string('coursegrade', 'certificate');
 $strcredithours = get_string('credithours', 'certificate');
 $filename = clean_filename($certificate->name.'.pdf');
+
+// Initialize $PAGE, compute blocks
+$PAGE->set_url('/mod/certificate/review.php', array('id' => $cm->id));
+$PAGE->set_context($context);
+$PAGE->set_cm($cm);
+
+// Get previous cert record
+if (!$certrecord = certificate_get_latest_issue($certificate->id, $USER->id)) {
+    notice(get_string('nocertificatesissued', 'certificate'), "$CFG->wwwroot/course/view.php?id=$course->id");
+    die;
+}
 
 // Load the specific certificatetype
 require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
