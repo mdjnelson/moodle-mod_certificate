@@ -238,16 +238,16 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         continue;
                     }
                     // Get grade item for module specified - is there an API function for this ??
-                    $sql = "SELECT gi.id " .
-                           "FROM {course_modules} cm " .
-                           "INNER JOIN {modules} m " .
-                           "ON cm.module = m.id " .
-                           "INNER JOIN {grade_items} gi " .
-                           "ON m.name = gi.itemmodule " .
-                           "WHERE cm.id = '$link->linkid' " .
-                           "AND cm.course = '$cm->course' " .
-                           "AND cm.instance = gi.iteminstance";
-                    if (!$gradeitem = $DB->get_record_sql($sql)) {
+                    $sql = "SELECT gi.id
+                                FROM {course_modules} cm
+                                INNER JOIN {modules} m
+                                ON cm.module = m.id
+                                INNER JOIN {grade_items} gi
+                                ON m.name = gi.itemmodule
+                                WHERE cm.id = :cmid
+                                AND cm.course = :courseid
+                                AND cm.instance = gi.iteminstance";
+                    if (!$gradeitem = $DB->get_record_sql($sql, array('cmid'=>$link->linkid, 'courseid'=>$cm->course))) {
                         // Not valid skip it
                         continue;
                     }
@@ -274,9 +274,9 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'orientation', 'L', array('certificatetype' => 'unicode_landscape'));
 
         // If the certificate type does not match any of the orientations in the above then set to 'L'
-        $sql = "UPDATE {certificate} " .
-               "SET orientation = 'L' " .
-               "WHERE orientation = ''";
+        $sql = "UPDATE {certificate}
+                    SET orientation = 'L'
+                    WHERE orientation = ''";
         $DB->execute($sql);
 
         // Update all the certificate types
