@@ -830,15 +830,13 @@ function certificate_prepare_issue($course, $user, $certificate) {
         return;
     }
 
-    $timecreated = time();
-    $code = certificate_generate_code();
-    $studentname = fullname($user);
-    $newrec = new Object();
+    // Create new certificate issue record
+    $newrec = new stdClass();
     $newrec->certificateid = $certificate->id;
     $newrec->userid = $user->id;
-    $newrec->timecreated = $timecreated;
-    $newrec->studentname = $studentname;
-    $newrec->code = $code;
+    $newrec->timecreated =  time();
+    $newrec->studentname = fullname($user);
+    $newrec->code = certificate_generate_code();
     $newrec->classname = $course->fullname;
 
     $DB->insert_record('certificate_issues', $newrec, false);
