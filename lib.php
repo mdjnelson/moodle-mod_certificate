@@ -142,8 +142,8 @@ function certificate_reset_userdata($data) {
 
     if (!empty($data->reset_certificate)) {
         $sql = "SELECT cert.id
-                    FROM {certificate} cert
-                    WHERE cert.course = :courseid";
+                FROM {certificate} cert
+                WHERE cert.course = :courseid";
         $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", array('courseid'=>$data->courseid));
         $status[] = array('component'=>$componentstr, 'item'=>get_string('certificateremoved', 'certificate'), 'error'=>false);
     }
@@ -242,9 +242,9 @@ function certificate_get_participants($certificateid) {
     global $DB;
 
     $sql = "SELECT DISTINCT u.id, u.id
-                FROM {user} u, {certificate_issues} a
-                WHERE a.certificateid = :certificateid
-                AND u.id = a.userid";
+            FROM {user} u, {certificate_issues} a
+            WHERE a.certificateid = :certificateid
+            AND u.id = a.userid";
     return  $DB->get_records_sql($sql, array('certificateid'=>$certificateid));
 }
 
@@ -682,19 +682,19 @@ function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupm
     // about the same u.id being returned multiple times due to being in the
     // certificate issues table multiple times.
     $subsql = "SELECT MAX(ci2.timecreated) as timecreated
-                      FROM {certificate_issues} ci2
-                      WHERE ci2.certificateid = :subsqlcertificateid
-                      AND ci2.certdate > 0
-                      AND ci2.userid = u.id";
+               FROM {certificate_issues} ci2
+               WHERE ci2.certificateid = :subsqlcertificateid
+               AND ci2.certdate > 0
+               AND ci2.userid = u.id";
     $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated, ci.certdate, ci.studentname, ci.reportgrade
-                                                        FROM {user} u
-                                                        INNER JOIN {certificate_issues} ci
-                                                        ON u.id = ci.userid
-                                                        WHERE u.deleted = 0
-                                                        AND ci.certificateid = :certificateid
-                                                        AND ci.certdate > 0
-                                                        AND ci.timecreated = ($subsql)
-                                                        ORDER BY {$sort}", array('certificateid'=>$certificateid, 'subsqlcertificateid'=>$certificateid));
+                                   FROM {user} u
+                                   INNER JOIN {certificate_issues} ci
+                                   ON u.id = ci.userid
+                                   WHERE u.deleted = 0
+                                   AND ci.certificateid = :certificateid
+                                   AND ci.certdate > 0
+                                   AND ci.timecreated = ($subsql)
+                                   ORDER BY {$sort}", array('certificateid'=>$certificateid, 'subsqlcertificateid'=>$certificateid));
 
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
@@ -850,9 +850,9 @@ function certificate_get_latest_issue($certificateid, $userid) {
     global $DB;
 
     $sql = "SELECT MAX(timecreated) AS latest
-                FROM {certificate_issues}
-                WHERE certificateid = :certificateid
-                AND userid = :userid";
+            FROM {certificate_issues}
+            WHERE certificateid = :certificateid
+            AND userid = :userid";
     if ($record = $DB->get_record_sql($sql, array('certificateid'=>$certificateid, 'userid'=>$userid))) {
         $latest = $record->latest;
     }
@@ -1479,10 +1479,10 @@ function certificate_generate_date($certificate, $course) {
     if ($certificate->printdate == '2') {
         // Get the enrolment end date
         $sql = "SELECT MAX(c.timecompleted) as timecompleted
-                    FROM {course_completions} c
-                    WHERE c.userid = :userid
-                    AND c.course = :courseid
-                    AND c.deleted = 0";
+                FROM {course_completions} c
+                WHERE c.userid = :userid
+                AND c.course = :courseid
+                AND c.deleted = 0";
         if ($timecompleted = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'courseid'=>$course->id))) {
             if ($timecompleted->timecompleted) {
                 $certdate = $timecompleted->timecompleted;
