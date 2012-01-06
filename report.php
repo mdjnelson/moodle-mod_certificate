@@ -24,7 +24,6 @@ if ($download) {
 if ($action) {
     $url->param('action', $action);
 }
-$PAGE->set_url($url);
 
 if (!$cm = get_coursemodule_from_id('certificate', $id)) {
     print_error('Course Module ID was incorrect');
@@ -34,7 +33,10 @@ if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
     print_error('Course is misconfigured');
 }
 
-require_login($course->id, false, $cm);
+// Requires a course login
+require_course_login($course->id, false, $cm);
+
+// Check capabilities
 $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 require_capability('mod/certificate:manage', $context);
 
@@ -51,25 +53,21 @@ $strgrade = get_string('grade','certificate');
 $strcode = get_string('code', 'certificate');
 $strreport= get_string('report', 'certificate');
 
+$PAGE->navbar->add($strreport);
+$PAGE->set_title(format_string($certificate->name).": $strreport");
+$PAGE->set_heading($course->fullname);
+$PAGE->set_url($url);
+
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
-if (!$download) {
-    $PAGE->navbar->add($strreport);
-    $PAGE->set_title(format_string($certificate->name).": $strreport");
-    $PAGE->set_heading($course->fullname);
-    echo $OUTPUT->header();
-    // Check to see if groups are being used in this choice
-    $groupmode = groups_get_activity_groupmode($cm);
-    if ($groupmode) {
-        groups_get_activity_group($cm, true);
-        groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
-    }
-} else {
-    $groupmode = groups_get_activity_groupmode($cm);
+// Check to see if groups are being used in this choice
+if ($groupmode = groups_get_activity_groupmode($cm)) {
+    groups_get_activity_group($cm, true);
+    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
 }
 
 if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm)) {
-    notify('There are no issued certificates');
+    notify(get_string('nocertificatesissued', 'certificate'));
     die;
 }
 
@@ -229,13 +227,12 @@ if ($download == "txt") {
     exit;
 }
 
-echo '<br />';
-echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
+// Create the table for the users
 $table = new html_table();
 $table->width = "95%";
 $table->tablealign = "center";
-$table->head  = array ($strto, $strdate, $strgrade, $strcode);
-$table->align = array ("LEFT", "LEFT", "CENTER", "CENTER");
+$table->head  = array($strto, $strdate, $strgrade, $strcode);
+$table->align = array("left", "left", "center", "center");
 foreach ($users as $user) {
     $name = $OUTPUT->user_picture($user).$user->studentname;
     $date = userdate($user->certdate).certificate_print_user_files($certificate, $user->id, $context->id);
@@ -248,23 +245,19 @@ foreach ($users as $user) {
     $table->data[] = array ($name, $date, $grade, $code);
 }
 
+// Create table to store buttons
+$tablebutton = new html_table();
+$tablebutton->attributes['class'] = 'downloadreport';
+$btndownloadods = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'ods')), get_string("downloadods"));
+$btndownloadxls = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'xls')), get_string("downloadexcel"));
+$btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'txt')), get_string("downloadtext"));
+$tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
 echo '<br />';
 echo html_writer::table($table);
-
-// Now give links for downloading spreadsheets.
-echo "<br />\n";
-echo "<center><table class=\"downloadreport\"><tr>\n";
-echo "<td>";
-$options = array();
-$options["id"] = "$cm->id";
-$options["download"] = "ods";
-echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadods"));
-echo "</td><td>";
-$options["download"] = "xls";
-echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadexcel"));
-echo "</td><td>";
-$options["download"] = "txt";
-echo $OUTPUT->single_button(new moodle_url("report.php", $options), get_string("downloadtext"));
-echo "</td></tr></table></center>";
-
+echo "<div style='margin:auto; width:50%'>";
+echo html_writer::table($tablebutton);
+echo "</div>";
 echo $OUTPUT->footer($course);
