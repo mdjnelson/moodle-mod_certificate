@@ -511,7 +511,7 @@ function certificate_email_students($user, $course, $certificate, $certrecord, $
     $component = 'mod_certificate';
     $filearea = 'issue';
     $filepath = '/';
-    $files = $fs->get_area_files($context->id, $component, $filearea, $certificate->id);
+    $files = $fs->get_area_files($context->id, $component, $filearea, $certrecord->id);
     foreach ($files as $f) {
         $filepathname = $f->get_contenthash();
     }
@@ -587,15 +587,15 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
  *
  * @global object
  * @param string $pdf is the string contents of the pdf
- * @param int $certificateid the certificate id
+ * @param int $certrecordid the certificate issue record id
  * @param string $filename pdf filename
  * @param int $contextid context id
  * @return bool
  */
-function certificate_save_pdf($pdf, $certificateid, $filename, $contextid) {
+function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
     global $DB, $USER;
 
-    if (empty($certificateid)) {
+    if (empty($certrecordid)) {
         return false;
     }
 
@@ -613,14 +613,14 @@ function certificate_save_pdf($pdf, $certificateid, $filename, $contextid) {
         'contextid' => $contextid,   // ID of context
         'component' => $component,   // usually = table name
         'filearea' => $filearea,     // usually = table name
-        'itemid' => $certificateid,  // usually = ID of row in table
+        'itemid' => $certrecordid,  // usually = ID of row in table
         'filepath' => $filepath,     // any path beginning and ending in /
         'filename' => $filename,    // any filename
         'mimetype' => 'application/pdf',    // any filename
         'userid'    => $USER->id);
 
     // Check for file first
-    if (!$fs->file_exists($contextid, $component, $filearea, $certificateid, $filepath, $filename)) {
+    if (!$fs->file_exists($contextid, $component, $filearea, $certrecordid, $filepath, $filename)) {
         $fs->create_file_from_string($fileinfo, $pdf);
     }
 
