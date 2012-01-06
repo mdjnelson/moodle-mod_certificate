@@ -44,12 +44,12 @@ $PAGE->set_heading($course->fullname);
 // Add the page view to the Moodle log
 add_to_log($course->id, 'certificate', 'view all', 'index.php?id='.$course->id, '');
 
-echo $OUTPUT->header();
-
 // Get the certificates, if there are none display a notice
 if (!$certificates = get_all_instances_in_course('certificate', $course)) {
+    echo $OUTPUT->header();
     notice(get_string('nocertificates', 'certificate'), "$CFG->wwwroot/course/view.php?id=$course->id");
-    die;
+    echo $OUTPUT->footer();
+    exit();
 }
 
 if ($usesections = course_format_uses_sections($course->format)) {
@@ -97,6 +97,8 @@ foreach ($certificates as $certificate) {
         $table->data[] = array ($link, $issued);
     }
 }
+
+echo $OUTPUT->header();
 echo '<br />';
 echo html_writer::table($table);
 echo $OUTPUT->footer();
