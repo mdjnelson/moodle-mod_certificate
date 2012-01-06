@@ -66,9 +66,12 @@ if ($groupmode = groups_get_activity_groupmode($cm)) {
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
 }
 
+// Ensure there are issues to display, if not display notice
 if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm)) {
+    echo $OUTPUT->header();
     notify(get_string('nocertificatesissued', 'certificate'));
-    die;
+    echo $OUTPUT->footer($course);
+    exit();
 }
 
 if ($download == "ods") {
@@ -125,7 +128,6 @@ if ($download == "ods") {
     exit;
 }
 
-// Print spreadsheet if one is asked for:
 if ($download == "xls") {
     require_once("$CFG->libdir/excellib.class.php");
 
@@ -179,7 +181,7 @@ if ($download == "xls") {
     $workbook->close();
     exit;
 }
-// print text file
+
 if ($download == "txt") {
     $filename = clean_filename("$course->shortname ".strip_tags(format_string($certificate->name,true))).'.txt';
 
