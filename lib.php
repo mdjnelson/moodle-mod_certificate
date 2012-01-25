@@ -816,7 +816,8 @@ function certificate_prepare_issue($course, $user, $certificate) {
     global $DB;
 
     if ($certificate->reissuecert == 0) {
-        if ($certissue = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id))) {
+        // Get the last one they received
+        if ($certissue = certificate_get_latest_issue($certificate->id, $user->id)) {
             return $certissue;
         }
     } else if ($certissue = $DB->get_record('certificate_issues', array('certificateid'=>$certificate->id, 'userid'=>$user->id, 'certdate'=>'0'))) {
