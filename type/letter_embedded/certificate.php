@@ -85,7 +85,7 @@ $credithours =  $strcredithours.': '.$certificate->printhours;
 } else $credithours = '';
 
     $pdf = new TCPDF($certificate->orientation, 'pt', 'Letter', true, 'UTF-8', false);
-    $pdf->SetProtection(array('print'));
+    // $pdf->SetProtection(array('print'));
     $pdf->SetTitle($certificate->name);
     $pdf->setPrintHeader(false);
     $pdf->setPrintFooter(false);
@@ -143,7 +143,7 @@ $credithours =  $strcredithours.': '.$certificate->printhours;
     $pdf->SetAlpha(1);
     print_seal($pdf, $certificate, $sealx, $sealy, '', '');
     print_signature($pdf, $certificate, $sigx, $sigy, '', '');
-    
+
 // Add text
     $pdf->SetTextColor(0,0,120);
     cert_printtext($pdf, $x, $y, 'C', 'freesans', '', 30, get_string('title', 'certificate'));
