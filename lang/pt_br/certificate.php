@@ -1,260 +1,187 @@
-<?PHP // $Id: certificate.php,v 3.1.9 2008/01/20
+<?php
 
 /**
- * Strings for component 'block_mentees', language 'pt_br', branch 'MOODLE_21_STABLE'
+ * Language strings for the certificate module
  *
- * @package   block_mentees
- * @copyright 2011 onwards Leonardo Gon�alves  {@link http://twitter.com/leogalpao}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package mod
+ * @subpackage certificate
+ * @copyright 2012 Luis Alcantara <lgmalcantara@gmail.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addlinklabel'] = 'Adicionar outra opção de atividade lincada.';
+$string['addlinktitle'] = 'Clique para adicionar outra opção de atividade lincada';
+$string['areaintro'] = 'Introdução do certificado';
+$string['awarded'] = 'Atribuído';
+$string['awardedto'] = 'Atribuído a';
+$string['back'] = 'Voltar';
+$string['border'] = 'Moldura';
+$string['borderblack'] = 'Preto';
+$string['borderblue'] = 'Azul';
+$string['borderbrown'] = 'Marron';
+$string['bordercolor'] = 'Linhas de borda';
+$string['bordercolor_help'] = 'Como as imagens podem aumentar substancialmente o tamanho de um arquivo PDF, é possível desenhar linhas de borda ao invés de utilizar uma imagem de borda. (Tenha certeza que a opção de imagem de Borda esteja selecionada com a opção Nenhuma Borda). A opção de Linhas de Borda irá imprimir bordas de três linhas de larguras variadas na cor escolhida.';
+$string['bordergreen'] = 'Verde';
+$string['borderlines'] = 'Linhas';
+$string['borderstyle'] = 'Imagem de Borda';
+$string['borderstyle_help'] = 'A opção de Imagem de Borda permite que se escolha entre as imagens disponíveis no diretório certificate/pix/borders. Selecione a imagem de borda que você deseja ao redor do seu certificado, ou escolha Nenhuma Borda.';
+$string['certificate:view'] = 'Ver certificado';
+$string['certificate:manage'] = 'Configurar certificado';
+$string['certificate:printteacher'] = 'Imprimir professor';
+$string['certificate:student'] = 'Obter certificado';
+$string['certificate'] = 'Verification for certificate code:';
+$string['certificatename'] = 'Nome do certificado';
+$string['certificatereport'] = 'Relatório de certificados';
+$string['certificatesfor'] = 'Certificados de';
+$string['certificatetype'] = 'Tipo de certificado';
+$string['certificatetype_help'] = 'Aqui define-se qual o layout desejado para o certificado. A pasta type do módulo certificado inclui quatro certificados padrão:
+A4 com fontes incorporadas, que imprime em papel tamanho A4, com as fontes inclusas no arquivo.
+A4 sem fontes incorporados, que imprime em papel tamanho A4, sem incluir as fontes ao arquivo.
+Carta com fontes incorporadas, que imprime em papel tamanho carta, com as fontes inclusas no arquivo.
+Carta sem fontes incorporados, que imprime em papel tamanho carta, sem incluir as fontes ao arquivo.
 
-//General functions
+Os tipos sem fontes incorporadas usam as fontes Helvetica e Times.
+Se você não tiver certeza que seus usuários terão essas fontes nos seus computadores, ou se o seu idioma
+utiliza caracteres ou símbolos que não são inclusos nas fontes Helvetica e Times, recomenda-se optar por
+um tipo com fontes incorporadas. Os tipos com fontes incorporadas usam as fontes Dejavusans e Dejavuserif.
+Esta opção criará arquivos pdf significativamente maiores, portanto não recomenda-se o uso de um tipo com
+fontes incorporadas, a menos que você julgue necessário.
+
+Pastas como novos tipos de layouts podem ser adicionadas a pasta certificate/type. O nome da pasta e
+quaisquer novas palavras traduzidas para estes novos tipos devem ser adicionadas aos arquivos de idiomas
+do módulo certificado.
+';
+$string['certify'] = 'Este certificado atesta que';
+$string['code'] = 'Código';
+$string['completiondate'] = 'Término do Curso';
+$string['course'] = 'Pelo Curso';
+$string['coursegrade'] = 'Nota no curso';
+$string['coursename'] = 'Curso';
+$string['credithours'] = 'Carga horária';
+$string['customtext'] = 'Texto padrão';
+$string['customtext_help'] = 'Se você quiser que o certificado imprima nomes diferentes para o professor do que aqueles que são atribuídos ao curso
+com o papel de professor, não selecione Imprimir Professor ou qualquer imagem de assinatura, exceto para a imagem de linha.
+Digite os nomes dos professores nesta caixa de texto como você gostaria que eles aparecessem. Por padrão, esse texto será colocado no canto inferior esquerdo do certificado. As seguintes tags html estão disponíveis: &lt;br&gt;, &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;img&gt; (src e width (ou height) são obrigatórios), &lt;a&gt; (href é obrigatório), &lt;font&gt; (atributos possíveis são: color, (utilizando código de cor hexadecimal), face, (arial, times, courier, helvetica, symbol)).';
+$string['date'] = 'Em';
+$string['datefmt'] = 'Formato da Data';
+$string['datefmt_help'] = 'Escolha um formato de data a utilizar na impressão do certificado. Alternativamente pode-se escolher a última opção, para ter a data impressa no formato do idioma escolhido pelo usuário.';
+$string['datehelp'] = 'Data';
+$string['deletissuedcertificates'] = 'Apagar certificados emitidos';
+$string['delivery'] = 'Entrega';
+$string['delivery_help'] = 'Escolha aqui como você gostaria que os certificado sejam entregues ao seus alunos.
+Abrir em uma nova janela: Abre o certificado em uma nova janela do navegador.
+Forçar Download: Abre a janela do navegador para o download do arquivo.
+Enviar por e-mail : Escolhendo esta opção envia o certificado para o aluno como um anexo de e-mail.
+Após o recebimento do certificado pelo usuário, se ele acessar o link a partir da página do curso, ele cerá a data do recebimento do certificado, bem como serão capazes de rever o certificado recebido.';
+$string['designoptions'] = 'Opções de design';
+$string['download'] = 'Forçar download';
+$string['emailcertificate'] = 'Enviar por e-mail (requer que a opção salvar esteja ativada!)';
+$string['emailothers'] = 'Enviar e-mail a outros';
+$string['emailothers_help'] = 'Digite aqui os endereços de e-mail das pessoas que devem ser alertadas com um e-mail, sempre que os alunos recebem um certificado. A Lista de e-mails deve ser separada por vírgulas.';
+$string['emailstudenttext'] = 'Em anexo, está o seu certificado do curso {$a->course}.';
+$string['emailteachers'] = 'Enviar e-mail aos professores';
+$string['emailteachers_help'] = 'Se habilitado, os professores serão avisados ​​através de um e-mail sempre que os seus alunos receberem um certificado.';
+$string['emailteachermail'] = '
+O Aluno {$a->student} recebeu o seu certificado: \'{$a->certificate}\'
+do curso {$a->course}.
+
+Você pode revê-lo aqui:
+
+{$a->url}';
+$string['emailteachermailhtml'] = '
+O Aluno {$a->student} recebeu o seu certificado: \'<i>{$a->certificate}</i>\'
+do curso {$a->course}.
+
+Você pode revê-lo aqui:
+
+<a href=\"{$a->url}\">Relatório de certificado</a>.';
+$string['entercode'] = 'Entre o código do certificado para verificar:';
+$string['getcertificate'] = 'Obter o seu certificado';
+$string['grade'] = 'Nota';
+$string['gradedate'] = 'Data da nota';
+$string['gradefmt'] = 'Formato da nota';
+$string['gradefmt_help'] = 'Existem três formas disponíveis para a impressão da nota no certificado:
+
+Porcentagem: imprime a nota como uma porcentagem.
+Pontos: imprime o valor dos pontos atingidos no relatório de notas.
+Conceito: Imprime o grau conceitual através de uma letra (A+, A, A-, etc..).';
+$string['gradeletter'] = 'Conceito';
+$string['gradepercent'] = 'Porcentagem';
+$string['gradepoints'] = 'Pontos';
+$string['incompletemessage'] = 'Para baixar o seu certificado, é necessário completar todas as atividades requeridas. Por favor retorne ao curso para completar o curso.';
+$string['intro'] = 'Introdução';
+$string['issueoptions'] = 'Opções de edição';
+$string['issued'] = 'Emitido';
+$string['issueddate'] = 'Data de emissão';
+$string['landscape'] = 'Paisagem';
+$string['lastviewed'] = 'Você recebeu este certificado em:';
+$string['letter'] = 'Porta-retrato (carta)';
+$string['lockingoptions'] = 'Opções de restrição';
 $string['modulename'] = 'Certificado';
 $string['modulenameplural'] = 'Certificados';
-$string['certificatename'] = 'Nome do certificado';
-$string['certificate:view'] = 'Ver Certificado';
-$string['certificate:manage'] = 'Gerenciar certificado';
-$string['certificate:printteacher'] = 'Mostrar Professor';
-$string['certificate:student'] = 'Ober certificado';
-
-//Adding an instance
-$string['intro'] = 'Introdu��o';
-$string['addlinklabel'] = 'Adicionar outra op��o de atividade';
-$string['addlinktitle'] = 'Click para adicionar outra op��o de atividade';
-$string['issueoptions'] = 'Op��es de emiss�o';
-$string['textoptions'] = 'Op��es de Texto';
-$string['designoptions'] = 'Op��es de Design';
-$string['lockingoptions'] = 'Op��es de bloqueio';
-$string['certificatetype'] = 'Tipo de certificado';
-$string['emailteachers'] = 'Email do professor';
-$string['emailothers'] = 'Outros emails';
-$string['savecertificate'] = 'Salvar Certificado';
-$string['deliver'] = 'Enviar';
-$string['download'] = 'For�ar Download';
-$string['openbrowser'] = 'Abrir em uma nova janela';
-$string['emailcertificate'] = 'Email (Requer salvar!)';
-$string['border'] = 'Borda';
-$string['borderstyle'] = 'Imagem da borda';
-$string['borderlines'] = 'Linhas';
-$string['bordercolor'] = 'Linhas de borda';
-$string['borderblack'] = 'Preto';
-$string['borderbrown'] = 'Marrom';
-$string['borderblue'] = 'Azul';
-$string['bordergreen'] = 'Verde';
-$string['printwmark'] = 'Marca D\'�gua';
-$string['datehelp'] = 'Data';
-$string['dateformat'] = 'Formato da data';
-$string['userdateformat'] = 'Formato de data do usu�rio';
-$string['receiveddate'] = 'Data de recebimento';
-$string['courseenddate'] = 'Data do fim do treinamento (Deve ser definido!)';
-$string['gradedate'] = 'Data da nota';
-$string['printcode'] = 'Imprimir C�digo';
-$string['printgrade'] = 'Imprimir data';
-$string['printoutcome'] = 'Imprimir Resultado';
-$string['nogrades'] = 'Notas n�o dispon�veis';
-$string['gradeformat'] = 'Formato de nota';
-$string['gradepercent'] = 'Percentual';
-$string['gradepoints'] = 'Num�rica(em pontos)';
-$string['gradeletter'] = 'Letras';
-$string['printhours'] = 'Imprimir total de horas de treinamento';
-$string['printsignature'] = 'Mostrar Assinatura Digital';
-$string['sigline'] = 'Linha';
-$string['printteacher'] = 'Mostrar o(s) nome(s) do(s) Professor(es)';
-$string['customtext'] = 'Texto Personalizado';
-$string['printdate'] = 'Mostrar Data';
-$string['printseal'] = 'Mostrar Selo ou Logo';
-$string['lockgrade'] = 'Bloquear por nota';
-$string['requiredgrade'] = 'Nota m�nima exigida';
-$string['coursetime'] = 'tempo m�nimo exigido';
-$string['linkedactivity'] = 'Atividade ligada';
-$string['minimumgrade'] = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nota Obrigat�ria';
-$string['activitylocklabel'] = 'Atividade ligada/Nota m�nima %';
-$string['coursetimedependency'] = 'Tempo m�nimo em minutos no curso';
-$string['activitydependencies'] = 'Atividades dependentes';
-
-//Strings for verification block
-$string['entercode'] = 'Digite o c�digo de certificado para verificar:';
-$string['validate'] = 'Verificar';
-$string['certificate'] = 'Verifica��o de c�digo de certificado:';
-$string['verifycertificate'] = 'Verificar certificado';
-$string['notfound'] = 'O n�mero do certificado n�o p�de ser validado.';
-$string['back'] = 'Voltar';
-$string['to'] = 'Concedido a';
-$string['course'] = 'Para';
-$string['date'] = 'em';
-$string['grade'] = 'Nota';
-
-//Certificate view, index, report strings
-$string['incompletemessage'] = 'Para baixar o seu certificado, voc� deve primeiro preencher todos os requisitos'.'Atividades. Por Favor retorne ao treinamento e complete todas as atividades.';
-$string['awardedto'] = 'Concedido para';
-$string['issued'] = 'Emitido';
-$string['notissued'] = 'N�o emitido';
-$string['notissuedyet'] = 'Ainda n�o emitido';
-$string['notreceived'] = 'Voc� n�o recebeu este certificado';
-$string['getcertificate'] = 'Ober certificado';
-$string['report'] = 'Relat�rio';
-$string['code'] = 'C�digo';
-$string['viewed'] = 'Voc� recebeu este certificado em:';
-$string['viewcertificateviews'] = 'Ver {$a} Certificados emitidos';
-$string['reviewcertificate'] = 'Rever seus certificados';
-$string['openwindow'] = 'Clique no botao abaixo para abrir o seu certificado
-em uma nova janela.';
-$string['opendownload'] = 'Click no bot�o abaixo para salvar o seu certificado
-no seu computador.';
-$string['openemail'] = 'Click no bot�o abaixo e o seu certificado 
-ser� enviado por email.';
-$string['receivedcerts'] = 'Certificados recebidos';
-$string['errorlockgrade'] = 'Sua nota atual em  {$a->mod} ({$a->current%}) est� abaixo do n�vel exigido ({$a->needed%}) para receber o certificado.';
-$string['errorlocksurvey'] = 'Voc� precisa completar todo o treinamento antes de receber seu certificado.';
-$string['errorlockgradecourse'] = 'Sua nota atual em  ({$a->current%}) est� abaixo do n�vel exigido ({$a->needed%}) para receber o certificado.';
-$string['errorlocktime'] = 'Voc� deve primeiro alcan�ar a quantidade m�nima de tempo de trabalho neste treinamento antes de receber seu certificado.';
-$string['errorlockmod'] = 'Voc� deve primeiro alcan�ar todos os requisitos m�nimos de atividades do treinamento antes de receber seu certificado.';
-
-//Email text
-$string['emailstudenttext'] = 'Enviar o seu certificado para {$a->course}.';
-$string['awarded'] = 'Atribuido';
-$string['emailteachermail'] = '
-{$a->student} recebeu seu certificado: \'{$a->certificate}\'
-for {$a->course}.
-
-Voc� pode rever aqui:
-
-    {$a->url}';
-$string['emailteachermailhtml'] = '
-{$a->student} recebeu seu certificado: \'<i>{$a->certificate}</i>\'
-for {$a->course}.
-
-Voc� pode rever aqui:
-
-    <a href=\"{$a->url}\">Certificate Report</a>.';
-
-//Names of type folders
-$string['typeportrait'] = 'Retrato';
-$string['typeletter_portrait'] = 'Retrato (Carta)';
-$string['typelandscape'] = 'Paisagem';
-$string['typeletter_landscape'] = 'paisagem (Carta)';
-$string['typeunicode_landscape'] = 'Unicode (Paisagem)';
-$string['typeunicode_portrait'] = 'Unicode (Retrato)';
-
-//Print to certificate strings
-$string['grade'] = 'Grade';
-$string['coursegrade'] = 'Grade do Curso';
-$string['credithours'] = 'Horas de Treinamento';
-
-$string['titlelandscape'] = '';
-$string['introlandscape'] = 'Certificamos que';
-$string['statementlandscape'] = 'Completou o Treinamento';
-
-$string['titleletterlandscape'] = '';
-$string['introletterlandscape'] = 'Certificamos que';
-$string['statementletterlandscape'] = 'Completou o Treinamento';
-
-$string['titleportrait'] = '';
-$string['introportrait'] = 'Certificamos que';
-$string['statementportrait'] = 'Completou o Treinamento';
-$string['ondayportrait'] = 'no dia';
-
-$string['titleletterportrait'] = 'Certificado de Conclus�o';
-$string['introletterportrait'] = 'Certificamos que';
-$string['statementletterportrait'] = 'Completou o Treinamento';
-
-//Certificate transcript strings
+$string['mycertificates'] = 'Meus certificados';
+$string['nocertificates'] = 'Não há certificado algum.';
+$string['nocertificatesissued'] = 'Nenhum certificado foi emitido até o momento';
+$string['nocertificatesreceived'] = 'não recebeu certificado algum.';
+$string['nogrades'] = 'Notas não disponíveis';
 $string['notapplicable'] = 'N/A';
-$string['certificatesfor'] = 'Certificado para';
-$string['coursename'] = 'Treinamento';
-$string['viewtranscript'] = 'Ver Certificado';
-$string['mycertificates'] = 'Meus Certificados';
-$string['nocertificatesreceived'] = 'Voc� ainda n�o recebeu nenhum certificado.';
-$string['notissued'] = 'N�o recebido';
-$string['reportcertificate'] = 'Relat�rio de Certificados';
-$string['certificatereport'] = 'Relat�rio de Certificados';
-$string['printerfriendly'] = 'P�gina para Impress�o';
-
-// 2.0 strings
-$string['activitydependencies_help'] = '<p>Escolha aqui as atividades do curso e suas respectivas notas m�nimas exigidas percentual que deve ser alcan�ada para receber o certificado. Quaisquer atividades que s�o classificadas de acordo com os pontos ser�o convertidos em um percentual para o c�lculo do grau necess�rio. </ P>
-<p> Voc� tamb�m pode optar por bloquear o certificado com base na conclus�o de uma pesquisa, question�rio, ou atividade feedback. Para essas atividades, deixe o campo definido grau de &quot;No&quot;.  </p>';
-$string['border_help'] = '<p>The Border Image option allows you to choose a border image from the certificate/pix/borders folder.  Select the border image that you want around the certificate edges or select no border. 
-The folder includes two different border images, each in 4 different colors. </p>
-<p>Keep in mind that adding images to the certificate will increase the size of the pdf file.  You can add your own border images to the certificate/pix/borders folder and they will also appear here in the dropdown.  The border images must be in the JPEG (.jpg) or PNG 8 (.png) format.
-</p>';
-$string['bordercolor_help'] = '<p> Since images can substantially increase the size of the pdf file, you may choose to print a border of lines instead of using a border image (be sure the Border Image option is set to No). </p>
-<p> The Border Lines option will print a nice border of three lines of varying widths in the chosen color.</p>';
-$string['certificatetype_help'] = '<p>This is where you determine the layout of the certificate. The certificate type folder includes four default certificates:</p>
-<p><strong>New types can be added to the certificate/type folder. The names of the folders and any new language strings for the new type must be added to the certificate/lang/en_utf8/certificate.php file. </strong></p>
-<p><strong>Landscape:</strong> prints on A4 size paper with landscape orientation.<br>
-  <strong>Landscape Letter:</strong> prints on letter size paper with landscape orientation.<br>
-  <strong>Portrait</strong>: prints on A4 size paper with portrait orientation.<br>
-  <strong>Portrait Letter:</strong> prints on letter size paper with portrait orientation.</p>
-<p>Most languages will print fine, even if they contain accents or umlauts. However, if your language  uses characters, you will need to choose a unicode type. These types use a different pdf library that embeds the entire font in the pdf. This will make the pdf files rather large; thus it is not recommended to use this type unless you must. </p>
-<p>&nbsp;</p>';
-$string['coursetime_help'] = 'Enter here the minimum amount of time, in minutes, that  a student must be logged into the course before they will be able to receive the certificate.';
-$string['customtext_help'] = '<p>If you want the certificate to print different names for the teacher than those who are assigned
-the role of teacher, do not select Print Teacher or any signature image except for the line image.  Enter the teacher names in this text box as you would like them to appear.  By default, this text is placed in the lower left of the certificate. You can change this placement in your certificate/type/&quot;type name&quot;/certificate.php file. </p>
-<p>In that file, find the line of code similar to this at the very bottom of the page:</p>
-<p>cert_printtext(150, 450, \'\', \'\', \'\', \'\', \'\'); </p>
-<p>The two numbers reflect the X placement (over from the left) and Y placement (down from the top) values for the text. You can change these if you would like. </p>
-<p>You can also use the text box to enter  html. For example, you can add a link or  an image.</p>
-
-<div style="border: 1px solid black;font-size: 12px">
-The following html tags are available:
-<ul type="square">
-<li>&lt;br&gt; and &lt;p&gt;</li>
-<li>&lt;b&gt;, &lt;i&gt; and &lt;u&gt;</li>
-<li>&lt;img&gt; (src and width (or height) are mandatory)</li>
-<li>&lt;a&gt; (href is mandatory)</li>
-<li>&lt;font&gt;: possible attributes are:<br />
-  color: hex color code<br />
-  face: arial, times, courier, helvetica, symbol </li></ul></div>
-<p>Example html:</p>
-<p>Mr. James Salesman, Manager&lt;br&gt;&lt;br&gt;Sales Department&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#0000CC&quot;&gt;&lt;b&gt;Your Company&lt;font face=&quot;Symbol&quot;&gt;&amp;Ograve;&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;&lt;img src=&quot;http://yourmoodle.com/mod/certificate/pix/seals/Logo.png&quot; width=&quot;100&quot;&gt;&lt;p&gt;&lt;a href=&quot;http://www.site.com target=&quot;_blank&quot;&gt;Click here&lt;/a&gt;&lt;/p&gt;</p>';
-$string['datehelp_help'] = 'Choose a date format to print the date on the certificate. Or, choose the last option to have the date printed in the format of the user\'s chosen language.';
-$string['delivery'] = 'Enviar';
-$string['delivery_help'] = '<p>Choose here how you would like your students to get their certificate.</p>
-<p><strong>Abrir no Navegador:</strong> Abrir o certificado em uma nova janela. 
-<br>
-<strong>For�ar Download:</strong> Opens the browser file download window. <strong>(Note: </strong>Internet Explorer does not support the open option from the download window. The save option must be chosen first.)<br>
-<strong>Email Certificate:</strong> Choosing this option sends the certificate to the student as an email attachment.</p>
-<p>After a student receives their certificate, if they click on the certificate link again, they will see the date they received their certificate and will be able to review their received certificate.</p>';
-$string['emailothers_help'] = 'Enter the email addresses here, separated by a comma, of those who should be alerted with a short email whenever students receive a certificate.';
-$string['emailteachers_help'] = 'If enabled, then teachers are alerted with a short email whenever students receive a certificate.';
-$string['grade_help'] = '<p align="left">There are three available formats if you choose to print a grade on the certificate:</p>
-<p align="left"><strong>Percentage Grade:</strong> Prints the grade as a percentage.<strong><br />
-  Points Grade: </strong>Prints the point value of the grade. <br />
-  <strong>Letter Grade:</strong> Prints the percentage grade as a letter.  The values for the letter grades can be customized in type/certificate.php.</p>';
-$string['pluginadministration'] = 'Administra��o Certificado';
+$string['notfound'] = 'O código do certificado não pode ser validado.';
+$string['notissued'] = 'Não emitido';
+$string['notissuedyet'] = 'Não emitido ainda';
+$string['notreceived'] = 'Você não recebeu este certificado ainda';
+$string['openbrowser'] = 'Abrir em uma nova janela';
+$string['opendownload'] = 'Clique no botão abaixo para salvar o seu certificado no seu computador.';
+$string['openemail'] = 'Clique no botão abaixo, e o seu certificado será enviado como anexo a você por e-mail.';
+$string['openwindow'] = 'Clique no botão abaixo para abrir o seu certificado em nova janela do navegador.';
+$string['or'] = 'Ou';
+$string['orientation'] = 'Orientação';
+$string['orientation_help'] = 'Escolher a orientação certificado entre retrato ou paisagem.';
+$string['pluginadministration'] = 'Administração de certificado';
 $string['pluginname'] = 'Certificado';
-$string['printcode_help'] = 'A unique 10-digit code of random letters and numbers can be printed on the certificate. This number can then be verified by comparing it to the code number displayed in the teacher &quot;View Issued Certificates&quot; report.';
-$string['printgrade_help'] = '<p>You can choose any available course grade items from the gradebook to print the user\'s grade received for that item on the certificate.  The grade items are listed in the order in which they appear in the gradebook. </p>
-<p align="left">There are three available formats if you choose to print a grade on the certificate.</p>
-<p align="left">Note: Once a user has received their certificate, their grade on the certificate will NOT change. </p>';
-$string['printhours_help'] = 'Enter here the number of credit hours to be printed on the certificate.';
-$string['printoutcome_help'] = '<p>You can choose any course outcome to print the name of the outcome and the user\'s received outcome on the certificate.</p>
-<p>An example might be:</p>
-<p> Assignment Outcome: Proficient </p>';
-$string['printseal_help'] = '<p>This option allows you to select a seal or logo to print on the certificate from the certificate/pix/seals folder. Four seal images and an example  logo image are included. By default, this image is placed in the lower right corner of the certificate. You can change this placement in your certificate/type/&quot;type name&quot;/certificate.php file. </p>
-<p>In that file, find the line of code similar to this one toward the bottom:</p>
-<p> print_seal($certificate-&gt;printseal, $orientation, 590, 425, \'\', \'\'); </p>
-<p>The two numbers reflect the X placement (over from the left) and Y placement (down from the top) values for the image. You can change these if you would like. </p>
-<p>Keep in mind that adding images to the certificate will increase the size of the pdf file. 
-You can add your own  images to the certificate/pix/seals folder and they will also appear here in 
-the dropdown.  The  images must be in the JPEG (.jpg) or PNG 8 (.png) format. </p>';
-$string['printsignature_help'] = '<p>This option allows you to  print a signature image from the certificate/pix/signatures folder.  You can print a graphic representation of a signature, or print a line for a written signature. A sample signature image and a line image are included.</p>
-<p>By default, this image is placed in the lower left of the certificate. You can change this placement in your certificate/type/&quot;type name&quot;/certificate.php file. </p>
-<p>In that file, find the line of code similar to this one toward the bottom:</p>
-<p>print_signature($certificate-&gt;printsignature, $orientation, 110, 450, \'\', \'\');</p>
-<p>The two numbers reflect the X placement (over from the left) and Y placement (down from the top) values for the image. You can change these if you would like. </p>
-<p>Keep in mind that adding images to the certificate will increase the size of the pdf file. You can add your own images to the certificate/pix/signatures folder and they will also appear here in the dropdown.  The images must be in the JPEG (.jpg) or PNG 8 (.png) format. </p>
-<p>&nbsp;</p>';
-$string['printteacher_help'] = 'For printing the teacher name on the certificate, set the role of teacher at the module level.  Do this if, for example, you have more than one teacher for the course or you have more than one certificate in the course and you want to print different teacher names on each certificate.  Click to edit the certificate, then click on the Locally assigned roles tab.  Then assign the role of Teacher (editing teacher) to the certificate (they do not HAVE to be a teacher in the course--you can assign that role to anyone).  Those names will be printed on the certificate for teacher.';
-$string['printwmark_help'] = '<p>A watermark file can be placed in the background of the certificate. A watermark is a faded graphic. A watermark could be a logo, seal, crest, wording, or whatever you want to use as a graphic background. Two watermark images are included, a sample school crest and a Fleur de lis.</p>
-<p>Keep in mind that adding images to the certificate will increase the size of the pdf file. 
-You can add your own  images to the certificate/pix/watermarks folder and they will also appear here in the dropdown.  The  images must be in the JPEG (.jpg) or PNG 8 (.png) 
-format. </p>';
-$string['requiredgrade_help'] = 'Choose the minimum required percentage course grade (the average grade of all graded activities in the course) that the student must achieve to receive the certificate. Any activities that are graded using points will be converted to a percentage for calculating the required grade.';
-$string['save'] = 'Salvar';
-$string['save_help'] = '<p>If you choose this option, then a copy of each student\'s certificate is saved in the course files moddata folder
-for that certificate. A link to each student\'s saved certificate will be displayed in the teacher &quot;View Issued Certificates&quot; report. </p>';
-$string['writing'] = 'Escrita';
-$string['writing_help'] = 'Writing help';
-?>
+$string['portrait'] = 'Porta-retrato';
+$string['printdate'] = 'Imprimir data';
+$string['printdate_help'] = 'Esta é a data que será impressa, se uma data for adicionada à impressão. Se a data de conclusão do curso for selecionada, mas o aluno ainda não tiver concluído o curso, a data de recebimento será impressa. Você também pode optar por imprimir a data com base em quando uma atividade recebeu a nota. Se um certificado for emitido antes que a atividade receber uma nota, a data de recebimento será impressa.';
+$string['printerfriendly'] = 'Página de impressão';
+$string['printhours'] = 'Imprimir carga horária';
+$string['printhours_help'] = 'Digite aqui o número de horas de crédito a ser impresso no certificado, como carga horária.';
+$string['printgrade'] = 'Imprimir nota';
+$string['printgrade_help'] = 'Você pode escolher qualquer atividade com nota disponível no curso, para imprimir como nota do certificado. As atividades disponíveis são listadas na ordem em que aparecem no relatório de notas. Escolha o formato da nota abaixo.';
+$string['printnumber'] = 'Imprimir código';
+$string['printnumber_help'] = 'Um código de 10 dígitos único de letras e números aleatórios pode ser impresso no certificado. Este número pode então ser verificado comparando-o com o número do código exibido no relatório certificados.';
+$string['printoutcome'] = 'Imprimir resultado';
+$string['printoutcome_help'] = 'Pode-se escolher qualquer informação de retorno das atividades do curso que o usuário recebeu, para imprimir no certificado. Um exemplo prático seroa: Resultado no curso: Proficiente.';
+$string['printseal'] = 'Imprimir selo ou imagem de logomarca';
+$string['printseal_help'] = 'Esta opção permite que você selecione um selo ou logotipo para ser impresso no certificado, dentre os disponíveis na pasta certificate/pix/seals. Por padrão, essa imagem é colocada no canto inferior direito do certificado.';
+$string['printsignature'] = 'Imagem de assinatura';
+$string['printsignature_help'] = 'Esta opção permite imprimir uma imagem de assinatura no certificado, contida na pasta certificate/pix/signatures. É possível imprimir uma representação gráfica de uma assinatura, ou imprimir uma linha para efetuar a assinatura manualmente, após sua impressão. Por padrão, essa imagem é disposta no canto inferior esquerdo do certificado.';
+$string['printteacher'] = 'Imprimir o(s) nome(s) do(s) professor(es)';
+$string['printteacher_help'] = 'Para imprimir o nome do professor no certificado, defina o papel de professor no nível do módulo certificado. Isto possibilita que mesmo havendo mais de um professor para o curso, ou se houver a disponibilização de mais de um certificado no curso onde pretende-se imprimir nomes de professor diferentes em cada certificado. Para isto, acesse a edição do certificado, e em seguida, clique na guia de papéis atribuídos localmente. Em seguida, atribua o papel de Professor (professor editor) ao certificado (lembrando que o usuário não precisa ser necessariamente um professor no curso - é possível atribuir esse papel qualquer pessoa). Esses nomes serão impressos no certificado para o professor.';
+$string['printwmark'] = 'Imagem de marca d\'água';
+$string['printwmark_help'] = 'Um arquivo de marca d\'água pode ser colocado no fundo do certificado. Uma marca d\'água é uma imagem com transparência. Uma marca d\'água pode ser um logotipo, um selo, um texto, ou o que você desejar usar como um detalhe na imagem de fundo.';
+$string['receivedcerts'] = 'Certificados recebidos';
+$string['receiveddate'] = 'Data de recebimento';
+$string['reissuecert'] = 'Reemitir Certificados';
+$string['reissuecert_help'] = 'Optando-se pela opção sim aqui, este certificado será reemitido com nova data, nova nota e novo código a cada vez que um usuário acessar o link do certificado. Nota: Apesar da tabela mostrar as datas de recebimento passadas, não haverá botão algum para a revisão das versões anteriores para os usuários. Apenas o último certificado emitido será exibido no relatório certificado.';
+$string['removecert'] = 'Certificados emitidos removidos';
+$string['report'] = 'Relatório';
+$string['reportcert'] = 'Relatório detalhado de certificados';
+$string['reportcert_help'] = 'Optando-se pela opção sim aqui, a data de recebimento deste certificado, o seu código, e o nome do curso será mostrado nos relatórios de certificado dos usuários. Se você optar por imprimir uma nota no certificado, então esta nota também aparecerá no relatório certificado.';
+$string['reviewcertificate'] = 'Rever o seu certificado';
+$string['savecert'] = 'Salvar certificados';
+$string['savecert_help'] = 'Optando-se pela opção sim aqui, uma cópia dos certificados de cada usuário será salva na pasta do curso no formato PDF. Um link para cada certificado do usuário será exibido no relatório de certificado.';
+$string['sigline'] = 'Linha para assinatura manual';
+$string['statement'] = 'completou o curso';
+$string['summaryofattempts'] = 'Resumo dos certificados recebidos anteriormente';
+$string['textoptions'] = 'Opções de texto';
+$string['title'] = 'CERTIFICADO de REALIZAÇÃO';
+$string['to'] = 'Atribuído a';
+$string['typeA4_embedded'] = 'A4 com fontes incorporadas';
+$string['typeA4_non_embedded'] = 'A4 sem fontes incorporadas';
+$string['typeletter_embedded'] = 'Carta com fontes incorporadas';
+$string['typeletter_non_embedded'] = 'Carta sem fontes incorporadas';
+$string['userdateformat'] = 'Formato de data da linguagem do usuário';
+$string['validate'] = 'Validar';
+$string['verifycertificate'] = 'Verificar Certificado';
+$string['viewcertificateviews'] = 'Ver {$a} certificados emitidos';
+$string['viewed'] = 'Você recebeu este certificado em:';
+$string['viewtranscript'] = 'Ver certificados';
