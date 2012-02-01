@@ -80,7 +80,9 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
         $table->add_index('certificate_id', XMLDB_INDEX_NOTUNIQUE, array('certificate_id'));
         $table->add_index('linkid', XMLDB_INDEX_NOTUNIQUE, array('linkid'));
-        $dbman->create_table($table);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
 
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2007061301, 'certificate');
