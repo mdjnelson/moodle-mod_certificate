@@ -23,39 +23,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
     $dbman = $DB->get_manager();
 
     // ===== 1.9.0 or older upgrade line ======//
-    if ($oldversion < 2007102806) {
-        // Add new fields to certificate table
-        $table = new xmldb_table('certificate');
-        $field = new xmldb_field('printoutcome');
-        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'gradefmt');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // certificate savepoint reached
-        upgrade_mod_savepoint(true, 2007102806, 'certificate');
-    }
-
-    if ($oldversion < 2007102800) {
-        // Add new fields to certificate table
-        $table = new xmldb_table('certificate');
-        $field = new xmldb_field('reportcert');
-        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'savecert');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        $table = new xmldb_table('certificate_issues');
-        $field = new xmldb_field('reportgrade');
-        $field->set_attributes(XMLDB_TYPE_CHAR, '10', null, null, null, null, 'certdate');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // certificate savepoint reached
-        upgrade_mod_savepoint(true, 2007102800, 'certificate');
-    }
-
     if ($oldversion < 2007061300) {
         // Add new fields to certificate table
         $table = new xmldb_table('certificate');
@@ -127,6 +94,39 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2007061302, 'certificate');
+    }
+
+    if ($oldversion < 2007102800) {
+        // Add new fields to certificate table
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('reportcert');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'savecert');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $table = new xmldb_table('certificate_issues');
+        $field = new xmldb_field('reportgrade');
+        $field->set_attributes(XMLDB_TYPE_CHAR, '10', null, null, null, null, 'certdate');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2007102800, 'certificate');
+    }
+
+    if ($oldversion < 2007102806) {
+        // Add new fields to certificate table
+        $table = new xmldb_table('certificate');
+        $field = new xmldb_field('printoutcome');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'gradefmt');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2007102806, 'certificate');
     }
 
     if ($oldversion < 2008080904) {
