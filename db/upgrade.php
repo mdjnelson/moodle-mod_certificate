@@ -30,7 +30,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('printoutcome');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'gradefmt');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
     }
 
     if ($result && $oldversion < 2007102800) {
@@ -38,12 +38,12 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('reportcert');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'savecert');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
 
         $table = new xmldb_table('certificate_issues');
         $field = new xmldb_field('reportgrade');
         $field->set_attributes(XMLDB_TYPE_CHAR, '10', null, null, null, null, 'certdate');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
     }
 
     if ($result && $oldversion < 2007061300) {
@@ -51,22 +51,22 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('emailothers');
         $field->set_attributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'emailteachers');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
 
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('printhours');
         $field->set_attributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'gradefmt');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
 
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('lockgrade');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'printhours');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
 
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('requiredgrade');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'lockgrade');
-        $result = $result && add_field($table, $field);
+        $result = $result && $dbman->add_field($table, $field);
 
         // Rename field save to savecert
         $field = new xmldb_field('save');
@@ -78,18 +78,18 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $field = new xmldb_field('savecert');
             $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'emailothers');
 
-            $result = $result && add_field($table, $field);
+            $result = $result && $dbman->add_field($table, $field);
         }
 
     }
 
     if ($result && $oldversion < 2007061301) {
         $table = new xmldb_table('certificate_linked_modules');
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE,  null, null);
-        $table->add_field('certificate_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'id');
-        $table->add_field('linkid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'certificate_id');
-        $table->add_field('linkgrade', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'linkid');
-        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'linkgrade');
+        $table->$dbman->add_field('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE,  null, null);
+        $table->$dbman->add_field('certificate_id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'id');
+        $table->$dbman->add_field('linkid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'certificate_id');
+        $table->$dbman->add_field('linkgrade', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'linkid');
+        $table->$dbman->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'linkgrade');
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'), null, null);
         $table->add_index('certificate_id', XMLDB_INDEX_NOTUNIQUE, array('certificate_id'));
         $table->add_index('linkid', XMLDB_INDEX_NOTUNIQUE, array('linkid'));
@@ -115,7 +115,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field = new xmldb_field('intro');
         $field->set_attributes(XMLDB_TYPE_TEXT, 'small', null, null, null, null, 'name');
         if (!field_exists($table, $field)) {
-            $result = $result && add_field($table, $field);
+            $result = $result && $dbman->add_field($table, $field);
         }
     }
 
@@ -126,13 +126,13 @@ function xmldb_certificate_upgrade($oldversion=0) {
         // Add new field to certificate table
         $table = new xmldb_table('certificate');
         $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
-        $dbman->add_field($table, $field);
+        $dbman->$dbman->add_field($table, $field);
 
         $field = new xmldb_field('orientation', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, ' ', 'certificatetype');
-        $dbman->add_field($table, $field);
+        $dbman->$dbman->add_field($table, $field);
 
         $field = new xmldb_field('reissuecert', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'reportcert');
-        $dbman->add_field($table, $field);
+        $dbman->$dbman->add_field($table, $field);
 
         // Set default orientation accordingly
         $DB->set_field('certificate', 'orientation', 'P', array('certificatetype' => 'portrait'));
@@ -162,7 +162,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // Conditionally launch add field id
         if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
+            $dbman->$dbman->add_field($table, $field);
         }
 
         // certificate savepoint reached
@@ -184,11 +184,11 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // Have to check, may be added during earlier upgrade, or may be missing due to not being included in install.xml
         if (!$dbman->field_exists($table, $reissuefield)) {
-            $dbman->add_field($table, $reissuefield);
+            $dbman->$dbman->add_field($table, $reissuefield);
         }
 
         if (!$dbman->field_exists($table, $orientationfield)) {
-            $dbman->add_field($table, $orientationfield);
+            $dbman->$dbman->add_field($table, $orientationfield);
         }
 
         // Fresh 2.0 installs won't have this table, but upgrades from 1.9 will
