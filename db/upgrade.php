@@ -180,7 +180,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
 
         // savepoint reached
-        upgrade_mod_savepoint(true, 2009081000, 'certificate');
+        upgrade_mod_savepoint(true, 2009062900, 'certificate');
     }
 
     if ($oldversion < 2011030105) {
