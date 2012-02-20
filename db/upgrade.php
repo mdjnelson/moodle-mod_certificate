@@ -378,5 +378,16 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2012010501, 'certificate');
     }
 
+    if ($oldversion < 2012022001) {
+        // CONTRIB-3470 - certdate remaining 0 on issued certificates, need to update
+        $sql = "UPDATE {certificate_issues}
+                SET certdate = timecreated
+                WHERE certdate = 0";
+        $DB->execute($sql);
+
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2012022001, 'certificate');
+    }
+
     return true;
 }
