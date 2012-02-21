@@ -741,7 +741,12 @@ function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupm
 function certificate_get_attempts($certificateid, $userid) {
     global $DB;
 
-    if ($issues = $DB->get_records('certificate_issues', array('certificateid'=>$certificateid, 'userid'=>$userid))) {
+    $sql = "SELECT *
+            FROM {certificate_issues} i
+            WHERE certificateid = :certificateid
+            AND userid = :userid
+            AND certdate > 0";
+    if ($issues = $DB->get_records_sql($sql, array('certificateid'=>$certificateid, 'userid'=>$userid))) {
         return $issues;
     } else {
         return 0;
@@ -789,12 +794,9 @@ function certificate_print_attempts($certificateid, $userid) {
         }
         $row[] = $datecompleted;
 
-        // Ouside the if because we may be showing feedback but not grades.
         if ($gradecolumn) {
             $attemptgrade = $attempt->reportgrade;
             $row[] = $attemptgrade;
-        } else {
-            $row[] = '';
         }
 
         $table->data[$attempt->id] = $row;
@@ -1509,11 +1511,6 @@ function print_seal($pdf, $certificate, $x, $y, $w, $h) {
 function certificate_generate_date($certificate, $course) {
     global $DB, $USER;
 
-    // Set default date, in case no options are valid
-    $certdate = time();
-    if ($certificate->printdate == '0') {
-        $certdate = '';
-    }
     if ($certificate->printdate == '2') {
         // Get the enrolment end date
         $sql = "SELECT MAX(c.timecompleted) as timecompleted
@@ -1526,11 +1523,13 @@ function certificate_generate_date($certificate, $course) {
                 $certdate = $timecompleted->timecompleted;
             }
         }
-    }
-    if ($certificate->printdate > 2) {
+    } else if ($certificate->printdate > 2) {
         $modinfo = certificate_print_mod_grade($course, $certificate->printdate);
         $certdate = $modinfo->dategraded;
+    } else {
+        $certdate = time();
     }
+
     return $certdate;
 }
 
