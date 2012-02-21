@@ -1,3 +1,48 @@
+==============
+:::::NOTE:::::
+==============
+Please not that this is only a fork and not the official module which is
+developed by PukunuiAustralia.
+
+This fork extends the Certificate module by adding the course specific
+borders, seals, signatures and watermarks. 
+
+Borders, seals, signatures and watermarks are the images used during the
+creation of the Certificate. In the original project was not possible
+to confine specific borders to specific courses. What happens is that
+all courses can see all borders, seals, signatures and watermarks.
+
+This fork implements a filter that makes borders, seals, signatures and
+watermarks visibile only for specific courses.
+
+You will notice that every sub folder of the pix folder has now a new 
+folder named "by_course_shortname". Inside this folder you should store 
+the images that are going to be visible only by specific courses.
+
+The visibility is enabled by the naming convention: COURSE_SHORTNAME_description.{jpg,png}
+
+Example: pix/borders/by_course_shortname/course_007_purple_border.jpg
+
+The border purple_border is going to be visible only inside
+the certificates of the course that has course_007 as shortname.
+For every other course this border is going to be invisible.
+
+This applies also to seals, signatures and watermarks.
+
+Please note that every image inside by_course_shortname folder
+that doesn't follow the naming convention is going to be ignored.
+
+To install clone the repository:
+
+git clone git://github.com/arael/moodle-mod_certificate.git
+
+or download the compressed archive.
+
+
+==============================================================================
+FOLLOWS THE ORIGINALE README.txt file 
+==============================================================================
+
 QUICK INSTALL
 =============
 
