@@ -1041,6 +1041,33 @@ function certificate_types() {
 }
 
 /**
+ * Add specific course backgrounds and images
+ *
+ * @return array
+ */
+
+function add_images_by_course_shortname( $path, $images) {
+	global $COURSE;
+
+	//load a the course specific backgrounds if available
+	$my_path = $path."/by_course_shortname";
+    if ($handle = opendir($my_path)) {
+		while (false !== ($file = readdir($handle))) {
+        if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
+                $i = strpos($file, '.');
+                if ($i > 1 and preg_match('/^'.$COURSE->shortname.'_/', $file) === 1) {
+                    // Set the style name
+                    $images[$file] = substr($file, 0, $i);
+                }
+            }
+        }
+        closedir($handle);
+    }
+
+	return $images;
+}
+
+/**
  * Get border images for mod_form.
  *
  * @return array
@@ -1063,6 +1090,8 @@ function certificate_get_borders () {
         }
         closedir($handle);
     }
+	// add course specific backgrounds
+	$borderstyleoptions = add_images_by_course_shortname($my_path, $borderstyleoptions);
 
     // Sort borders
     ksort($borderstyleoptions);
@@ -1122,6 +1151,10 @@ function certificate_get_watermarks () {
         }
         closedir($handle);
     }
+	
+	// add course specific watermarks
+	$wmarkoptions = add_images_by_course_shortname($my_path, $wmarkoptions);
+
     // Order watermarks
     ksort($wmarkoptions);
 
@@ -1151,6 +1184,10 @@ function certificate_get_signatures () {
         }
         closedir($handle);
     }
+
+	// add course specific signatures
+	$signatureoptions = add_images_by_course_shortname($my_path, $signatureoptions);
+
     // Order signatures
     ksort($signatureoptions);
 
