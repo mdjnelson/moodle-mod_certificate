@@ -1,12 +1,14 @@
-pix/borders/by_course_shortname/*.jpg
-pix/borders/by_course_shortname/*.png
+pix/borders/c/*.jpg
+pix/borders/c/*.png
 
-pix/seals/by_course_shortname/*.jpg
-pix/seals/by_course_shortname/*.png
+pix/seals/c/*.jpg
+pix/seals/c/*.png
 
-pix/signatures/by_course_shortname/*.jpg
-pix/signatures/by_course_shortname/*.png
+pix/signatures/c/*.jpg
+pix/signatures/c/*.png
 
-pix/watermarks/by_course_shortname/*.jpg
-pix/watermarks/by_course_shortname/*.png
+pix/watermarks/c/*.jpg
+pix/watermarks/c/*.png
+
+*.swp
 

@@ -28,6 +28,16 @@ require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/grade/lib.php');
 require_once($CFG->dirroot.'/grade/querylib.php');
 
+
+// elab Goran Josic code BEGIN
+
+// this variable defines the lenght of the filename
+// modify this value if you modify the db/install.xml
+// table definitions
+define('FILE_NAME_LENGTH', 30);
+// elab Goran Josic code END
+
+
 /**
  * Add certificate instance.
  *
@@ -1042,26 +1052,35 @@ function certificate_types() {
     return $types;
 }
 
+
+
+// eLab Goran Josic code BEGIN
+
 /**
  * Add specific course backgrounds and images
  *
  * @return array
  */
 
-function add_images_by_course_shortname( $path, $images) {
+
+function add_images_by_course_shortname($path, $images) {
 	global $COURSE;
 
 	$course_shortname = preg_replace('/\./','\\.', $COURSE->shortname);
 	//load a the course specific backgrounds if available
-	$my_path = $path."/by_course_shortname";
+	$protected_dir="/c";
+	$my_path = $path.$protected_dir;
     if ($handle = opendir($my_path)) {
 		while (false !== ($file = readdir($handle))) {
         if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
                 $i = strpos($file, '.');
-                if ($i > 1 and preg_match('/^'.$course_shortname.'_/', $file) === 1) {
+				// use only files that which lenght is under FILE_NAME_LENGTH - strlen($protected_dir) size; default is 30-2=28 chars
+				// file check code has been added also to functions certificate_get_borders, certificate_get_seals, 
+				// certificate_get_watermarks and certificate_get_signatures
+                if ($i > 1 and strlen($file) < FILE_NAME_LENGTH - strlen($protected_dir) and preg_match('/^'.$course_shortname.'_/', $file) === 1) {
                     // Set the style name
                     //$images[$file] = substr($file, 0, $i);
-                    $images[$file] = preg_replace('/\....$/','', $file);
+                    $images[$protected_dir.'/'.$file] = preg_replace('/\....$/','', $file);
                 }
             }
         }
@@ -1070,6 +1089,8 @@ function add_images_by_course_shortname( $path, $images) {
 
 	return $images;
 }
+
+// eLab Goran Josic code END
 
 /**
  * Get border images for mod_form.
@@ -1086,7 +1107,7 @@ function certificate_get_borders () {
         while (false !== ($file = readdir($handle))) {
         if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
                 $i = strpos($file, '.');
-                if ($i > 1) {
+                if ($i > 1 and strlen($file) < FILE_NAME_LENGTH) {
                     // Set the style name
                     $borderstyleoptions[$file] = substr($file, 0, $i);
                 }
@@ -1119,13 +1140,17 @@ function certificate_get_seals () {
         while (false !== ($file = readdir($handle))) {
             if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
                     $i = strpos($file, '.');
-                    if ($i > 1) {
+                    if ($i > 1 and strlen($file) < FILE_NAME_LENGTH) {
                         $sealoptions[$file] = substr($file, 0, $i);
                     }
                 }
             }
         closedir($handle);
     }
+
+	// add course specific seals
+	$sealoptions = add_images_by_course_shortname($my_path, $sealoptions);
+
     // Order seals
     ksort($sealoptions);
 
@@ -1148,7 +1173,7 @@ function certificate_get_watermarks () {
         while (false !== ($file = readdir($handle))) {
         if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
             $i = strpos($file, '.');
-                if ($i > 1) {
+                if ($i > 1 and strlen($file) < FILE_NAME_LENGTH) {
                     $wmarkoptions[$file] = substr($file, 0, $i);
                 }
             }
@@ -1181,7 +1206,7 @@ function certificate_get_signatures () {
         while (false !== ($file = readdir($handle))) {
             if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1)) {
                 $i = strpos($file, '.');
-                if ($i > 1) {
+                if ($i > 1 and strlen($file) < FILE_NAME_LENGTH) {
                     $signatureoptions[$file] = substr($file, 0, $i);
                 }
             }

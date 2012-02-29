@@ -16,21 +16,27 @@ This fork implements a filter that makes borders, seals, signatures and
 watermarks visibile only for specific courses.
 
 You will notice that every sub folder of the pix folder has now a new 
-folder named "by_course_shortname". Inside this folder you should store 
+folder named "c". Inside this folder you should store 
 the images that are going to be visible only by specific courses.
 
 The visibility is enabled by the naming convention: COURSE_SHORTNAME_description.{jpg,png}
 
-Example: pix/borders/by_course_shortname/course_007_purple_border.jpg
+Example: pix/borders/c/course_007_purple.jpg
 
-The border purple_border is going to be visible only inside
+The border "course_007_purple" is going to be visible only inside
 the certificates of the course that has course_007 as shortname.
 For every other course this border is going to be invisible.
 
 This applies also to seals, signatures and watermarks.
 
-Please note that every image inside by_course_shortname folder
+Please note that every image inside "c" folder
 that doesn't follow the naming convention is going to be ignored.
+
+Also note that, generally, the filename length shouldn't be longer 
+than 30 chars while in the "c" folder the length is limited to 28 chars.
+This is a limitation related to the tables of this module.
+If you modify the lenght of the tables please modify also
+the FILE_NAME_LENGTH constant in the lib.php file.
 
 To install clone the repository:
 
