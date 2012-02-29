@@ -1051,15 +1051,17 @@ function certificate_types() {
 function add_images_by_course_shortname( $path, $images) {
 	global $COURSE;
 
+	$course_shortname = preg_replace('/\./','\\.', $COURSE->shortname);
 	//load a the course specific backgrounds if available
 	$my_path = $path."/by_course_shortname";
     if ($handle = opendir($my_path)) {
 		while (false !== ($file = readdir($handle))) {
         if (strpos($file, '.png',1)||strpos($file, '.jpg',1) ) {
                 $i = strpos($file, '.');
-                if ($i > 1 and preg_match('/^'.$COURSE->shortname.'_/', $file) === 1) {
+                if ($i > 1 and preg_match('/^'.$course_shortname.'_/', $file) === 1) {
                     // Set the style name
-                    $images[$file] = substr($file, 0, $i);
+                    //$images[$file] = substr($file, 0, $i);
+                    $images[$file] = preg_replace('/\....$/','', $file);
                 }
             }
         }
