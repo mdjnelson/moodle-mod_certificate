@@ -3,10 +3,10 @@
 /**
  * Language strings for the certificate module
  *
- * @package    mod
+ * @package mod
  * @subpackage certificate
- * @copyright  Mark Nelson <mark@moodle.com.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2012 Ale Vilar <alevilar@gmail.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['addlinklabel'] = 'Agregar otro opciones de actividad condicional'; 
