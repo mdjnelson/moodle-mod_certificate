@@ -404,7 +404,7 @@ function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
  * Uses the email_teachers info.
  * Code suggested by Eloy Lafuente
  */
-function certificate_email_others ($course, $certificate, $certrecord, $cm) {
+function certificate_email_others($course, $certificate, $certrecord, $cm) {
     global $USER, $CFG, $DB;
 
     if ($certificate->emailothers) {
@@ -1047,7 +1047,7 @@ function certificate_types() {
  *
  * @return array
  */
-function certificate_get_borders () {
+function certificate_get_borders() {
     global $CFG, $DB;
 
     // load border files
@@ -1079,7 +1079,7 @@ function certificate_get_borders () {
  *
  * @return array
  */
-function certificate_get_seals () {
+function certificate_get_seals() {
     global $CFG, $DB;
 
     $my_path = "$CFG->dirroot/mod/certificate/pix/seals";
@@ -1107,7 +1107,7 @@ function certificate_get_seals () {
  *
  * @return array
  */
-function certificate_get_watermarks () {
+function certificate_get_watermarks() {
     global $CFG, $DB;
 
     // load watermark files
@@ -1136,7 +1136,7 @@ function certificate_get_watermarks () {
  *
  * @return array
  */
-function certificate_get_signatures () {
+function certificate_get_signatures() {
     global $CFG, $DB;
 
     // load signature files
