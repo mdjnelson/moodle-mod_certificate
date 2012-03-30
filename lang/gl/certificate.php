@@ -1,4 +1,4 @@
-<?PHP // $Id$ 
+<?PHP // $Id$
       // certificate.php - created with Moodle 1.9.3+ (Build: 20081224) (2007101533)
       // modifications from Toni Soto (Vigo) www.colegioapostol.com
 
@@ -50,7 +50,7 @@ $string['emailteachermail'] = '$a->student xa recibiu o seu certificado: \'$a->c
 Pode revisa-lo en: $a->url';
 $string['emailteachermailhtml'] = '$a->student xa recibiu o seu certificado: \'<i>$a->certificate</i>\' do curso $a->course.
 
-Puede revisa-lo en: <a href=\"$a->url\">Informe do Certificado</a>.';
+Puede revisa-lo en: <a href="$a->url">Informe do Certificado</a>.';
 $string['emailteachers'] = 'Enviar email a los profesores';
 $string['entercode'] = 'Introduza o código para verifica-lo';
 $string['errorlockgrade'] = 'A súa calificación actual en $a->mod ($a->current%%) está por debaixo da calificación necesaria ($a->needed%%) para recibir o certificado.';
