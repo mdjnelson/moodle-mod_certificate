@@ -295,7 +295,7 @@ function view_header($course, $certificate, $cm) {
     }
 
     if (!empty($certificate->intro)) {
-        echo $OUTPUT->box(format_text($certificate->intro), 'generalbox', 'intro');
+        echo $OUTPUT->box(format_module_intro('certificate', $certificate, $cm->id), 'generalbox', 'intro');
     }
 }
 
