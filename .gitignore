@@ -1,0 +1,14 @@
+pix/borders/c/*.jpg
+pix/borders/c/*.png
+
+pix/seals/c/*.jpg
+pix/seals/c/*.png
+
+pix/signatures/c/*.jpg
+pix/signatures/c/*.png
+
+pix/watermarks/c/*.jpg
+pix/watermarks/c/*.png
+
+*.swp
+
