@@ -94,7 +94,7 @@ do curso {$a->course}.
 
 Você pode revê-lo aqui:
 
-<a href=\"{$a->url}\">Relatório de certificado</a>.';
+<a href="{$a->url}">Relatório de certificado</a>.';
 $string['entercode'] = 'Entre o código do certificado para verificar:';
 $string['getcertificate'] = 'Obter o seu certificado';
 $string['grade'] = 'Nota';

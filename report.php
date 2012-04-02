@@ -24,6 +24,7 @@ if ($download) {
 if ($action) {
     $url->param('action', $action);
 }
+$PAGE->set_url($url);
 
 if (!$cm = get_coursemodule_from_id('certificate', $id)) {
     print_error('Course Module ID was incorrect');
@@ -53,18 +54,20 @@ $strgrade = get_string('grade','certificate');
 $strcode = get_string('code', 'certificate');
 $strreport= get_string('report', 'certificate');
 
-$PAGE->navbar->add($strreport);
-$PAGE->set_title(format_string($certificate->name).": $strreport");
-$PAGE->set_heading($course->fullname);
-$PAGE->set_url($url);
+if (!$download) {
+    $PAGE->navbar->add($strreport);
+    $PAGE->set_title(format_string($certificate->name).": $strreport");
+    $PAGE->set_heading($course->fullname);
+    // Check to see if groups are being used in this choice
+    if ($groupmode = groups_get_activity_groupmode($cm)) {
+        groups_get_activity_group($cm, true);
+        groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
+    }
+} else {
+    $groupmode = groups_get_activity_groupmode($cm);
+}
 
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
-
-// Check to see if groups are being used in this choice
-if ($groupmode = groups_get_activity_groupmode($cm)) {
-    groups_get_activity_group($cm, true);
-    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
-}
 
 // Ensure there are issues to display, if not display notice
 if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm)) {

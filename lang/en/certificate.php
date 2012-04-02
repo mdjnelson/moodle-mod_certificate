@@ -85,7 +85,7 @@ for {$a->course}.
 
 You can review it here:
 
-    <a href=\"{$a->url}\">Certificate Report</a>.';
+    <a href="{$a->url}">Certificate Report</a>.';
 $string['entercode'] = 'Enter certificate code to verify:';
 $string['getcertificate'] = 'Get your certificate';
 $string['grade'] = 'Grade';
