@@ -1,7 +1,7 @@
 <?php
 
 if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from view.php in mod/tracker
+    die('Direct access to this script is forbidden.'); // It must be included from view.php
 }
 
 // Date formatting - can be customized if necessary
@@ -14,56 +14,50 @@ if ($certrecord->certdate > 0) {
 if ($certificate->printdate > 0) {
     if ($certificate->datefmt == 1) {
         $certificatedate = str_replace(' 0', ' ', strftime('%B %d, %Y', $certdate));
-    } if ($certificate->datefmt == 2) {
+    } else if ($certificate->datefmt == 2) {
         $certificatedate = date('F jS, Y', $certdate);
-    } if ($certificate->datefmt == 3) {
+    } else if ($certificate->datefmt == 3) {
         $certificatedate = str_replace(' 0', '', strftime('%d %B %Y', $certdate));
-    } if ($certificate->datefmt == 4) {
+    } else if ($certificate->datefmt == 4) {
         $certificatedate = strftime('%B %Y', $certdate);
-    } if ($certificate->datefmt == 5) {
-        $timeformat = get_string('strftimedate');
-        $certificatedate = userdate($certdate, $timeformat);
+    } else if ($certificate->datefmt == 5) {
+        $certificatedate = userdate($certdate, get_string('strftimedate', 'langconfig'));
     }
 }
 
-//Grade formatting
+// Grade formatting
 $grade = '';
-//Print the course grade
+// Print the course grade
 $coursegrade = certificate_print_course_grade($course);
-if ($certificate->printgrade == 1 && $certrecord->reportgrade == !null) {
+if ($certificate->printgrade == 1 && $certrecord->reportgrade) {
     $reportgrade = $certrecord->reportgrade;
     $grade = $strcoursegrade . ':  ' . $reportgrade;
-} else
-if ($certificate->printgrade > 0) {
+} else if ($certificate->printgrade > 0) {
     if ($certificate->printgrade == 1) {
         if ($certificate->gradefmt == 1) {
             $grade = $strcoursegrade . ':  ' . $coursegrade->percentage;
-        } if ($certificate->gradefmt == 2) {
+        } else if ($certificate->gradefmt == 2) {
             $grade = $strcoursegrade . ':  ' . $coursegrade->points;
-        } if ($certificate->gradefmt == 3) {
+        } else if ($certificate->gradefmt == 3) {
             $grade = $strcoursegrade . ':  ' . $coursegrade->letter;
         }
-    } else {
-//Print the mod grade
+    } else { // Print the mod grade
         $modinfo = certificate_print_mod_grade($course, $certificate->printgrade);
-        if ($certrecord->reportgrade == !null) {
+        if ($certrecord->reportgrade) {
             $modgrade = $certrecord->reportgrade;
             $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modgrade;
-        } else
-        if ($certificate->printgrade > 1) {
+        } else if ($certificate->printgrade > 1) {
             if ($certificate->gradefmt == 1) {
                 $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modinfo->percentage;
-            }
-            if ($certificate->gradefmt == 2) {
+            } else if ($certificate->gradefmt == 2) {
                 $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modinfo->points;
-            }
-            if ($certificate->gradefmt == 3) {
+            } else if ($certificate->gradefmt == 3) {
                 $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modinfo->letter;
             }
         }
     }
 }
-//Print the outcome
+// Print the outcome
 $outcome = '';
 $outcomeinfo = certificate_print_outcome($course, $certificate->printoutcome);
 if ($certificate->printoutcome > 0) {
@@ -76,16 +70,17 @@ if ($certificate->printnumber) {
     $code = $certrecord->code;
 }
 
-//Print the student name
+// Print the student name
 $studentname = '';
 $studentname = $certrecord->studentname;
 $classname = '';
 $classname = $certrecord->classname;
-//Print the credit hours
+// Print the credit hours
 if ($certificate->printhours) {
     $credithours = $strcredithours . ': ' . $certificate->printhours;
-} else
+} else {
     $credithours = '';
+}
 
 $pdf = new TCPDF($certificate->orientation, 'mm', 'A4', true, 'UTF-8', false);
 
@@ -96,8 +91,8 @@ $pdf->setPrintFooter(false);
 $pdf->SetAutoPageBreak(false, 0);
 $pdf->AddPage();
 
-//Define variables
-//Landscape
+// Define variables
+// Landscape
 if ($certificate->orientation == 'L') {
     $x = 10;
     $y = 30;
@@ -116,8 +111,7 @@ if ($certificate->orientation == 'L') {
     $brdrw = 297;
     $brdrh = 210;
     $codey = 175;
-} else {
-//Portrait
+} else { //Portrait
     $x = 10;
     $y = 40;
     $sealx = 150;
