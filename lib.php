@@ -1035,8 +1035,13 @@ function certificate_get_post_actions() {
 function certificate_types() {
     $types = array();
     $names = get_list_of_plugins('mod/certificate/type');
+    $sm = get_string_manager();
     foreach ($names as $name) {
-        $types[$name] = get_string('type'.$name, 'certificate');
+        if ($sm->string_exists('type'.$name, 'certificate')) {
+            $types[$name] = get_string('type'.$name, 'certificate');
+        } else {
+            $types[$name] = ucfirst($name);
+        }
     }
     asort($types);
     return $types;
