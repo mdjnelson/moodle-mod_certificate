@@ -1474,23 +1474,25 @@ function print_seal($pdf, $certificate, $x, $y, $w, $h) {
 function certificate_generate_date($certificate, $course) {
     global $DB, $USER;
 
+    // Set certificate date to current time, can be overwritten later
+    $certdate = time();
+
     if ($certificate->printdate == '2') {
         // Get the enrolment end date
         $sql = "SELECT MAX(c.timecompleted) as timecompleted
                 FROM {course_completions} c
                 WHERE c.userid = :userid
                 AND c.course = :courseid
-                AND c.deleted = 0";
+                AND c.deleted IS NULL";
         if ($timecompleted = $DB->get_record_sql($sql, array('userid'=>$USER->id, 'courseid'=>$course->id))) {
-            if ($timecompleted->timecompleted) {
+            if (!empty($timecompleted->timecompleted)) {
                 $certdate = $timecompleted->timecompleted;
             }
         }
     } else if ($certificate->printdate > 2) {
-        $modinfo = certificate_print_mod_grade($course, $certificate->printdate);
-        $certdate = $modinfo->dategraded;
-    } else {
-        $certdate = time();
+        if ($modinfo = certificate_print_mod_grade($course, $certificate->printdate)) {
+            $certdate = $modinfo->dategraded;
+        }
     }
 
     return $certdate;
