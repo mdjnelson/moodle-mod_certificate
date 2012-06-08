@@ -241,7 +241,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         continue;
                     }
                     $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '100');
+                    $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '110');
                 }
             }
             // Fresh installs won't have this table, but upgrades will
@@ -283,7 +283,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         continue;
                     }
                     $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100', true);
+                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '110', true);
                 }
             }
         }
