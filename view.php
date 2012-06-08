@@ -104,17 +104,17 @@ if (empty($action)) { // Not displaying PDF
     // The PDF filename
     $filename = clean_filename($certificate->name.'.pdf');
     if ($certificate->savecert == 1) {
-        //pdf contents are now in $file_contents as a string
+        // PDF contents are now in $file_contents as a string
        $file_contents = $pdf->Output('', 'S');
        certificate_save_pdf($file_contents, $certrecord->id, $filename, $context->id);
     }
     if ($certificate->delivery == 0) {
-        $pdf->Output($filename, 'I');// open in browser
+        $pdf->Output($filename, 'I'); // open in browser
     } elseif ($certificate->delivery == 1) {
         $pdf->Output($filename, 'D'); // force download when create
     } elseif ($certificate->delivery == 2) {
-        certificate_email_students($USER, $course, $certificate, $certrecord, $context);
-        $pdf->Output($filename, 'I');// open in browser
-        $pdf->Output('', 'S');// send
+        certificate_email_student($course, $certificate, $certrecord, $context);
+        $pdf->Output($filename, 'I'); // open in browser
+        $pdf->Output('', 'S'); // send
     }
 }

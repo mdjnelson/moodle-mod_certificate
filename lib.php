@@ -446,18 +446,13 @@ function certificate_email_teachers_html($info) {
  * Sends the student their issued certificate from moddata as an email
  * attachment.
  *
- * @param stdClass $user
  * @param stdClass $course
  * @param stdClass $certificate
  * @param stdClass $certrecord
  * @param stdClass $context
  */
-function certificate_email_students($user, $course, $certificate, $certrecord, $context) {
+function certificate_email_student($course, $certificate, $certrecord, $context) {
     global $DB, $USER;
-
-    if ($certrecord->mailed > 0)    {
-        return;
-    }
 
     // Get teachers
     if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
@@ -473,8 +468,13 @@ function certificate_email_students($user, $course, $certificate, $certrecord, $
         $teacher = array_shift($users);
     }
 
+    // Ok, no teachers, use administrator name
+    if (empty($teacher)) {
+        $teacher = fullname(get_admin());
+    }
+
     $info = new stdClass;
-    $info->username = fullname($user);
+    $info->username = fullname($USER);
     $info->certificate = format_string($certificate->name,true);
     $info->course = format_string($course->fullname,true);
     $from = fullname($teacher);
@@ -483,7 +483,6 @@ function certificate_email_students($user, $course, $certificate, $certrecord, $
 
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
-    $user->mailformat = 0;  // Always send HTML version as well
     $filename = clean_filename($certificate->name.'.pdf');
 
     // Get hashed pathname
@@ -499,8 +498,8 @@ function certificate_email_students($user, $course, $certificate, $certrecord, $
     $attachment = 'filedir/'.certificate_path_from_hash($filepathname).'/'.$filepathname;
     $attachname = $filename;
 
-    $DB->set_field('certificate_issues','mailed','1',array('certificateid'=> $certificate->id, 'userid'=> $user->id));
-    return email_to_user($user, $from, $subject, $message, $messagehtml, $attachment, $attachname);
+    $DB->set_field('certificate_issues', 'mailed', '1', array('certificateid'=> $certificate->id, 'userid'=> $USER->id));
+    return email_to_user($USER, $from, $subject, $message, $messagehtml, $attachment, $attachname);
 }
 
 /**

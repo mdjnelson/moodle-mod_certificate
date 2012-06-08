@@ -47,7 +47,7 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
         $issues = new backup_nested_element('issues');
 
         $issue = new backup_nested_element('issue', array('id'), array(
-            'certificateid', 'userid', 'timecreated', 'code', 'mailed'));
+            'certificateid', 'userid', 'timecreated', 'code'));
 
         // Build the tree
         $certificate->add_child($issues);
