@@ -54,7 +54,7 @@ if ($certificate->orientation == 'L') {
 
 // Add images and lines
 certificate_print_image($pdf, $certificate, CERT_IMAGE_BORDER, $brdrx, $brdry, $brdrw, $brdrh);
-certificate_draw_frame_letter($pdf, $certificate);
+certificate_draw_frame($pdf, $certificate);
 // Set alpha to semi-transparency
 $pdf->SetAlpha(0.2);
 certificate_print_image($pdf, $certificate, CERT_IMAGE_WATERMARK, $wmarkx, $wmarky, $wmarkw, $wmarkh);
