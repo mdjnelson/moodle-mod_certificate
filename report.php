@@ -17,6 +17,9 @@ $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
 
+$page = optional_param('page', 0, PARAM_INT);
+$perpage = optional_param('perpage', CERTIFICATE_PER_PAGE, PARAM_INT);
+
 $url = new moodle_url('/mod/certificate/report.php', array('id'=>$id));
 if ($download) {
     $url->param('download', $download);
@@ -54,6 +57,8 @@ $strgrade = get_string('grade','certificate');
 $strcode = get_string('code', 'certificate');
 $strreport= get_string('report', 'certificate');
 
+$offset = '';
+
 if (!$download) {
     $PAGE->navbar->add($strreport);
     $PAGE->set_title(format_string($certificate->name).": $strreport");
@@ -63,6 +68,14 @@ if (!$download) {
         groups_get_activity_group($cm, true);
         groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
     }
+
+    // Setup pagination
+    if ($perpage > CERTIFICATE_MAX_PER_PAGE) {
+    	$perpage = CERTIFICATE_MAX_PER_PAGE;
+    }
+
+    $offset = " LIMIT $perpage" . " OFFSET " . $page * $perpage ;
+
 } else {
     $groupmode = groups_get_activity_groupmode($cm);
 }
@@ -70,12 +83,14 @@ if (!$download) {
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
 // Ensure there are issues to display, if not display notice
-if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm)) {
+if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $offset)) {
     echo $OUTPUT->header();
     notify(get_string('nocertificatesissued', 'certificate'));
     echo $OUTPUT->footer($course);
     exit();
 }
+
+$usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm));
 
 if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
@@ -260,6 +275,7 @@ $tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
+echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
 echo html_writer::table($table);
 echo "<div style='margin:auto; width:50%'>";

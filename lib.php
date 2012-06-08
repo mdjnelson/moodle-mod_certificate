@@ -28,6 +28,9 @@ require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/grade/lib.php');
 require_once($CFG->dirroot.'/grade/querylib.php');
 
+define('CERTIFICATE_PER_PAGE', 30);
+define('CERTIFICATE_MAX_PER_PAGE', 200);
+
 /**
  * Add certificate instance.
  *
@@ -669,8 +672,9 @@ function certificate_print_user_files($certificate, $userid, $context) {
  * @param string $sort the sort order
  * @param boolean $groupmode are we in group mode ?
  * @param stdClass $cm the course module
+ * @param string $offset sql string
  */
-function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupmode, $cm) {
+function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupmode, $cm, $offset = '') {
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
@@ -681,20 +685,31 @@ function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupm
     // used in the main sql query, this is used so that we don't get an error
     // about the same u.id being returned multiple times due to being in the
     // certificate issues table multiple times.
-    $subsql = "SELECT MAX(ci2.timecreated) as timecreated
-               FROM {certificate_issues} ci2
-               WHERE ci2.certificateid = :subsqlcertificateid
-               AND ci2.certdate > 0
-               AND ci2.userid = u.id";
-    $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated, ci.certdate, ci.studentname, ci.reportgrade
-                                   FROM {user} u
-                                   INNER JOIN {certificate_issues} ci
-                                   ON u.id = ci.userid
-                                   WHERE u.deleted = 0
-                                   AND ci.certificateid = :certificateid
-                                   AND ci.certdate > 0
-                                   AND ci.timecreated = ($subsql)
-                                   ORDER BY {$sort}", array('certificateid'=>$certificateid, 'subsqlcertificateid'=>$certificateid));
+
+    // 2012-06-07 Optimized Query, removed the timecreated subquery
+    $sql =
+"
+SELECT u.*, ci.code, ci.timecreated, ci.certdate, ci.studentname, ci.reportgrade
+FROM {certificate_issues} ci
+JOIN
+    (
+    SELECT id, MAX(timecreated) as timecreated
+    FROM {certificate_issues}
+    WHERE
+    certificateid = :certificateid
+    GROUP BY userid
+
+    ) as cimax
+    ON ci.id = cimax.id
+INNER JOIN {user} u
+    ON ci.userid = u.id
+WHERE
+    ci.certdate > 0 AND
+    u.deleted = 0
+ORDER BY {$sort}
+{$offset}";
+
+    $users = $DB->get_records_sql($sql, array('certificateid'=>$certificateid));
 
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
@@ -710,9 +725,7 @@ function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupm
         }
     }
 
-    if (!$groupmode) {
-        return $users;
-    } else {
+    if ($groupmode) {
         $currentgroup = groups_get_activity_group($cm);
         if ($currentgroup) {
             $groupusers = groups_get_members($currentgroup, 'u.*');
@@ -726,9 +739,9 @@ function certificate_get_issues($certificateid, $sort="ci.certdate ASC", $groupm
                 }
             }
         }
-
-        return $users;
     }
+
+    return $users;
 }
 
 /**
