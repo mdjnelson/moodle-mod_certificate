@@ -207,7 +207,7 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
 
     $result = new stdClass;
     if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
-        $result->info = get_string('issuertdated', 'certificate');
+        $result->info = get_string('issued', 'certificate');
         $result->time = $issue->timecreated;
     } else {
         $result->info = get_string('notissued', 'certificate');
