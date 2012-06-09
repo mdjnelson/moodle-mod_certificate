@@ -701,16 +701,16 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
 
     // Setup pagination - when both $page and $perpage = 0, get all results
     if ($page || $perpage) {
-	    if ($page < 0) {
-	    	$page = 0;
-	    }
+        if ($page < 0) {
+            $page = 0;
+        }
 
-	    if ($perpage > CERT_MAX_PER_PAGE) {
-	    	$perpage = CERT_MAX_PER_PAGE;
-	    } else if ($perpage < 1) {
-	    	$perpage = CERT_PER_PAGE;
-	    }
-	    $limitsql = " LIMIT $perpage" . " OFFSET " . $page * $perpage ;
+        if ($perpage > CERT_MAX_PER_PAGE) {
+            $perpage = CERT_MAX_PER_PAGE;
+        } else if ($perpage < 1) {
+            $perpage = CERT_PER_PAGE;
+        }
+        $limitsql = " LIMIT $perpage" . " OFFSET " . $page * $perpage ;
     }
 
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
