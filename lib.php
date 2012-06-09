@@ -38,6 +38,9 @@ define('CERT_IMAGE_SIGNATURE', 'signatures');
 /** The watermark type images */
 define('CERT_IMAGE_SEAL', 'seals');
 
+define('CERT_PER_PAGE', 30);
+define('CERT_MAX_PER_PAGE', 200);
+
 /**
  * Add certificate instance.
  *
@@ -682,22 +685,42 @@ function certificate_get_issue($course, $user, $certificate, $cm) {
  * @param string $sort the sort order
  * @param boolean $groupmode are we in group mode ?
  * @param stdClass $cm the course module
+ * @param int $page offset
+ * @param int $perpage total per page
  */
-function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm) {
+function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm, $page = 0, $perpage = 0) {
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
-    // Get all the users that have certificates issued, should only be on issue per user  for a certificate
+    $limitsql = '';
+    $page = (int)$page;
+    $perpage = (int)$perpage;
+
+    // Setup pagination - when both $page and $perpage = 0, get all results
+    if ($page || $perpage) {
+	    if ($page < 0) {
+	    	$page = 0;
+	    }
+
+	    if ($perpage > CERT_MAX_PER_PAGE) {
+	    	$perpage = CERT_MAX_PER_PAGE;
+	    } else if ($perpage < 1) {
+	    	$perpage = CERT_PER_PAGE;
+	    }
+	    $limitsql = " LIMIT $perpage" . " OFFSET " . $page * $perpage ;
+    }
+
+    // Get all the users that have certificates issued, should only be one issue per user for a certificate
     $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated
                                    FROM {user} u
                                    INNER JOIN {certificate_issues} ci
                                    ON u.id = ci.userid
                                    WHERE u.deleted = 0
                                    AND ci.certificateid = :certificateid
-                                   ORDER BY {$sort}", array('certificateid' => $certificateid));
+                                   ORDER BY {$sort} {$limitsql}", array('certificateid' => $certificateid));
 
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
@@ -713,9 +736,7 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
         }
     }
 
-    if (!$groupmode) {
-        return $users;
-    } else {
+    if ($groupmode) {
         $currentgroup = groups_get_activity_group($cm);
         if ($currentgroup) {
             $groupusers = groups_get_members($currentgroup, 'u.*');
@@ -729,9 +750,8 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
                 }
             }
         }
-
-        return $users;
     }
+    return $users;
 }
 
 /**
