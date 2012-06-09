@@ -17,7 +17,10 @@ $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
 
-$url = new moodle_url('/mod/certificate/report.php', array('id'=>$id));
+$page = optional_param('page', 0, PARAM_INT);
+$perpage = optional_param('perpage', CERT_PER_PAGE, PARAM_INT);
+
+$url = new moodle_url('/mod/certificate/report.php', array('id'=>$id, 'page' => $page, 'perpage' => $perpage));
 if ($download) {
     $url->param('download', $download);
 }
@@ -65,12 +68,14 @@ if (!$download) {
     }
 } else {
     $groupmode = groups_get_activity_groupmode($cm);
+    // Get all results when $page and $perpage are 0
+    $page = $perpage = 0;
 }
 
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
 // Ensure there are issues to display, if not display notice
-if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm)) {
+if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage)) {
     echo $OUTPUT->header();
     notify(get_string('nocertificatesissued', 'certificate'));
     echo $OUTPUT->footer($course);
@@ -217,6 +222,8 @@ if ($download == "txt") {
     exit;
 }
 
+$usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm));
+
 // Create the table for the users
 $table = new html_table();
 $table->width = "95%";
@@ -240,6 +247,7 @@ $tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
+echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
 echo html_writer::table($table);
 echo html_writer::tag('div', html_writer::table($tablebutton), array('style' => 'margin:auto; width:50%'));
