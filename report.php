@@ -17,7 +17,10 @@ $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
 
-$url = new moodle_url('/mod/certificate/report.php', array('id'=>$id));
+$page = optional_param('page', 0, PARAM_INT);
+$perpage = optional_param('perpage', CERT_PER_PAGE, PARAM_INT);
+
+$url = new moodle_url('/mod/certificate/report.php', array('id'=>$id, 'page' => $page, 'perpage' => $perpage));
 if ($download) {
     $url->param('download', $download);
 }
@@ -34,16 +37,16 @@ if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
     print_error('Course is misconfigured');
 }
 
+if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
+    print_error('Certificate ID was incorrect');
+}
+
 // Requires a course login
 require_course_login($course->id, false, $cm);
 
 // Check capabilities
 $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 require_capability('mod/certificate:manage', $context);
-
-if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
-    print_error('Certificate ID was incorrect');
-}
 
 // Declare some variables
 $strcertificates = get_string('modulenameplural', 'certificate');
@@ -65,12 +68,14 @@ if (!$download) {
     }
 } else {
     $groupmode = groups_get_activity_groupmode($cm);
+    // Get all results when $page and $perpage are 0
+    $page = $perpage = 0;
 }
 
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
 // Ensure there are issues to display, if not display notice
-if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm)) {
+if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage)) {
     echo $OUTPUT->header();
     notify(get_string('nocertificatesissued', 'certificate'));
     echo $OUTPUT->footer($course);
@@ -90,41 +95,36 @@ if ($download == "ods") {
     $myxls =& $workbook->add_worksheet($strreport);
 
     // Print names of all the fields
-    $myxls->write_string(0,0,get_string("lastname"));
-    $myxls->write_string(0,1,get_string("firstname"));
-    $myxls->write_string(0,2,get_string("idnumber"));
-    $myxls->write_string(0,3,get_string("group"));
-    $myxls->write_string(0,4,$strdate);
-    $myxls->write_string(0,5,$strgrade);
-    $myxls->write_string(0,6,$strcode);
+    $myxls->write_string(0, 0, get_string("lastname"));
+    $myxls->write_string(0, 1, get_string("firstname"));
+    $myxls->write_string(0, 2, get_string("idnumber"));
+    $myxls->write_string(0, 3, get_string("group"));
+    $myxls->write_string(0, 4, $strdate);
+    $myxls->write_string(0, 5, $strgrade);
+    $myxls->write_string(0, 6, $strcode);
 
     // Generate the data for the body of the spreadsheet
-    $i=0;
-    $row=1;
+    $i = 0;
+    $row = 1;
     if ($users) {
         foreach ($users as $user) {
-            $myxls->write_string($row,0,$user->lastname);
-            $myxls->write_string($row,1,$user->firstname);
-            $studentid=(!empty($user->idnumber) ? $user->idnumber : " ");
-            $myxls->write_string($row,2,$studentid);
+            $myxls->write_string($row, 0, $user->lastname);
+            $myxls->write_string($row, 1, $user->firstname);
+            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
+            $myxls->write_string($row, 2, $studentid);
             $ug2 = '';
             if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
                 foreach ($usergrps as $ug) {
                     $ug2 = $ug2. $ug->name;
                 }
             }
-            $myxls->write_string($row,3,$ug2);
-            $myxls->write_string($row,4,userdate($user->certdate));
-            if ($user->reportgrade != null) {
-                $grade = $user->reportgrade;
-            } else {
-                $grade = get_string('notapplicable','certificate');
-            }
-            $myxls->write_string($row,5,$grade);
-            $myxls->write_string($row,6,$user->code);
+            $myxls->write_string($row, 3, $ug2);
+            $myxls->write_string($row, 4, userdate($user->timecreated));
+            $myxls->write_string($row, 5, certificate_get_grade($certificate, $course, $user->id));
+            $myxls->write_string($row, 6, $user->code);
             $row++;
         }
-        $pos=6;
+        $pos = 6;
     }
     // Close the workbook
     $workbook->close();
@@ -135,7 +135,7 @@ if ($download == "xls") {
     require_once("$CFG->libdir/excellib.class.php");
 
     // Calculate file name
-    $filename = clean_filename("$course->shortname ".strip_tags(format_string($certificate->name,true))).'.xls';
+    $filename = clean_filename("$course->shortname " . strip_tags(format_string($certificate->name, true))) . '.xls';
     // Creating a workbook
     $workbook = new MoodleExcelWorkbook("-");
     // Send HTTP headers
@@ -144,41 +144,36 @@ if ($download == "xls") {
     $myxls =& $workbook->add_worksheet($strreport);
 
     // Print names of all the fields
-    $myxls->write_string(0,0,get_string("lastname"));
-    $myxls->write_string(0,1,get_string("firstname"));
-    $myxls->write_string(0,2,get_string("idnumber"));
-    $myxls->write_string(0,3,get_string("group"));
-    $myxls->write_string(0,4,$strdate);
-    $myxls->write_string(0,5,$strgrade);
-    $myxls->write_string(0,6,$strcode);
+    $myxls->write_string(0, 0, get_string("lastname"));
+    $myxls->write_string(0, 1, get_string("firstname"));
+    $myxls->write_string(0, 2, get_string("idnumber"));
+    $myxls->write_string(0, 3, get_string("group"));
+    $myxls->write_string(0, 4, $strdate);
+    $myxls->write_string(0, 5, $strgrade);
+    $myxls->write_string(0, 6, $strcode);
 
     // Generate the data for the body of the spreadsheet
-    $i=0;
-    $row=1;
+    $i = 0;
+    $row = 1;
     if ($users) {
         foreach ($users as $user) {
-            $myxls->write_string($row,0,$user->lastname);
-            $myxls->write_string($row,1,$user->firstname);
-            $studentid=(!empty($user->idnumber) ? $user->idnumber : " ");
+            $myxls->write_string($row, 0, $user->lastname);
+            $myxls->write_string($row, 1, $user->firstname);
+            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
             $myxls->write_string($row,2,$studentid);
             $ug2 = '';
             if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
                 foreach ($usergrps as $ug) {
-                    $ug2 = $ug2. $ug->name;
+                    $ug2 = $ug2 . $ug->name;
                 }
             }
-            $myxls->write_string($row,3,$ug2);
-            $myxls->write_string($row,4,userdate($user->certdate));
-            if ($user->reportgrade != null) {
-                $grade = $user->reportgrade;
-            } else {
-                $grade = get_string('notapplicable','certificate');
-            }
-            $myxls->write_string($row,5,$grade);
-            $myxls->write_string($row,6,$user->code);
+            $myxls->write_string($row, 3, $ug2);
+            $myxls->write_string($row, 4, userdate($user->timecreated));
+            $myxls->write_string($row, 5, certificate_get_grade($certificate, $course, $user->id));
+            $myxls->write_string($row, 6, $user->code);
             $row++;
         }
-        $pos=6;
+        $pos = 6;
     }
     // Close the workbook
     $workbook->close();
@@ -186,7 +181,7 @@ if ($download == "xls") {
 }
 
 if ($download == "txt") {
-    $filename = clean_filename("$course->shortname ".strip_tags(format_string($certificate->name,true))).'.txt';
+    $filename = clean_filename("$course->shortname " . strip_tags(format_string($certificate->name, true))) . '.txt';
 
     header("Content-Type: application/download\n");
     header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -195,7 +190,7 @@ if ($download == "txt") {
     header("Pragma: public");
 
     // Print names of all the fields
-    echo get_string("firstname")."\t".get_string("lastname") . "\t". get_string("idnumber") . "\t";
+    echo get_string("firstname"). "\t" .get_string("lastname") . "\t". get_string("idnumber") . "\t";
     echo get_string("group"). "\t";
     echo $strdate. "\t";
     echo $strgrade. "\t";
@@ -206,31 +201,28 @@ if ($download == "txt") {
     $row=1;
     if ($users) foreach ($users as $user) {
         echo $user->lastname;
-        echo "\t".$user->firstname;
+        echo "\t" . $user->firstname;
         $studentid = " ";
         if (!empty($user->idnumber)) {
             $studentid = $user->idnumber;
         }
-        echo "\t". $studentid."\t";
+        echo "\t" . $studentid . "\t";
         $ug2 = '';
         if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
             foreach ($usergrps as $ug) {
                 $ug2 = $ug2. $ug->name;
             }
         }
-        echo $ug2. "\t";
-        echo userdate($user->certdate)."\t";
-        if ($user->reportgrade != null) {
-            $grade = $user->reportgrade;
-        } else {
-            $grade = get_string('notapplicable','certificate');
-        }
-        echo $grade."\t";
-        echo $user->code."\n";
+        echo $ug2 . "\t";
+        echo userdate($user->timecreated) . "\t";
+        echo certificate_get_grade($certificate, $course, $user->id) . "\t";
+        echo $user->code . "\n";
         $row++;
     }
     exit;
 }
+
+$usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm));
 
 // Create the table for the users
 $table = new html_table();
@@ -239,15 +231,10 @@ $table->tablealign = "center";
 $table->head  = array($strto, $strdate, $strgrade, $strcode);
 $table->align = array("left", "left", "center", "center");
 foreach ($users as $user) {
-    $name = $OUTPUT->user_picture($user).$user->studentname;
-    $date = userdate($user->certdate).certificate_print_user_files($certificate, $user->id, $context->id);
-    if ($user->reportgrade != null) {
-        $grade = $user->reportgrade;
-    } else {
-        $grade = get_string('notapplicable','certificate');
-    }
+    $name = $OUTPUT->user_picture($user) . fullname($user);
+    $date = userdate($user->timecreated) . certificate_print_user_files($certificate, $user->id, $context->id);
     $code = $user->code;
-    $table->data[] = array ($name, $date, $grade, $code);
+    $table->data[] = array ($name, $date, certificate_get_grade($certificate, $course, $user->id), $code);
 }
 
 // Create table to store buttons
@@ -260,9 +247,8 @@ $tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
+echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
 echo html_writer::table($table);
-echo "<div style='margin:auto; width:50%'>";
-echo html_writer::table($tablebutton);
-echo "</div>";
+echo html_writer::tag('div', html_writer::table($tablebutton), array('style' => 'margin:auto; width:50%'));
 echo $OUTPUT->footer($course);

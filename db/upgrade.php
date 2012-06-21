@@ -241,7 +241,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         continue;
                     }
                     $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '100');
+                    $condition_info->add_grade_condition($gradeitem->id, $cert->requiredgrade, '110');
                 }
             }
             // Fresh installs won't have this table, but upgrades will
@@ -283,7 +283,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                         continue;
                     }
                     $condition_info = new condition_info($cm, CONDITION_MISSING_EVERYTHING);
-                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '100', true);
+                    $condition_info->add_grade_condition($gradeitem->id, $link->linkgrade, '110', true);
                 }
             }
         }
@@ -387,6 +387,58 @@ function xmldb_certificate_upgrade($oldversion=0) {
 
         // certificate savepoint reached
         upgrade_mod_savepoint(true, 2012022001, 'certificate');
+    }
+
+    if ($oldversion < 2012060901) {
+        // Editing this table
+        $table = new xmldb_table('certificate');
+
+        // Get rid of the reissue cert column, this was a hack introduced later
+        // in 1.9 when the bug was brought up that grades were not refreshing
+        // since they were being stored in the issues table.
+        // The certificate will now always return the current grade, student name
+        // and course name.
+        $field = new xmldb_field('reissuecert');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // The poor certificate_issues table is going to have a lot of
+        // duplicates, we don't need that now, just keep the latest one
+        $sql = "DELETE
+                FROM {certificate_issues}
+                WHERE id NOT IN (SELECT * FROM (SELECT MAX(id)
+                                 FROM {certificate_issues}
+                                 GROUP BY certificateid, userid) as t)";
+        $DB->execute($sql);
+
+        // Going to be editing this table
+        $table = new xmldb_table('certificate_issues');
+
+        // Conditionally remove columns no longer needed
+        $field = new xmldb_field('studentname');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('classname');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('certdate');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('reportgrade');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('mailed');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // certificate savepoint reached
+        upgrade_mod_savepoint(true, 2012060901, 'certificate');
     }
 
     return true;

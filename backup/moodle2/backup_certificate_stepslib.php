@@ -39,7 +39,7 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
         // Define each element separated
         $certificate = new backup_nested_element('certificate', array('id'), array(
             'name', 'intro', 'introformat', 'emailteachers', 'emailothers',
-            'savecert', 'reportcert', 'reissuecert', 'delivery', 'certificatetype', 'orientation',
+            'savecert', 'reportcert', 'delivery', 'certificatetype', 'orientation',
             'borderstyle', 'bordercolor', 'printwmark', 'printdate', 'datefmt', 'printnumber',
             'printgrade', 'gradefmt', 'printoutcome', 'printhours', 'printteacher', 'customtext',
             'printsignature', 'printseal', 'timemodified'));
@@ -47,8 +47,7 @@ class backup_certificate_activity_structure_step extends backup_activity_structu
         $issues = new backup_nested_element('issues');
 
         $issue = new backup_nested_element('issue', array('id'), array(
-            'certificateid', 'userid', 'timecreated', 'studentname',
-            'code', 'classname', 'certdate', 'reportgrade', 'mailed'));
+            'certificateid', 'userid', 'timecreated', 'code'));
 
         // Build the tree
         $certificate->add_child($issues);

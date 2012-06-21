@@ -36,21 +36,15 @@ require_course_login($course->id, true, $cm);
 $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 require_capability('mod/certificate:view', $context);
 
-// Declare some variables
-$strreviewcertificate = get_string('reviewcertificate', 'certificate');
-$strgetcertificate = get_string('getcertificate', 'certificate');
-$strgrade = get_string('grade', 'certificate');
-$strcoursegrade = get_string('coursegrade', 'certificate');
-$strcredithours = get_string('credithours', 'certificate');
-$filename = clean_filename($certificate->name.'.pdf');
-
 // Initialize $PAGE, compute blocks
 $PAGE->set_url('/mod/certificate/review.php', array('id' => $cm->id));
 $PAGE->set_context($context);
 $PAGE->set_cm($cm);
+$PAGE->set_title(format_string($certificate->name));
+$PAGE->set_heading(format_string($course->fullname));
 
 // Get previous cert record
-if (!$certrecord = certificate_get_latest_issue($certificate->id, $USER->id)) {
+if (!$certrecord = $DB->get_record('certificate_issues', array('userid' => $USER->id, 'certificateid' => $certificate->id))) {
     notice(get_string('nocertificatesissued', 'certificate'), "$CFG->wwwroot/course/view.php?id=$course->id");
     die;
 }
@@ -58,23 +52,32 @@ if (!$certrecord = certificate_get_latest_issue($certificate->id, $USER->id)) {
 // Load the specific certificatetype
 require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
 
-if (empty($action)) {
-    view_header($course, $certificate, $cm);
-    if ($certrecord->certdate > 0) { // Review certificate
-        if (empty($action)) {
-            view_header($course, $certificate, $cm);
-            $link = new moodle_url('/mod/certificate/review.php?id='.$cm->id.'&action=get');
-            echo '<p align="center">'.get_string('viewed', 'certificate').'<br />'.userdate($certrecord->certdate).'</p>';
-            echo '<center>';
-            $linkname = $strreviewcertificate;
-            $button = new single_button($link, $linkname);
-            $button->add_action(new popup_action('click', $link, array('height' => 600, 'width' => 800)));
-            echo $OUTPUT->render($button);
-            echo '</center>';
-
-            echo $OUTPUT->footer($course);
-            exit;
-        }
-    }
+if ($action) {
+    $filename = clean_filename($certificate->name.'.pdf');
+    $pdf->Output($filename, 'I'); // open in browser
+    exit();
 }
-$pdf->Output($filename, 'I'); // open in browser
+
+echo $OUTPUT->header();
+
+if (has_capability('mod/certificate:manage', $context)) {
+    $numusers = count(certificate_get_issues($certificate->id, 'ci.timecreated ASC', '', $cm));
+    $url = html_writer::tag('a', get_string('viewcertificateviews', 'certificate', $numusers),
+        array('href' => $CFG->wwwroot . '/mod/certificate/report.php?id=' . $cm->id));
+    echo html_writer::tag('div', $url, array('class' => 'reportlink'));
+}
+
+if (!empty($certificate->intro)) {
+    echo $OUTPUT->box(format_module_intro('certificate', $certificate, $cm->id), 'generalbox', 'intro');
+}
+
+echo html_writer::tag('p', get_string('viewed', 'certificate'). '<br />' . userdate($certrecord->timecreated), array('style' => 'text-align:center'));
+
+$link = new moodle_url('/mod/certificate/review.php?id='.$cm->id.'&action=get');
+$linkname = get_string('reviewcertificate', 'certificate');
+$button = new single_button($link, $linkname);
+$button->add_action(new popup_action('click', $link, array('height' => 600, 'width' => 800)));
+
+echo html_writer::tag('div', $OUTPUT->render($button), array('style' => 'text-align:center'));
+
+echo $OUTPUT->footer($course);

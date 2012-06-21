@@ -11,7 +11,6 @@
 
 require_once('../../config.php');
 require_once('lib.php');
-global $DB;
 
 $id = required_param('id', PARAM_INT);           // Course Module ID
 
@@ -66,11 +65,13 @@ if ($usesections) {
 
 foreach ($certificates as $certificate) {
     if (!$certificate->visible) {
-        //Show dimmed if the mod is hidden
-        $link = "<a class=\"dimmed\" href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
+        // Show dimmed if the mod is hidden
+        $link = html_writer::tag('a', $certificate->name, array('class' => 'dimmed',
+            'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule));
     } else {
-        //Show normal if the mod is visible
-        $link = "<a href=\"view.php?id=$certificate->coursemodule\">$certificate->name</a>";
+        // Show normal if the mod is visible
+        $link = html_writer::tag('a', $certificate->name, array('class' => 'dimmed',
+            'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule));
     }
     if ($certificate->section !== $currentsection) {
         if ($certificate->section) {
@@ -82,16 +83,12 @@ foreach ($certificates as $certificate) {
         $currentsection = $certificate->section;
     }
     // Get the latest certificate issue
-    if ($certrecord = certificate_get_latest_issue($certificate->id, $USER->id)) {
-        if ($certrecord->certdate > 0) {
-            $issued = userdate($certrecord->certdate);
-        } else {
-            $issued = get_string('notreceived', 'certificate');
-        }
+    if ($certrecord = $DB->get_record('certificate_issues', array('userid' => $USER->id, 'certificateid' => $certificate->id))) {
+        $issued = userdate($certrecord->timecreated);
     } else {
         $issued = get_string('notreceived', 'certificate');
     }
-    if ($course->format == 'weeks' or $course->format == 'topics') {
+    if (($course->format == 'weeks') || ($course->format == 'topics')) {
         $table->data[] = array ($certificate->section, $link, $issued);
     } else {
         $table->data[] = array ($link, $issued);
