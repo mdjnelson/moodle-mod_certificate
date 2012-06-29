@@ -65,12 +65,12 @@ $certrecord = certificate_get_issue($course, $USER, $certificate, $cm);
 require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
 
 if (empty($action)) { // Not displaying PDF
+    echo $OUTPUT->header();
+
     /// find out current groups mode
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/view.php?id=' . $cm->id);
     $currentgroup = groups_get_activity_group($cm);
     $groupmode = groups_get_activity_groupmode($cm);
-
-    echo $OUTPUT->header();
 
     if (has_capability('mod/certificate:manage', $context)) {
         $numusers = count(certificate_get_issues($certificate->id, 'ci.timecreated ASC', $groupmode, $cm));

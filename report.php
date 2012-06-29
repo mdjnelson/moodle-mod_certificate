@@ -64,7 +64,6 @@ if (!$download) {
     // Check to see if groups are being used in this choice
     if ($groupmode = groups_get_activity_groupmode($cm)) {
         groups_get_activity_group($cm, true);
-        groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
     }
 } else {
     $groupmode = groups_get_activity_groupmode($cm);
@@ -77,6 +76,7 @@ add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certif
 // Ensure there are issues to display, if not display notice
 if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage)) {
     echo $OUTPUT->header();
+    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
     notify(get_string('nocertificatesissued', 'certificate'));
     echo $OUTPUT->footer($course);
     exit();
@@ -246,6 +246,7 @@ $btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", array('id'
 $tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
 
 echo $OUTPUT->header();
+groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
 echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
 echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
