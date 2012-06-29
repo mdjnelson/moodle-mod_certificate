@@ -742,8 +742,8 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
             if (empty($groupusers)) {
                 return array();
             }
-            foreach($groupusers as $id => $gpuser) {
-                if (!isset($users[$id])) {
+            foreach($users as $id => $unused) {
+                if (!isset($groupusers[$id])) {
                     //remove this user as it isn't in the group!
                     unset($users[$id]);
                 }
