@@ -67,8 +67,13 @@ require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certi
 if (empty($action)) { // Not displaying PDF
     echo $OUTPUT->header();
 
+    /// find out current groups mode
+    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/view.php?id=' . $cm->id);
+    $currentgroup = groups_get_activity_group($cm);
+    $groupmode = groups_get_activity_groupmode($cm);
+
     if (has_capability('mod/certificate:manage', $context)) {
-        $numusers = count(certificate_get_issues($certificate->id, 'ci.timecreated ASC', '', $cm));
+        $numusers = count(certificate_get_issues($certificate->id, 'ci.timecreated ASC', $groupmode, $cm));
         $url = html_writer::tag('a', get_string('viewcertificateviews', 'certificate', $numusers),
             array('href' => $CFG->wwwroot . '/mod/certificate/report.php?id=' . $cm->id));
         echo html_writer::tag('div', $url, array('class' => 'reportlink'));
