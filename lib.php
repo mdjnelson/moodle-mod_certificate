@@ -29,13 +29,13 @@ require_once($CFG->dirroot.'/grade/lib.php');
 require_once($CFG->dirroot.'/grade/querylib.php');
 
 
-/** The watermark type images */
+/** The border image folder */
 define('CERT_IMAGE_BORDER', 'borders');
-/** The watermark type images */
+/** The watermark image folder */
 define('CERT_IMAGE_WATERMARK', 'watermarks');
-/** The watermark type images */
+/** The signature image folder */
 define('CERT_IMAGE_SIGNATURE', 'signatures');
-/** The watermark type images */
+/** The seal image folder */
 define('CERT_IMAGE_SEAL', 'seals');
 
 define('CERT_PER_PAGE', 30);
