@@ -326,52 +326,13 @@ function xmldb_certificate_upgrade($oldversion=0) {
         // Unnecessary length of 2 for fields in the certificate table
         $table = new xmldb_table('certificate');
         // Email teachers
-        $field = new xmldb_field('emailteachers');
-        $field->type = XMLDB_TYPE_INTEGER;
-        $field->length = 1;
-        $field->unsigned = true;
-        $field->notnull = true;
-        $field->default = 0;
+        $field = new xmldb_field('emailteachers', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
         $dbman->change_field_precision($table, $field);
         // Save cert
-        $field = new xmldb_field('savecert');
-        $field->type = XMLDB_TYPE_INTEGER;
-        $field->length = 1;
-        $field->unsigned = true;
-        $field->notnull = true;
-        $field->default = 0;
+        $field = new xmldb_field('savecert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
         $dbman->change_field_precision($table, $field);
         // Report cert
-        $field = new xmldb_field('reportcert');
-        $field->type = XMLDB_TYPE_INTEGER;
-        $field->length = 1;
-        $field->unsigned = true;
-        $field->notnull = true;
-        $field->default = 0;
-        $dbman->change_field_precision($table, $field);
-        // Reissue cert
-        $field = new xmldb_field('reissuecert');
-        $field->type = XMLDB_TYPE_INTEGER;
-        $field->length = 1;
-        $field->unsigned = true;
-        $field->notnull = true;
-        $field->default = 0;
-        $dbman->change_field_precision($table, $field);
-
-        // Increase the length of the studentname field in the issue table - CONTRIB-3324
-        $table = new xmldb_table('certificate_issues');
-        $field = new xmldb_field('studentname');
-        $field->type = XMLDB_TYPE_CHAR;
-        $field->length = '255';
-        $field->notnull = true;
-        $field->default = '';
-        $dbman->change_field_precision($table, $field);
-        // While we are here change the length of classname to 255, for some reason it is at 254
-        $field = new xmldb_field('classname');
-        $field->type = XMLDB_TYPE_CHAR;
-        $field->length = '255';
-        $field->notnull = true;
-        $field->default = '';
+        $field = new xmldb_field('reportcert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
         $dbman->change_field_precision($table, $field);
 
         // certificate savepoint reached
