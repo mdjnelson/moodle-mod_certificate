@@ -105,21 +105,28 @@ if (empty($action)) { // Not displaying PDF
     echo html_writer::tag('div', $OUTPUT->render($button), array('style' => 'text-align:center'));
     echo $OUTPUT->footer($course);
     exit;
-} else { // Output to pdf
-    // The PDF filename
-    $filename = clean_filename($certificate->name.'.pdf');
-    if ($certificate->savecert == 1) {
-        // PDF contents are now in $file_contents as a string
-       $file_contents = $pdf->Output('', 'S');
-       certificate_save_pdf($file_contents, $certrecord->id, $filename, $context->id);
+
+} else {
+    if ($certificate->certificatetype == 'flash') {
+        echo $certhtml;
+    } else {
+        // Output to pdf
+        // The PDF filename
+        $filename = clean_filename($certificate->name.'.pdf');
+        if ($certificate->savecert == 1) {
+            $file_contents = $pdf->Output('', 'S');
+	    certificate_save_pdf($file_contents, $certrecord->id, $filename, $context->id);
+        }
+        if ($certificate->delivery == 0) {
+	    $pdf->Output($filename, 'I'); // open in browser
+        } elseif ($certificate->delivery == 1) {
+	    $pdf->Output($filename, 'D'); // force download when create
+        } elseif ($certificate->delivery == 2) {
+            certificate_email_student($course, $certificate, $certrecord, $context);
+           $pdf->Output($filename, 'I'); // open in browser
+           $pdf->Output('', 'S'); // send
+        }
     }
-    if ($certificate->delivery == 0) {
-        $pdf->Output($filename, 'I'); // open in browser
-    } elseif ($certificate->delivery == 1) {
-        $pdf->Output($filename, 'D'); // force download when create
-    } elseif ($certificate->delivery == 2) {
-        certificate_email_student($course, $certificate, $certrecord, $context);
-        $pdf->Output($filename, 'I'); // open in browser
-        $pdf->Output('', 'S'); // send
-    }
-}
+} 
+
+?>

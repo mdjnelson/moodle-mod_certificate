@@ -58,7 +58,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $modules = certificate_get_mods();
         $dateoptions = certificate_get_date_options() + $modules;
         $mform->addElement('select', 'printdate', get_string('printdate', 'certificate'), $dateoptions);
-        $mform->setDefault('printdate', 'N');
+        $mform->setDefault('printdate', 'Course Completion');
         $mform->addHelpButton('printdate', 'printdate', 'certificate');
 
         $dateformatoptions = array( 1 => 'January 1, 2000', 2 => 'January 1st, 2000', 3 => '1 January 2000',
@@ -91,6 +91,9 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setType('printhours', PARAM_TEXT);
         $mform->addHelpButton('printhours', 'printhours', 'certificate');
 
+        $mform->addElement('text', 'tcleosehours', get_string('tcleosehours', 'certificate'), array('size'=>'5'));
+        $mform->setType('tcleosehours', PARAM_TEXT);
+
         $mform->addElement('select', 'printteacher', get_string('printteacher', 'certificate'), $ynoptions);
         $mform->setDefault('printteacher', 0);
         $mform->addHelpButton('printteacher', 'printteacher', 'certificate');
@@ -101,8 +104,8 @@ class mod_certificate_mod_form extends moodleform_mod {
 
         // Design Options
         $mform->addElement('header', 'designoptions', get_string('designoptions', 'certificate'));
-        $mform->addElement('select', 'certificatetype', get_string('certificatetype', 'certificate'), certificate_types());
-        $mform->setDefault('certificatetype', 'A4_non_embedded');
+        $mform->addElement('select', 'certificatetype', get_string('certificatetype', 'certificate'), certificate_types(), array('onChange'=>'document.getElementById("pdfoptions").display="block";'));
+        $mform->setDefault('certificatetype', 'flash');
         $mform->addHelpButton('certificatetype', 'certificatetype', 'certificate');
 
         $orientation = array( 'L' => get_string('landscape', 'certificate'), 'P' => get_string('portrait', 'certificate'));
@@ -131,6 +134,13 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addElement('select', 'printseal', get_string('printseal', 'certificate'), certificate_get_images(CERT_IMAGE_SEAL));
         $mform->setDefault('printseal', 0);
         $mform->addHelpButton('printseal', 'printseal', 'certificate');
+
+        $mform->disabledIf('orientation', 'certificatetype', 'eq', 'flash');
+        $mform->disabledIf('borderstyle', 'certificatetype', 'eq', 'flash');
+        $mform->disabledIf('bordercolor', 'certificatetype', 'eq', 'flash');
+        $mform->disabledIf('printwmark', 'certificatetype', 'eq', 'flash');
+        $mform->disabledIf('printsignature', 'certificatetype', 'eq', 'flash');
+        $mform->disabledIf('printseal', 'certificatetype', 'eq', 'flash');
 
         $this->standard_coursemodule_elements();
 
