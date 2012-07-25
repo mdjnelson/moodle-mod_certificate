@@ -1253,7 +1253,7 @@ function certificate_get_code($certificate, $certrecord) {
  */
 function certificate_get_credit_hours($certificate) {
     if ($certificate->printhours) {
-        return get_string('credithours', 'certificate') . ': ' . $certificate->printhours;
+        return $certificate->printhours;
     }
 
     return '';
