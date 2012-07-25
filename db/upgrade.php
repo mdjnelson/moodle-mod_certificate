@@ -428,7 +428,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                     }
                 }
             }
-            // We can not get rid of this table
+            // We can now get rid of this table
             $table = new xmldb_table('certificate_linked_modules');
             $dbman->drop_table($table);
         }
