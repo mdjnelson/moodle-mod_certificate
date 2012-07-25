@@ -66,7 +66,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2007061300, 'certificate');
     }
 
@@ -84,7 +84,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->create_table($table);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2007061301, 'certificate');
     }
 
@@ -94,7 +94,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field->set_attributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'certificate_id');
         $dbman->change_field_unsigned($table, $field);
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2007061302, 'certificate');
     }
 
@@ -114,7 +114,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2007102800, 'certificate');
     }
 
@@ -127,7 +127,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2007102806, 'certificate');
     }
 
@@ -140,7 +140,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2008080904, 'certificate');
     }
 
@@ -196,7 +196,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2011030105, 'certificate');
     }
 
@@ -287,7 +287,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                 }
             }
         }
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110102, 'certificate');
     }
 
@@ -318,7 +318,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_landscape'));
         $DB->set_field('certificate', 'certificatetype', 'letter_non_embedded', array('certificatetype' => 'letter_portrait'));
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
     }
 
@@ -335,7 +335,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $field = new xmldb_field('reportcert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
         $dbman->change_field_precision($table, $field);
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2012010501, 'certificate');
     }
 
@@ -346,7 +346,7 @@ function xmldb_certificate_upgrade($oldversion=0) {
                 WHERE certdate = 0";
         $DB->execute($sql);
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2012022001, 'certificate');
     }
 
@@ -398,8 +398,43 @@ function xmldb_certificate_upgrade($oldversion=0) {
             $dbman->drop_field($table, $field);
         }
 
-        // certificate savepoint reached
+        // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2012060901, 'certificate');
+    }
+
+    if ($oldversion < 2012072501) {
+        // Add a column to store the required grade
+        $table = new xmldb_table('certificate');
+        $requiredtimefield = new xmldb_field('requiredtime', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED,
+            XMLDB_NOTNULL, null, '0', 'delivery');
+
+        if (!$dbman->field_exists($table, $requiredtimefield)) {
+            $dbman->add_field($table, $requiredtimefield);
+        }
+
+        // If this table still exists, then the install was from a 1.9 version
+        if ($dbman->table_exists('certificate_linked_modules')) {
+            // Now we need to loop through the restrictions in the certificate_linked_modules
+            // table and check if there were any required time conditions
+            if ($certlinks = $DB->get_records('certificate_linked_modules')) {
+                foreach ($certlinks as $link) {
+                    // If the link id is '-1' then the setting applies to the time spent in the course
+                    if ($link->linkid == '-1') {
+                        // Make sure the certificate exists
+                        if ($certificate = $DB->get_record('certificate', array('id' => $link->certificate_id))) {
+                            $certificate->requiredtime = $link->linkgrade;
+                            $DB->update_record('certificate', $certificate);
+                        }
+                    }
+                }
+            }
+            // We can not get rid of this table
+            $table = new xmldb_table('certificate_linked_modules');
+            $dbman->drop_table($table);
+        }
+
+        // Certificate savepoint reached
+        upgrade_mod_savepoint(true, 2012072501, 'certificate');
     }
 
     return true;
