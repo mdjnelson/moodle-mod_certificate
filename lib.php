@@ -818,6 +818,45 @@ function certificate_print_attempts($course, $certificate, $attempts) {
 }
 
 /**
+ * Get the time the user has spent in the course
+ *
+ * @param object $course
+ * @param null
+ */
+function certificate_get_course_time($courseid) {
+    global $CFG, $USER;
+
+    set_time_limit(0);
+
+    $totaltime = 0;
+    $sql = "l.course = :courseid AND l.userid = :userid";
+    if ($logs = get_logs($sql, array('courseid' => $courseid, 'userid' => $USER->id), 'l.time ASC', '', '', $totalcount)) {
+        foreach ($logs as $log) {
+            if (!isset($login)) {
+                // For the first time $login is not set so the first log is also the first login
+                $login = $log->time;
+                $lasthit = $log->time;
+                $totaltime = 0;
+            }
+            $delay = $log->time - $lasthit;
+            if ($delay > ($CFG->sessiontimeout * 60)) {
+                // The difference between the last log and the current log is more than
+                // the timeout Register session value so that we have found a session!
+                $login = $log->time;
+            } else {
+                $totaltime += $delay;
+            }
+            // Now the actual log became the previous log for the next cycle
+            $lasthit = $log->time;
+        }
+
+        return $totaltime;
+    }
+
+    return 0;
+}
+
+/**
  * Get all the modules
  *
  * @return array

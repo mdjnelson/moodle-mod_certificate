@@ -52,6 +52,10 @@ class mod_certificate_mod_form extends moodleform_mod {
             $mform->addHelpButton('reportcert', 'reportcert', 'certificate');
         }
 
+        $mform->addElement('text', 'requiredtime', get_string('coursetimereq', 'certificate'), array('size'=>'3'));
+        $mform->setType('requiredtime', PARAM_INT);
+        $mform->addHelpButton('requiredtime', 'coursetimereq', 'certificate');
+
         // Text Options
         $mform->addElement('header', 'textoptions', get_string('textoptions', 'certificate'));
 
@@ -135,6 +139,23 @@ class mod_certificate_mod_form extends moodleform_mod {
         $this->standard_coursemodule_elements();
 
         $this->add_action_buttons();
+    }
 
+    /**
+     * Some basic validation
+     *
+     * @param $data
+     * @param $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        // Check that the required time entered is valid
+        if ((!is_number($data['requiredtime']) || $data['requiredtime'] < 0)) {
+            $errors['requiredtime'] = get_string('requiredtimenotvalid', 'certificate');
+        }
+
+        return $errors;
     }
 }

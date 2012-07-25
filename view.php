@@ -58,11 +58,21 @@ if ($PAGE->user_allowed_editing()) {
     $PAGE->set_button($OUTPUT->single_button($url, $strsubmit));
 }
 
+// Check if the user can view the certificate
+if ($certificate->requiredtime && !has_capability('mod/certificate:manage', $context)) {
+    if (certificate_get_course_time($course->id) < $certificate->requiredtime) {
+        $a = new stdClass;
+        $a->requiredtime = $certificate->requiredtime;
+        notice(get_string('requiredtimenotmet', 'certificate', $a), "$CFG->wwwroot/course/view.php?id=$course->id");
+        die;
+    }
+}
+
 // Create new certificate record, or return existing record
 $certrecord = certificate_get_issue($course, $USER, $certificate, $cm);
 
 // Load the specific certificatetype
-require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
+require("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
 
 if (empty($action)) { // Not displaying PDF
     echo $OUTPUT->header();
