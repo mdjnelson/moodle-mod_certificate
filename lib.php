@@ -108,7 +108,7 @@ function certificate_update_instance($certificate) {
  * and any data that depends on it.
  *
  * @param int $id
- * @return bool success
+ * @return bool true if successful
  */
 function certificate_delete_instance($id) {
     global $DB;
@@ -188,7 +188,7 @@ function certificate_reset_course_form_definition(&$mform) {
  *
  * Written by Jean-Michel Vedrine
  *
- * @param $course
+ * @param stdClass $course
  * @return array
  */
 function certificate_reset_course_form_defaults($course) {
@@ -203,7 +203,7 @@ function certificate_reset_course_form_defaults($course) {
  * @param stdClass $user
  * @param stdClass $mod
  * @param stdClass $certificate
- * @return object|null
+ * @return stdClass the user outline object
  */
 function certificate_user_outline($course, $user, $mod, $certificate) {
     global $DB;
@@ -227,7 +227,7 @@ function certificate_user_outline($course, $user, $mod, $certificate) {
  * @param stdClass $user
  * @param stdClass $mod
  * @param stdClass $page
- * @return object|null
+ * @return string the user complete information
  */
 function certificate_user_complete($course, $user, $mod, $certificate) {
    global $DB, $OUTPUT;
@@ -249,7 +249,7 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
  * for a given instance of certificate.
  *
  * @param int $certificateid
- * @return object list of participants
+ * @return stdClass list of participants
  */
 function certificate_get_participants($certificateid) {
     global $DB;
@@ -301,7 +301,7 @@ function certificate_cron () {
  * @param stdClass $user
  * @param stdClass $course
  * @param stdClass $cm
- * @return array
+ * @return array the teacher array
  */
 function certificate_get_teachers($certificate, $user, $course, $cm) {
     global $USER, $DB;
@@ -355,7 +355,6 @@ function certificate_get_teachers($certificate, $user, $course, $cm) {
  * @param stdClass $certificate
  * @param stdClass $certrecord
  * @param stdClass $cm course module
- * @return null
  */
 function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
     global $USER, $CFG, $DB;
@@ -525,7 +524,7 @@ function certificate_path_from_hash($contenthash) {
  * @param string $filearea
  * @param array $args
  * @param bool $forcedownload
- * @return bool false if file not found, does not return if found - just send the file
+ * @return bool|nothing false if file not found, does not return anything if found - just send the file
  */
 function certificate_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $CFG, $DB, $USER;
@@ -567,12 +566,11 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
 /**
  * This function returns success or failure of file save
  *
- * @global object
  * @param string $pdf is the string contents of the pdf
  * @param int $certrecordid the certificate issue record id
  * @param string $filename pdf filename
  * @param int $contextid context id
- * @return bool
+ * @return bool return true if successful, false otherwise
  */
 function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
     global $DB, $USER;
@@ -582,7 +580,7 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
     }
 
     if (empty($pdf)) {
-        return true; // Nothing to do
+        return false;
     }
 
     $fs = get_file_storage();
@@ -615,7 +613,7 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
  * @param stdClass $certificate
  * @param int $userid
  * @param stdClass $context
- * @return boolean, true if success printing
+ * @return string return the user files
  */
 function certificate_print_user_files($certificate, $userid, $context) {
     global $CFG, $DB, $OUTPUT;
@@ -682,10 +680,11 @@ function certificate_get_issue($course, $user, $certificate, $cm) {
  *
  * @param int $certificateid
  * @param string $sort the sort order
- * @param boolean $groupmode are we in group mode ?
+ * @param bool $groupmode are we in group mode ?
  * @param stdClass $cm the course module
  * @param int $page offset
  * @param int $perpage total per page
+ * @return stdClass the users
  */
 function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm, $page = 0, $perpage = 0) {
     global $CFG, $DB;
@@ -757,7 +756,7 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
  * Returns a list of previously issued certificates--used for reissue.
  *
  * @param int $certificateid
- * @return object the attempts else false if none found
+ * @return stdClass the attempts else false if none found
  */
 function certificate_get_attempts($certificateid) {
     global $DB, $USER;
@@ -776,10 +775,10 @@ function certificate_get_attempts($certificateid) {
 /**
  * Prints a table of previously issued certificates--used for reissue.
  *
- * @param object $course
- * @param object $certificate
- * @param object $attempts
- * @param null
+ * @param stdClass $course
+ * @param stdClass $certificate
+ * @param stdClass $attempts
+ * @return string the attempt table
  */
 function certificate_print_attempts($course, $certificate, $attempts) {
     global $OUTPUT, $DB;
@@ -820,7 +819,7 @@ function certificate_print_attempts($course, $certificate, $attempts) {
 /**
  * Get the time the user has spent in the course
  *
- * @param object $course
+ * @param int $courseid
  * @param null
  */
 function certificate_get_course_time($courseid) {
@@ -1009,6 +1008,7 @@ function certificate_types() {
 /**
  * Get images for mod_form.
  *
+ * @param string $type the image type
  * @return array
  */
 function certificate_get_images($type) {
@@ -1061,7 +1061,7 @@ function certificate_get_images($type) {
  * @param stdClass $course
  * @param int $moduleid
  * @param int $userid
- * @return mixed
+ * @return stdClass|bool return the mod object if it exists, false otherwise
  */
 function certificate_get_mod_grade($course, $moduleid, $userid) {
     global $DB;
@@ -1102,6 +1102,7 @@ function certificate_get_mod_grade($course, $moduleid, $userid) {
  * @param stdClass $certificate
  * @param stdClass $certrecord
  * @param stdClass $course
+ * @param int $userid
  * @return string the date
  */
 function certificate_get_date($certificate, $certrecord, $course, $userid = null) {
@@ -1155,6 +1156,7 @@ function certificate_get_date($certificate, $certrecord, $course, $userid = null
  *
  * @param stdClass $certificate
  * @param stdClass $course
+ * @param int $userid
  * @return string the grade result
  */
 function certificate_get_grade($certificate, $course, $userid = null) {
@@ -1209,8 +1211,8 @@ function certificate_get_grade($certificate, $course, $userid = null) {
 /**
  * Returns the outcome to display on the certificate
  *
+ * @param stdClass $certificate
  * @param stdClass $course
- * @param int $moduleid
  * @return string the outcome
  */
 function certificate_get_outcome($certificate, $course) {
@@ -1256,7 +1258,6 @@ function certificate_get_code($certificate, $certrecord) {
  * @param char $style ''=normal, B=bold, I=italic, U=underline
  * @param int $size font size in points
  * @param string $text the text to print
- * @return null
  */
 function certificate_print_text($pdf, $x, $y, $align, $font, $style, $size, $text) {
     $pdf->setFont($font, $style, $size);
@@ -1269,7 +1270,6 @@ function certificate_print_text($pdf, $x, $y, $align, $font, $style, $size, $tex
  *
  * @param stdClass $pdf
  * @param stdClass $certificate
- * @return null
  */
 function certificate_draw_frame($pdf, $certificate) {
     if ($certificate->bordercolor > 0) {
@@ -1317,7 +1317,6 @@ function certificate_draw_frame($pdf, $certificate) {
  *
  * @param stdClass $pdf
  * @param stdClass $certificate
- * @return null
  */
 function certificate_draw_frame_letter($pdf, $certificate) {
     if ($certificate->bordercolor > 0) {
@@ -1369,7 +1368,6 @@ function certificate_draw_frame_letter($pdf, $certificate) {
  * @param int $y y position
  * @param int $w the width
  * @param int $h the height
- * @return null
  */
 function certificate_print_image($pdf, $certificate, $type, $x, $y, $w, $h) {
     global $CFG;
@@ -1427,4 +1425,3 @@ function certificate_generate_code() {
 
     return $code;
 }
-
