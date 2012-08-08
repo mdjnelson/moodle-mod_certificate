@@ -12,8 +12,8 @@ $pdf->setPrintFooter(false);
 $pdf->AddPage();
 $pdf->SetAutoPageBreak(false, 0);
 
-//Define variables
-//Landscape
+// Define variables
+// Landscape
 if ($certificate->orientation == 'L') {
     $x = 28;
     $y = 125;
@@ -32,8 +32,7 @@ if ($certificate->orientation == 'L') {
     $brdrw = 792;
     $brdrh = 612;
     $codey = 505;
-} else {
-//Portrait
+} else { // Portrait
     $x = 28;
     $y = 170;
     $sealx = 440;
@@ -74,7 +73,9 @@ certificate_print_text($pdf, $x, $y + 205, 'C', 'freeserif', '', 20, $course->fu
 certificate_print_text($pdf, $x, $y + 255, 'C', 'freeserif', '', 14, certificate_get_date($certificate, $certrecord, $course));
 certificate_print_text($pdf, $x, $y + 283, 'C', 'freeserif', '', 10, certificate_get_grade($certificate, $course));
 certificate_print_text($pdf, $x, $y + 311, 'C', 'freeserif', '', 10, certificate_get_outcome($certificate, $course));
-certificate_print_text($pdf, $x, $y + 339, 'C', 'freeserif', '', 10, get_string('credithours', 'certificate') . ': ' . certificate_get_credit_hours($certificate));
+if ($certificate->printhours) {
+    certificate_print_text($pdf, $x, $y + 339, 'C', 'freeserif', '', 10, get_string('credithours', 'certificate') . ': ' . $certificate->printhours);
+}
 certificate_print_text($pdf, $x, $codey, 'C', 'freeserif', '', 10, certificate_get_code($certificate, $certrecord));
 $i = 0;
 if ($certificate->printteacher) {

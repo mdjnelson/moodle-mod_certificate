@@ -1246,20 +1246,6 @@ function certificate_get_code($certificate, $certrecord) {
 }
 
 /**
- * Returns the credit hours to display on the certificate.
- *
- * @param stdClass $course
- * @return string the hours
- */
-function certificate_get_credit_hours($certificate) {
-    if ($certificate->printhours) {
-        return $certificate->printhours;
-    }
-
-    return '';
-}
-
-/**
  * Sends text to output given the following params.
  *
  * @param stdClass $pdf
