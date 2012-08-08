@@ -1413,6 +1413,18 @@ function certificate_print_image($pdf, $certificate, $type, $x, $y, $w, $h) {
  * @return string
  */
 function certificate_generate_code() {
-    return (random_string(10));
+    global $DB;
+
+    $uniquecodefound = false;
+    $code = random_string(10);
+    while (!$uniquecodefound) {
+        if (!$DB->record_exists('certificate_issues', array('code' => $code))) {
+            $uniquecodefound = true;
+        } else {
+            $code = random_string(10);
+        }
+    }
+
+    return $code;
 }
 
