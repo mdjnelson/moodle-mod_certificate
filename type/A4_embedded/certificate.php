@@ -73,7 +73,9 @@ certificate_print_text($pdf, $x, $y + 72, 'C', 'freesans', '', 20, $course->full
 certificate_print_text($pdf, $x, $y + 92, 'C', 'freesans', '', 14,  certificate_get_date($certificate, $certrecord, $course));
 certificate_print_text($pdf, $x, $y + 102, 'C', 'freeserif', '', 10, certificate_get_grade($certificate, $course));
 certificate_print_text($pdf, $x, $y + 112, 'C', 'freeserif', '', 10, certificate_get_outcome($certificate, $course));
-certificate_print_text($pdf, $x, $y + 122, 'C', 'freeserif', '', 10, get_string('credithours', 'certificate') . ': ' . certificate_get_credit_hours($certificate));
+if ($certificate->printhours) {
+    certificate_print_text($pdf, $x, $y + 122, 'C', 'freeserif', '', 10, get_string('credithours', 'certificate') . ': ' . $certificate->printhours);
+}
 certificate_print_text($pdf, $x, $codey, 'C', 'freeserif', '', 10, certificate_get_code($certificate, $certrecord));
 $i = 0;
 if ($certificate->printteacher) {

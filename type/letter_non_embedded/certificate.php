@@ -12,6 +12,7 @@ $pdf->setPrintFooter(false);
 $pdf->SetAutoPageBreak(false, 0);
 $pdf->AddPage();
 
+// Define variables
 // Landscape
 if ($certificate->orientation == 'L') {
     $x = 28;
@@ -72,7 +73,9 @@ certificate_print_text($pdf, $x, $y + 205, 'C', 'Helvetica', '', 20, $course->fu
 certificate_print_text($pdf, $x, $y + 255, 'C', 'Helvetica', '', 14, certificate_get_date($certificate, $certrecord, $course));
 certificate_print_text($pdf, $x, $y + 283, 'C', 'Times', '', 10, certificate_get_grade($certificate, $course));
 certificate_print_text($pdf, $x, $y + 311, 'C', 'Times', '', 10, certificate_get_outcome($certificate, $course));
-certificate_print_text($pdf, $x, $y + 339, 'C', 'Times', '', 10, get_string('credithours', 'certificate') . ': ' . certificate_get_credit_hours($certificate));
+if ($certificate->printhours) {
+    certificate_print_text($pdf, $x, $y + 339, 'C', 'Times', '', 10, get_string('credithours', 'certificate') . ': ' . $certificate->printhours);
+}
 certificate_print_text($pdf, $x, $codey, 'C', 'Times', '', 10, certificate_get_code($certificate, $certrecord));
 $i = 0;
 if ($certificate->printteacher) {
