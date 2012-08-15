@@ -60,7 +60,7 @@ function certificate_add_instance($certificate) {
         $event->groupid = 0;
         $event->userid = 0;
         $event->eventtype = 'course';
-        $event->modulename  = 'certificate';
+        $event->modulename = 'certificate';
         $event->instance = $certificateid;
 
         add_event($event);
@@ -114,7 +114,7 @@ function certificate_delete_instance($id) {
     global $DB;
 
     // Ensure the certificate exists
-    if (!$certificate = $DB->get_record('certificate', array('id'=>$id))) {
+    if (!$certificate = $DB->get_record('certificate', array('id' => $id))) {
         return false;
     }
 
@@ -124,8 +124,8 @@ function certificate_delete_instance($id) {
     }
 
     $result = true;
-    $DB->delete_records('certificate_issues', array('certificateid'=> $id));
-    if (!$DB->delete_records('certificate', array('id'=> $id))) {
+    $DB->delete_records('certificate_issues', array('certificateid' => $id));
+    if (!$DB->delete_records('certificate', array('id' => $id))) {
         $result = false;
     }
 
@@ -157,14 +157,14 @@ function certificate_reset_userdata($data) {
         $sql = "SELECT cert.id
                 FROM {certificate} cert
                 WHERE cert.course = :courseid";
-        $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", array('courseid'=>$data->courseid));
-        $status[] = array('component'=>$componentstr, 'item'=>get_string('certificateremoved', 'certificate'), 'error'=>false);
+        $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", array('courseid' => $data->courseid));
+        $status[] = array('component' => $componentstr, 'item' => get_string('certificateremoved', 'certificate'), 'error' => false);
     }
 
     // Updating dates - shift may be negative too
     if ($data->timeshift) {
         shift_course_mod_dates('certificate', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
-        $status[] = array('component'=>$componentstr, 'item'=>get_string('datechanged'), 'error'=>false);
+        $status[] = array('component' => $componentstr, 'item' => get_string('datechanged'), 'error' => false);
     }
 
     return $status;
@@ -180,7 +180,7 @@ function certificate_reset_userdata($data) {
  */
 function certificate_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'certificateheader', get_string('modulenameplural', 'certificate'));
-    $mform->addElement('advcheckbox', 'reset_certificate', get_string('deletissuedcertificates','certificate'));
+    $mform->addElement('advcheckbox', 'reset_certificate', get_string('deletissuedcertificates', 'certificate'));
 }
 
 /**
@@ -192,7 +192,7 @@ function certificate_reset_course_form_definition(&$mform) {
  * @return array
  */
 function certificate_reset_course_form_defaults($course) {
-    return array('reset_certificate'=>1);
+    return array('reset_certificate' => 1);
 }
 
 /**
@@ -234,7 +234,7 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
 
    if ($issue = $DB->get_record('certificate_issues', array('certificateid' => $certificate->id, 'userid' => $user->id))) {
         echo $OUTPUT->box_start();
-        echo get_string('issued', 'certificate').": ";
+        echo get_string('issued', 'certificate') . ": ";
         echo userdate($issue->timecreated);
         certificate_print_user_files($certificate->id, $user->id);
         echo '<br />';
@@ -258,7 +258,7 @@ function certificate_get_participants($certificateid) {
             FROM {user} u, {certificate_issues} a
             WHERE a.certificateid = :certificateid
             AND u.id = a.userid";
-    return  $DB->get_records_sql($sql, array('certificateid'=>$certificateid));
+    return  $DB->get_records_sql($sql, array('certificateid' => $certificateid));
 }
 
 /**
@@ -307,7 +307,8 @@ function certificate_get_teachers($certificate, $user, $course, $cm) {
     global $USER, $DB;
 
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    $potteachers = get_users_by_capability($context, 'mod/certificate:manage', '', '', '', '', '', '', false, false);
+    $potteachers = get_users_by_capability($context, 'mod/certificate:manage',
+        '', '', '', '', '', '', false, false);
     if (empty($potteachers)) {
         return array();
     }
@@ -363,10 +364,10 @@ function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
         return;
     }
 
-    $user = $DB->get_record('user', array('id'=> $certrecord->userid));
+    $user = $DB->get_record('user', array('id' => $certrecord->userid));
 
     if ($teachers = certificate_get_teachers($certificate, $user, $course, $cm)) {
-        $strawarded  = get_string('awarded', 'certificate');
+        $strawarded = get_string('awarded', 'certificate');
         foreach ($teachers as $teacher) {
             $info = new stdClass;
             $info->student = fullname($USER);
@@ -374,7 +375,7 @@ function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
             $info->certificate = format_string($certificate->name,true);
             $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
             $from = $student;
-            $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
+            $postsubject = $strawarded . ': ' . $info->student . ' -> ' . $certificate->name;
             $posttext = certificate_email_teachers_text($info);
             $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
 
@@ -388,6 +389,11 @@ function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
  * whether the option to email others is set for this certificate.
  * Uses the email_teachers info.
  * Code suggested by Eloy Lafuente
+ *
+ * @param stdClass $course
+ * @param stdClass $certificate
+ * @param stdClass $certrecord
+ * @param stdClass $cm course module
  */
 function certificate_email_others($course, $certificate, $certrecord, $cm) {
     global $USER, $CFG, $DB;
@@ -395,7 +401,7 @@ function certificate_email_others($course, $certificate, $certrecord, $cm) {
     if ($certificate->emailothers) {
        $others = explode(',', $certificate->emailothers);
         if ($others) {
-            $strawarded  = get_string('awarded', 'certificate');
+            $strawarded = get_string('awarded', 'certificate');
             foreach ($others as $other) {
                 $other = trim($other);
                 if (validate_email($other)) {
@@ -403,11 +409,11 @@ function certificate_email_others($course, $certificate, $certrecord, $cm) {
                     $destination->email = $other;
                     $info = new stdClass;
                     $info->student = fullname($USER);
-                    $info->course = format_string($course->fullname,true);
-                    $info->certificate = format_string($certificate->name,true);
+                    $info->course = format_string($course->fullname, true);
+                    $info->certificate = format_string($certificate->name, true);
                     $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
                     $from = $student;
-                    $postsubject = $strawarded.': '.$info->student.' -> '.$certificate->name;
+                    $postsubject = $strawarded . ': ' . $info->student . ' -> ' . $certificate->name;
                     $posttext = certificate_email_teachers_text($info);
                     $posthtml = certificate_email_teachers_html($info);
 
@@ -425,7 +431,7 @@ function certificate_email_others($course, $certificate, $certrecord, $cm) {
  * @return string
  */
 function certificate_email_teachers_text($info) {
-    $posttext = get_string('emailteachermail', 'certificate', $info)."\n";
+    $posttext = get_string('emailteachermail', 'certificate', $info) . "\n";
 
     return $posttext;
 }
@@ -438,7 +444,7 @@ function certificate_email_teachers_text($info) {
  */
 function certificate_email_teachers_html($info) {
     $posthtml  = '<font face="sans-serif">';
-    $posthtml .= '<p>'.get_string('emailteachermailhtml', 'certificate', $info).'</p>';
+    $posthtml .= '<p>' . get_string('emailteachermailhtml', 'certificate', $info) . '</p>';
     $posthtml .= '</font>';
 
     return $posthtml;
@@ -458,14 +464,14 @@ function certificate_email_student($course, $certificate, $certrecord, $context)
 
     // Get teachers
     if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
-                                     '', '', '', '', false, true)) {
+        '', '', '', '', false, true)) {
         $users = sort_by_roleassignment_authority($users, $context);
         $teacher = array_shift($users);
     }
 
     // If we haven't found a teacher yet, look for a non-editing teacher in this course.
     if (empty($teacher) && $users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
-                                     '', '', '', '', false, true)) {
+        '', '', '', '', false, true)) {
         $users = sort_by_roleassignment_authority($users, $context);
         $teacher = array_shift($users);
     }
@@ -477,11 +483,11 @@ function certificate_email_student($course, $certificate, $certrecord, $context)
 
     $info = new stdClass;
     $info->username = fullname($USER);
-    $info->certificate = format_string($certificate->name,true);
-    $info->course = format_string($course->fullname,true);
+    $info->certificate = format_string($certificate->name, true);
+    $info->course = format_string($course->fullname, true);
     $from = fullname($teacher);
-    $subject = $info->course.': '.$info->certificate;
-    $message = get_string('emailstudenttext', 'certificate', $info)."\n";
+    $subject = $info->course . ': ' . $info->certificate;
+    $message = get_string('emailstudenttext', 'certificate', $info) . "\n";
 
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
@@ -533,7 +539,7 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    if (!$certificate = $DB->get_record('certificate', array('id'=>$cm->instance))) {
+    if (!$certificate = $DB->get_record('certificate', array('id' => $cm->instance))) {
         return false;
     }
 
@@ -544,7 +550,7 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
     if ($filearea === 'issue') {
         $certrecord = (int)array_shift($args);
 
-        if (!$certrecord = $DB->get_record('certificate_issues', array('id'=>$certrecord))) {
+        if (!$certrecord = $DB->get_record('certificate_issues', array('id' => $certrecord))) {
             return false;
         }
 
@@ -592,11 +598,11 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
     $fileinfo = array(
         'contextid' => $contextid,   // ID of context
         'component' => $component,   // usually = table name
-        'filearea' => $filearea,     // usually = table name
-        'itemid' => $certrecordid,  // usually = ID of row in table
-        'filepath' => $filepath,     // any path beginning and ending in /
-        'filename' => $filename,    // any filename
-        'mimetype' => 'application/pdf',    // any filename
+        'filearea'  => $filearea,     // usually = table name
+        'itemid'    => $certrecordid,  // usually = ID of row in table
+        'filepath'  => $filepath,     // any path beginning and ending in /
+        'filename'  => $filename,    // any filename
+        'mimetype'  => 'application/pdf',    // any filename
         'userid'    => $USER->id);
 
     // Check for file first
@@ -743,12 +749,13 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
             }
             foreach($users as $id => $unused) {
                 if (!isset($groupusers[$id])) {
-                    //remove this user as it isn't in the group!
+                    // remove this user as it isn't in the group!
                     unset($users[$id]);
                 }
             }
         }
     }
+
     return $users;
 }
 
@@ -765,7 +772,7 @@ function certificate_get_attempts($certificateid) {
             FROM {certificate_issues} i
             WHERE certificateid = :certificateid
             AND userid = :userid";
-    if ($issues = $DB->get_records_sql($sql, array('certificateid'=>$certificateid, 'userid'=>$USER->id))) {
+    if ($issues = $DB->get_records_sql($sql, array('certificateid' => $certificateid, 'userid' => $USER->id))) {
         return $issues;
     }
 
@@ -820,7 +827,7 @@ function certificate_print_attempts($course, $certificate, $attempts) {
  * Get the time the user has spent in the course
  *
  * @param int $courseid
- * @param null
+ * @return int the total time spent in seconds
  */
 function certificate_get_course_time($courseid) {
     global $CFG, $USER;
@@ -872,7 +879,7 @@ function certificate_get_mods() {
 
     $modules = array();
     $sections = get_all_sections($COURSE->id); // Sort everything the same as the course
-    for ($i=0; $i<=$COURSE->numsections; $i++) {
+    for ($i = 0; $i <= $COURSE->numsections; $i++) {
         // should always be true
         if (isset($sections[$i])) {
             $section = $sections[$i];
@@ -900,7 +907,7 @@ function certificate_get_mods() {
                         $mod_item = grade_get_grades($COURSE->id, 'mod', $mod->modname, $mod->instance);
                         $item = reset($mod_item->items);
                         if (isset($item->grademax)){
-                            $modules[$mod->id] = $sectionlabel.' '.$section->section.' : '.$instance->name;
+                            $modules[$mod->id] = $sectionlabel . ' ' . $section->section . ' : ' . $instance->name;
                         }
                     }
                 }
@@ -952,7 +959,7 @@ function certificate_get_outcomes() {
         foreach ($grade_items as $grade_item) {
             if (isset($grade_item->outcomeid)){
                 $itemmodule = $grade_item->itemmodule;
-                $printoutcome[$grade_item->id] = $itemmodule.': '.$grade_item->get_name();
+                $printoutcome[$grade_item->id] = $itemmodule . ': ' . $grade_item->get_name();
             }
         }
     }
@@ -964,6 +971,7 @@ function certificate_get_outcomes() {
     } else {
         $outcomeoptions['0'] = get_string('nooutcomes', 'certificate');
     }
+
     return $outcomeoptions;
 }
 
@@ -973,7 +981,7 @@ function certificate_get_outcomes() {
  * @return array
  */
 function certificate_get_view_actions() {
-    return array('view','view all','view report');
+    return array('view', 'view all', 'view report');
 }
 
 /**
@@ -1044,10 +1052,10 @@ function certificate_get_images($type) {
             closedir($handle);
         }
 
-        // Sort borders
+        // Sort images
         ksort($options);
 
-        // Add default borders
+        // Add no option
         $options[0] = get_string('no');
         return $options;
     } else {
@@ -1066,8 +1074,8 @@ function certificate_get_images($type) {
 function certificate_get_mod_grade($course, $moduleid, $userid) {
     global $DB;
 
-    $cm = $DB->get_record('course_modules', array('id'=> $moduleid));
-    $module = $DB->get_record('modules', array('id'=> $cm->module));
+    $cm = $DB->get_record('course_modules', array('id' => $moduleid));
+    $module = $DB->get_record('modules', array('id' => $cm->module));
 
     if ($grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $userid)) {
         $item = new grade_item();
@@ -1076,14 +1084,14 @@ function certificate_get_mod_grade($course, $moduleid, $userid) {
             $item->$key = $value;
         }
         $modinfo = new stdClass;
-        $modinfo->name = utf8_decode($DB->get_field($module->name, 'name', array('id'=> $cm->instance)));
+        $modinfo->name = utf8_decode($DB->get_field($module->name, 'name', array('id' => $cm->instance)));
         $grade = $item->grades[$userid]->grade;
         $item->gradetype = GRADE_TYPE_VALUE;
         $item->courseid = $course->id;
 
-        $modinfo->points = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_REAL, $decimals=2);
-        $modinfo->percentage = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals=2);
-        $modinfo->letter = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals=0);
+        $modinfo->points = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
+        $modinfo->percentage = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
+        $modinfo->letter = grade_format_gradevalue($grade, $item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
 
         if ($grade) {
             $modinfo->dategraded = $item->grades[$userid]->dategraded;
@@ -1122,7 +1130,7 @@ function certificate_get_date($certificate, $certrecord, $course, $userid = null
                 WHERE c.userid = :userid
                 AND c.course = :courseid
                 AND c.deleted IS NULL";
-        if ($timecompleted = $DB->get_record_sql($sql, array('userid'=>$userid, 'courseid'=>$course->id))) {
+        if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $userid, 'courseid' => $course->id))) {
             if (!empty($timecompleted->timecompleted)) {
                 $date = $timecompleted->timecompleted;
             }
@@ -1175,9 +1183,9 @@ function certificate_get_grade($certificate, $course, $userid = null) {
                 $grade = new grade_grade(array('itemid' => $course_item->id, 'userid' => $userid));
                 $course_item->gradetype = GRADE_TYPE_VALUE;
                 $coursegrade = new stdClass;
-                $coursegrade->points = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals=2);
-                $coursegrade->percentage = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals=2);
-                $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals=0);
+                $coursegrade->points = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
+                $coursegrade->percentage = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
+                $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
 
                 if ($certificate->gradefmt == 1) {
                     $grade = $strcoursegrade . ':  ' . $coursegrade->percentage;
@@ -1205,6 +1213,7 @@ function certificate_get_grade($certificate, $course, $userid = null) {
             }
         }
     }
+
     return '';
 }
 
@@ -1347,13 +1356,13 @@ function certificate_draw_frame_letter($pdf, $certificate) {
             case 'P':
                 // create outer line border in selected color
                 $pdf->SetLineStyle(array('width' => 1.5, 'color' => $color));
-                $pdf->Rect( 25, 20, 561, 751);
+                $pdf->Rect(25, 20, 561, 751);
                 // create middle line border in selected color
                 $pdf->SetLineStyle(array('width' => 0.2, 'color' => $color));
-                $pdf->Rect( 40, 35, 531, 721);
+                $pdf->Rect(40, 35, 531, 721);
                 // create inner line border in selected color
                 $pdf->SetLineStyle(array('width' => 1.0, 'color' => $color));
-                $pdf->Rect( 51, 46, 509, 699);
+                $pdf->Rect(51, 46, 509, 699);
             break;
         }
     }
