@@ -5,7 +5,7 @@
  *
  * @package    mod
  * @subpackage certificate
- * @copyright Mark Nelson <mark@moodle.com.au>
+ * @copyright  Mark Nelson <mark@moodle.com.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -13,7 +13,7 @@ require_once('../../config.php');
 require_once('lib.php');
 require_once("$CFG->libdir/pdflib.php");
 
-// Retreive any variables that are passed
+// Retrieve any variables that are passed
 $id = required_param('id', PARAM_INT);    // Course Module ID
 $action = optional_param('action', '', PARAM_ALPHA);
 

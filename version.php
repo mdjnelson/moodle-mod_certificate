@@ -3,11 +3,11 @@
 /**
  * Code fragment to define the version of the certificate module
  *
- * @package mod
- * @subpackage  certificate
- * @copyright   Mark Nelson <mark@moodle.com.au>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
- **/
+ * @package    mod
+ * @subpackage certificate
+ * @copyright  Mark Nelson <mark@moodle.com.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
+ */
 
 $module->version         = 2012080802;  // The current module version (Date: YYYYMMDDXX)
 $module->requires       = 2012062500;  // Requires this Moodle version
