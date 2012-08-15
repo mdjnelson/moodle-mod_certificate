@@ -28,7 +28,6 @@ require_once($CFG->dirroot.'/course/lib.php');
 require_once($CFG->dirroot.'/grade/lib.php');
 require_once($CFG->dirroot.'/grade/querylib.php');
 
-
 /** The border image folder */
 define('CERT_IMAGE_BORDER', 'borders');
 /** The watermark image folder */
@@ -1025,38 +1024,33 @@ function certificate_get_images($type) {
     switch($type) {
         case CERT_IMAGE_BORDER :
             $path = "$CFG->dirroot/mod/certificate/pix/borders";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/borders";
             break;
         case CERT_IMAGE_SEAL :
             $path = "$CFG->dirroot/mod/certificate/pix/seals";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/seals";
             break;
         case CERT_IMAGE_SIGNATURE :
             $path = "$CFG->dirroot/mod/certificate/pix/signatures";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/signatures";
             break;
         case CERT_IMAGE_WATERMARK :
             $path = "$CFG->dirroot/mod/certificate/pix/watermarks";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/watermarks";
             break;
     }
     // If valid path
     if (!empty($path)) {
         $options = array();
-        if ($handle = opendir($path)) {
-            while (false !== ($file = readdir($handle))) {
-            if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1) ) {
-                    $i = strpos($file, '.');
-                    if ($i > 1) {
-                        // Set the style name
-                        $options[$file] = substr($file, 0, $i);
-                    }
-                }
-            }
-            closedir($handle);
-        }
+        $options += certificate_scan_image_dir($path);
+        $options += certificate_scan_image_dir($uploadpath);
 
         // Sort images
         ksort($options);
 
-        // Add no option
-        $options[0] = get_string('no');
+        // Add the 'no' option to the top of the array
+        $options = array_merge(array('0' => get_string('no')), $options);
+
         return $options;
     } else {
         return array();
@@ -1384,19 +1378,23 @@ function certificate_print_image($pdf, $certificate, $type, $x, $y, $w, $h) {
     switch($type) {
         case CERT_IMAGE_BORDER :
             $attr = 'borderstyle';
-            $path = "$CFG->dirroot/mod/certificate/pix/borders/$certificate->borderstyle";
+            $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->borderstyle";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->borderstyle";
             break;
         case CERT_IMAGE_SEAL :
             $attr = 'printseal';
-            $path = "$CFG->dirroot/mod/certificate/pix/seals/$certificate->printseal";
+            $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->printseal";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->printseal";
             break;
         case CERT_IMAGE_SIGNATURE :
             $attr = 'printsignature';
-            $path = "$CFG->dirroot/mod/certificate/pix/signatures/$certificate->printsignature";
+            $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->printsignature";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->printsignature";
             break;
         case CERT_IMAGE_WATERMARK :
             $attr = 'printwmark';
-            $path = "$CFG->dirroot/mod/certificate/pix/watermarks/$certificate->printwmark";
+            $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->printwmark";
+            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->printwmark";
             break;
     }
     // Has to be valid
@@ -1408,6 +1406,9 @@ function certificate_print_image($pdf, $certificate, $type, $x, $y, $w, $h) {
             default :
                 if (file_exists($path)) {
                     $pdf->Image($path, $x, $y, $w, $h);
+                }
+                if (file_exists($uploadpath)) {
+                    $pdf->Image($uploadpath, $x, $y, $w, $h);
                 }
             break;
         }
@@ -1433,4 +1434,33 @@ function certificate_generate_code() {
     }
 
     return $code;
+}
+
+/**
+ * Scans directory for valid images
+ *
+ * @param string the path
+ * @return array
+ */
+function certificate_scan_image_dir($path) {
+    // Array to store the images
+    $options = array();
+
+    // Start to scan directory
+    if (is_dir($path)) {
+        if ($handle = opendir($path)) {
+            while (false !== ($file = readdir($handle))) {
+                if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1) ) {
+                    $i = strpos($file, '.');
+                    if ($i > 1) {
+                        // Set the name
+                        $options[$file] = substr($file, 0, $i);
+                    }
+                }
+            }
+            closedir($handle);
+        }
+    }
+
+    return $options;
 }
