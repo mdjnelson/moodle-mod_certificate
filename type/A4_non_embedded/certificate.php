@@ -88,5 +88,5 @@ if ($certificate->printteacher) {
     }
 }
 
-certificate_print_text($pdf, $custx, $custy, 'L', '', '', '', $certificate->customtext);
+certificate_print_text($pdf, $custx, $custy, 'L', null, null, null, $certificate->customtext);
 ?>
