@@ -91,7 +91,7 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->setDefault('printoutcome', 0);
         $mform->addHelpButton('printoutcome', 'printoutcome', 'certificate');
 
-        $mform->addElement('text', 'printhours', get_string('printhours', 'certificate'), array('size'=>'5'));
+        $mform->addElement('text', 'printhours', get_string('printhours', 'certificate'), array('size'=>'5', 'maxlength' => '255'));
         $mform->setType('printhours', PARAM_TEXT);
         $mform->addHelpButton('printhours', 'printhours', 'certificate');
 

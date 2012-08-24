@@ -322,23 +322,6 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2011110103, 'certificate');
     }
 
-    if ($oldversion < 2012010501) {
-        // Unnecessary length of 2 for fields in the certificate table
-        $table = new xmldb_table('certificate');
-        // Email teachers
-        $field = new xmldb_field('emailteachers', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
-        $dbman->change_field_precision($table, $field);
-        // Save cert
-        $field = new xmldb_field('savecert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
-        $dbman->change_field_precision($table, $field);
-        // Report cert
-        $field = new xmldb_field('reportcert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
-        $dbman->change_field_precision($table, $field);
-
-        // Certificate savepoint reached
-        upgrade_mod_savepoint(true, 2012010501, 'certificate');
-    }
-
     if ($oldversion < 2012022001) {
         // CONTRIB-3470 - certdate remaining 0 on issued certificates, need to update
         $sql = "UPDATE {certificate_issues}
@@ -455,6 +438,22 @@ function xmldb_certificate_upgrade($oldversion=0) {
         $dbman->change_field_precision($table, $field);
 
         $field = new xmldb_field('printseal', XMLDB_TYPE_CHAR, '255', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0);
+        $dbman->change_field_precision($table, $field);
+
+        // Change length of fields that are unnecessarily large
+        $field = new xmldb_field('printnumber', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0, 0);
+        $dbman->change_field_precision($table, $field);
+
+        $field = new xmldb_field('printhours', XMLDB_TYPE_CHAR, '255', XMLDB_UNSIGNED, false, 0, 0);
+        $dbman->change_field_precision($table, $field);
+
+        $field = new xmldb_field('emailteachers', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0, 0);
+        $dbman->change_field_precision($table, $field);
+
+        $field = new xmldb_field('savecert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0, 0);
+        $dbman->change_field_precision($table, $field);
+
+        $field = new xmldb_field('reportcert', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0, 0);
         $dbman->change_field_precision($table, $field);
 
         // Certificate savepoint reached

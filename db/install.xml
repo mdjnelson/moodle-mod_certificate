@@ -24,11 +24,11 @@
         <FIELD NAME="printwmark" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="bordercolor" NEXT="printdate"/>
         <FIELD NAME="printdate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printwmark" NEXT="datefmt"/>
         <FIELD NAME="datefmt" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printdate" NEXT="printnumber"/>
-        <FIELD NAME="printnumber" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="datefmt" NEXT="printgrade"/>
+        <FIELD NAME="printnumber" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="datefmt" NEXT="printgrade"/>
         <FIELD NAME="printgrade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printnumber" NEXT="gradefmt"/>
         <FIELD NAME="gradefmt" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printgrade" NEXT="printoutcome"/>
         <FIELD NAME="printoutcome" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="gradefmt" NEXT="printhours"/>
-        <FIELD NAME="printhours" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printoutcome" NEXT="printteacher"/>
+        <FIELD NAME="printhours" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printoutcome" NEXT="printteacher"/>
         <FIELD NAME="printteacher" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="printhours" NEXT="customtext"/>
         <FIELD NAME="customtext" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="printteacher" NEXT="printsignature"/>
         <FIELD NAME="printsignature" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="customtext" NEXT="printseal"/>
