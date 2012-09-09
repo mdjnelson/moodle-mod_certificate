@@ -86,7 +86,7 @@ if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
 
     // Calculate file name
-    $filename = clean_filename("$course->shortname ".strip_tags(format_string($certificate->name,true))).'.ods';
+    $filename = clean_filename("$course->shortname " . strip_tags(format_string($certificate->name,true))).'.ods';
     // Creating a workbook
     $workbook = new MoodleODSWorkbook("-");
     // Send HTTP headers

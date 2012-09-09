@@ -53,7 +53,8 @@ if (!$certrecord = $DB->get_record('certificate_issues', array('userid' => $USER
 require ("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
 
 if ($action) {
-    $filename = clean_filename($certificate->name.'.pdf');
+    $certname = clean_filename($certificate->name);
+    $filename = "$certname.pdf";
     $pdf->Output($filename, 'I'); // open in browser
     exit();
 }

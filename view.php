@@ -117,7 +117,8 @@ if (empty($action)) { // Not displaying PDF
     exit;
 } else { // Output to pdf
     // The PDF filename
-    $filename = clean_filename($certificate->name.'.pdf');
+    $certname = clean_filename($certificate->name);
+    $filename = "$certname.pdf";
     if ($certificate->savecert == 1) {
         // PDF contents are now in $file_contents as a string
        $file_contents = $pdf->Output('', 'S');
