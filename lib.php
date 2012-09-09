@@ -49,7 +49,8 @@ define('CERT_MAX_PER_PAGE', 200);
 function certificate_add_instance($certificate) {
     global $DB;
 
-    $certificate->timemodified = time();
+    $certificate->timecreated = time();
+    $certificate->timemodified = $certificate->timecreated;
 
     if ($certificateid = $DB->insert_record('certificate', $certificate)) {
         $event = new stdClass;

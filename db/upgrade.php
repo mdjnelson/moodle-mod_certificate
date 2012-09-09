@@ -460,5 +460,22 @@ function xmldb_certificate_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2012082401, 'certificate');
     }
 
+    if ($oldversion < 2012090901) {
+        $table = new xmldb_table('certificate');
+
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, 0, 0, 'printseal');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Set the time created to the time modified
+        $sql = "UPDATE {certificate}
+                SET timecreated = timemodified";
+        $DB->execute($sql);
+
+        // Certificate savepoint reached
+        upgrade_mod_savepoint(true, 2012090901, 'certificate');
+    }
+
     return true;
 }

@@ -52,6 +52,7 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
         $data = (object)$data;
         $oldid = $data->id;
         $data->course = $this->get_courseid();
+        $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
         // insert the certificate record
