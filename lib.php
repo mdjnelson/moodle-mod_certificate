@@ -374,7 +374,7 @@ function certificate_email_teachers($course, $certificate, $certrecord, $cm) {
             $info->course = format_string($course->fullname,true);
             $info->certificate = format_string($certificate->name,true);
             $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
-            $from = $student;
+            $from = $USER;
             $postsubject = $strawarded . ': ' . $info->student . ' -> ' . $certificate->name;
             $posttext = certificate_email_teachers_text($info);
             $posthtml = ($teacher->mailformat == 1) ? certificate_email_teachers_html($info) : '';
@@ -412,7 +412,7 @@ function certificate_email_others($course, $certificate, $certrecord, $cm) {
                     $info->course = format_string($course->fullname, true);
                     $info->certificate = format_string($certificate->name, true);
                     $info->url = $CFG->wwwroot.'/mod/certificate/report.php?id='.$cm->id;
-                    $from = $student;
+                    $from = $USER;
                     $postsubject = $strawarded . ': ' . $info->student . ' -> ' . $certificate->name;
                     $posttext = certificate_email_teachers_text($info);
                     $posthtml = certificate_email_teachers_html($info);
