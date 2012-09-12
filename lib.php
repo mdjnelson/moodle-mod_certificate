@@ -492,8 +492,9 @@ function certificate_email_student($course, $certificate, $certrecord, $context)
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
 
-    $certname = clean_filename($certificate->name);
-    $filename = "$certname.pdf";
+    // Remove full-stop at the end if it exists, to avoid "..pdf" being created and being filtered by clean_filename
+    $certname = rtrim($certificate->name, '.');
+    $filename = clean_filename("$certname.pdf");
 
     // Get hashed pathname
     $fs = get_file_storage();

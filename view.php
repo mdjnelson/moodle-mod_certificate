@@ -116,9 +116,9 @@ if (empty($action)) { // Not displaying PDF
     echo $OUTPUT->footer($course);
     exit;
 } else { // Output to pdf
-    // The PDF filename
-    $certname = clean_filename($certificate->name);
-    $filename = "$certname.pdf";
+    // Remove full-stop at the end if it exists, to avoid "..pdf" being created and being filtered by clean_filename
+    $certname = rtrim($certificate->name, '.');
+    $filename = clean_filename("$certname.pdf");
     if ($certificate->savecert == 1) {
         // PDF contents are now in $file_contents as a string
        $file_contents = $pdf->Output('', 'S');
