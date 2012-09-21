@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * letter_non_embedded certificate type
+ *
+ * @package    mod
+ * @subpackage certificate
+ * @copyright  Mark Nelson <markn@moodle.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.'); // It must be included from view.php
 }
