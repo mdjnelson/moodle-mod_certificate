@@ -702,7 +702,6 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
     $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
 
-    $limitsql = '';
     $page = (int) $page;
     $perpage = (int) $perpage;
 
@@ -717,7 +716,6 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
         } else if ($perpage < 1) {
             $perpage = CERT_PER_PAGE;
         }
-        $limitsql = " LIMIT $perpage" . " OFFSET " . $page * $perpage ;
     }
 
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
@@ -727,7 +725,9 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
                                    ON u.id = ci.userid
                                    WHERE u.deleted = 0
                                    AND ci.certificateid = :certificateid
-                                   ORDER BY {$sort} {$limitsql}", array('certificateid' => $certificateid));
+                                   ORDER BY {$sort}", array('certificateid' => $certificateid),
+                                   $page * $perpage,
+                                   $perpage);
 
     // now exclude all the certmanagers.
     foreach ($users as $id => $user) {
