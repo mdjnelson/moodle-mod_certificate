@@ -1,7 +1,19 @@
-<?PHP // $Id$
-      // certificate.php - created with Moodle 1.9.3+ (Build: 20081224) (2007101533)
-      // modifications from Toni Soto (Vigo) www.colegioapostol.com
+<?php
 
+// This file is part of the Certificate module for Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 $string['activitydependencies'] = 'Actividades dependentes';
 $string['activitylocklabel'] = 'Actividade Ligada / %% Calificación Mínima';
