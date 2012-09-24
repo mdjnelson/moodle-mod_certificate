@@ -75,7 +75,7 @@ if ($PAGE->user_allowed_editing()) {
 
 // Check if the user can view the certificate
 if ($certificate->requiredtime && !has_capability('mod/certificate:manage', $context)) {
-    if (certificate_get_course_time($course->id) < $certificate->requiredtime) {
+    if (certificate_get_course_time($course->id) < ($certificate->requiredtime * 60)) {
         $a = new stdClass;
         $a->requiredtime = $certificate->requiredtime;
         notice(get_string('requiredtimenotmet', 'certificate', $a), "$CFG->wwwroot/course/view.php?id=$course->id");
