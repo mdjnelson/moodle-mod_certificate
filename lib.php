@@ -608,10 +608,14 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
         'mimetype'  => 'application/pdf',    // any filename
         'userid'    => $USER->id);
 
-    // Check for file first
-    if (!$fs->file_exists($contextid, $component, $filearea, $certrecordid, $filepath, $filename)) {
-        $fs->create_file_from_string($fileinfo, $pdf);
+    // If the file exists, delete it and recreate it. This is to ensure that the
+    // latest certificate is saved on the server. For example, the student's grade
+    // may have been updated. This is a quick dirty hack.
+    if ($fs->file_exists($contextid, $component, $filearea, $certrecordid, $filepath, $filename)) {
+        $fs->delete_area_files($contextid, $component, $filearea, $certrecordid);
     }
+
+    $fs->create_file_from_string($fileinfo, $pdf);
 
     return true;
 }
