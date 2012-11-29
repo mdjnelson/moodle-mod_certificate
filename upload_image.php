@@ -33,12 +33,15 @@ require_login();
 $context = get_system_context();
 require_capability('moodle/site:config', $context);
 
-$PAGE->set_url('/mod/certificate/upload_image.php');
-$PAGE->set_pagetype('site-index');
-$PAGE->set_docs_path('');
-$PAGE->set_pagelayout('frontpage');
+$struploadimage = get_string('uploadimage', 'certificate');
+
+$PAGE->set_url('/admin/settings.php', array('section' => 'modsettingcertificate'));
+$PAGE->set_pagetype('admin-setting-modsettingcertificate');
+$PAGE->set_pagelayout('admin');
 $PAGE->set_context($context);
-$PAGE->set_title(get_string('uploadimage', 'certificate'));
+$PAGE->set_title($struploadimage);
+$PAGE->set_heading($SITE->fullname);
+$PAGE->navbar->add($struploadimage);
 
 $upload_form = new mod_certificate_upload_image_form();
 
