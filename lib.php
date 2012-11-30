@@ -882,24 +882,33 @@ function certificate_get_mods() {
     $strsection = get_string("section");
 
     // Collect modules data
-    get_all_mods($COURSE->id, $mods, $modnames, $modnamesplural, $modnamesused);
+    $modinfo = get_fast_modinfo($COURSE);
+    $mods = $modinfo->get_cms();
 
     $modules = array();
-    $sections = get_all_sections($COURSE->id); // Sort everything the same as the course
-    for ($i = 0; $i <= $COURSE->numsections; $i++) {
+    // Check what version we are running - really we should have separate branch for 2.4, but
+    // having a branch called master and one called MOODLE_24_STABLE may be confusing. This
+    // module will also be replaced in the future so hack will do. Here we get the course
+    // sections and sort the modules as they appear in the course.
+    if ($CFG->version >= '2012112900') {
+        $sections = $modinfo->get_section_info_all();
+    } else {
+        $sections = get_all_sections($COURSE->id);
+    }
+    for ($i = 0; $i <= count($sections) - 1; $i++) {
         // should always be true
         if (isset($sections[$i])) {
             $section = $sections[$i];
             if ($section->sequence) {
                 switch ($COURSE->format) {
                     case "topics":
-                    $sectionlabel = $strtopic;
+                        $sectionlabel = $strtopic;
                     break;
                     case "weeks":
-                    $sectionlabel = $strweek;
+                        $sectionlabel = $strweek;
                     break;
                     default:
-                    $sectionlabel = $strsection;
+                        $sectionlabel = $strsection;
                 }
 
                 $sectionmods = explode(",", $section->sequence);
