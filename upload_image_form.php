@@ -34,21 +34,24 @@ require_once($CFG->dirroot.'/mod/certificate/lib.php');
 class mod_certificate_upload_image_form extends moodleform {
 
     function definition() {
-        global $CFG;
+        global $CFG,$imagetypes;
 
         $mform =& $this->_form;
 
-        $imagetypes = array(
-            CERT_IMAGE_BORDER => get_string('border', 'certificate'),
-            CERT_IMAGE_WATERMARK => get_string('watermark', 'certificate'),
-            CERT_IMAGE_SIGNATURE => get_string('signature', 'certificate'),
-            CERT_IMAGE_SEAL => get_string('seal', 'certificate')
-        );
+        $context = context_system::instance();
+        foreach($imagetypes as $imagetype=>$label) {
+            $entry = new stdClass;
+            $entry->id = null;
+            $mform->addElement('filemanager', $imagetype, $label, null,
+                array('accepted_types' => array('web_image')));
+            $draftitemid = file_get_submitted_draft_itemid($imagetype);
+            file_prepare_draft_area($draftitemid, $context->id, 'mod_certificate', $imagetype, 0,
+                array('subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 50));
+            $entry->$imagetype = $draftitemid;
+            $this->set_data($entry);
 
-        $mform->addElement('select', 'imagetype', get_string('imagetype', 'certificate'), $imagetypes);
+        }
 
-        $mform->addElement('filepicker', 'certificateimage', '');
-        $mform->addRule('certificateimage', null, 'required', null, 'client');
 
         $this->add_action_buttons();
     }
@@ -58,27 +61,6 @@ class mod_certificate_upload_image_form extends moodleform {
      */
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
-
-        $supportedtypes = array('jpe' => 'image/jpeg',
-                                'jpeIE' => 'image/pjpeg',
-                                'jpeg' => 'image/jpeg',
-                                'jpegIE' => 'image/pjpeg',
-                                'jpg' => 'image/jpeg',
-                                'jpgIE' => 'image/pjpeg',
-                                'png' => 'image/png',
-                                'pngIE' => 'image/x-png');
-
-        $files = $this->get_draft_files('certificateimage');
-        if ($files) {
-            foreach ($files as $file) {
-                if (!in_array($file->get_mimetype(), $supportedtypes)) {
-                    $errors['certificateimage'] = get_string('unsupportedfiletype', 'certificate');
-                }
-            }
-        } else {
-            $errors['certificateimage'] = get_string('nofileselected', 'certificate');
-        }
-
         return $errors;
     }
 }
