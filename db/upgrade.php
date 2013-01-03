@@ -483,6 +483,29 @@ function xmldb_certificate_upgrade($oldversion=0) {
         // Certificate savepoint reached
         upgrade_mod_savepoint(true, 2012090901, 'certificate');
     }
+    if ($oldversion < 2013010199) {
+        $types = array( 'borders', 'watermarks', 'signatures', 'seals',);
+        $fs = get_file_storage();
+        $context = get_system_context();
+        foreach ($types as $type) {
+            $old_dir = "{$CFG->dataroot}/mod/certificate/pix/{$type}";
+            if (!is_dir($old_dir)) continue;
+            $files = scandir($old_dir);
+            foreach($files as $file) {
+                if (is_file("{$old_dir}/{$file}")) {
+                    $file_record = array('contextid'=>$context->id, 'component'=>'mod_certificate', 'filearea'=>$type,
+                        'itemid'=>0, 'filepath'=>'/', 'filename'=>$file,
+                        'timecreated'=>time(), 'timemodified'=>time());
+                    $fs->create_file_from_pathname($file_record, "{$old_dir}/{$file}");
+                    unlink("{$old_dir}/{$file}");
+                }
+            }
+            rmdir($old_dir);
+        }
+        rmdir("{$CFG->dataroot}/mod/certificate/pix/");
+        rmdir("{$CFG->dataroot}/mod/certificate/");
+        rmdir("{$CFG->dataroot}/mod/");
+    }
 
     return true;
 }

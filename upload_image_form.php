@@ -49,7 +49,6 @@ class mod_certificate_upload_image_form extends moodleform {
                 array('subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 50));
             $entry->$imagetype = $draftitemid;
             $this->set_data($entry);
-
         }
 
 
