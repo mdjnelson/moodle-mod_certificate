@@ -704,7 +704,54 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
 
     // get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-    $certmanagers = get_users_by_capability($context, 'mod/certificate:manage', 'u.id');
+
+    $conditionssql = '';
+    $conditionsparams = array();
+    if ($certmanagers = array_keys(get_users_by_capability($context, 'mod/certificate:manage', 'u.id'))) {
+        list($sql, $params) = $DB->get_in_or_equal($certmanagers, SQL_PARAMS_NAMED, 'cert');
+        $conditionssql .= "AND NOT u.id $sql \n";
+        $conditionsparams += $params;
+    }
+
+
+
+    $restricttogroup = false;
+    if ($groupmode) {
+        $currentgroup = groups_get_activity_group($cm);
+        if ($currentgroup) {
+            $restricttogroup = true;
+            $groupusers = array_keys(groups_get_members($currentgroup, 'u.*'));
+            if (empty($groupusers)) {
+                return array();
+            }
+        }
+    }
+
+    $restricttogrouping = false;
+
+    // if groupmembersonly used, remove users who are not in any group
+    if (!empty($CFG->enablegroupings) and $cm->groupmembersonly) {
+        if ($groupingusers = groups_get_grouping_members($cm->groupingid, 'u.id', 'u.id')) {
+            $restricttogrouping = true;
+        } else {
+            return array();
+        }
+    }
+
+    if ($restricttogroup || $restricttogrouping) {
+        if ($restricttogroup) {
+            $allowedusers = $groupusers;
+        } else if ($restricttogroup && $restricttogrouping) {
+            $allowedusers = array_intersect($groupusers, $groupingusers);
+        } else  {
+            $allowedusers = $groupingusers;
+        }
+
+        list($sql, $params) = $DB->get_in_or_equal($allowedusers, SQL_PARAMS_NAMED, 'grp');
+        $conditionssql .= "AND u.id $sql \n";
+        $conditionsparams += $params;
+    }
+
 
     $page = (int) $page;
     $perpage = (int) $perpage;
@@ -722,46 +769,22 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
         }
     }
 
+
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
+    $allparams = $conditionsparams + array('certificateid' => $certificateid);
+
     $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated
                                    FROM {user} u
                                    INNER JOIN {certificate_issues} ci
                                    ON u.id = ci.userid
                                    WHERE u.deleted = 0
                                    AND ci.certificateid = :certificateid
-                                   ORDER BY {$sort}", array('certificateid' => $certificateid),
+                                   $conditionssql
+                                   ORDER BY {$sort}",
+                                   $allparams,
                                    $page * $perpage,
                                    $perpage);
 
-    // now exclude all the certmanagers.
-    foreach ($users as $id => $user) {
-        if (isset($certmanagers[$id])) { //exclude certmanagers.
-            unset($users[$id]);
-        }
-    }
-
-    // if groupmembersonly used, remove users who are not in any group
-    if (!empty($users) and !empty($CFG->enablegroupings) and $cm->groupmembersonly) {
-        if ($groupingusers = groups_get_grouping_members($cm->groupingid, 'u.id', 'u.id')) {
-            $users = array_intersect($users, array_keys($groupingusers));
-        }
-    }
-
-    if ($groupmode) {
-        $currentgroup = groups_get_activity_group($cm);
-        if ($currentgroup) {
-            $groupusers = groups_get_members($currentgroup, 'u.*');
-            if (empty($groupusers)) {
-                return array();
-            }
-            foreach($users as $id => $unused) {
-                if (!isset($groupusers[$id])) {
-                    // remove this user as it isn't in the group!
-                    unset($users[$id]);
-                }
-            }
-        }
-    }
 
     return $users;
 }
