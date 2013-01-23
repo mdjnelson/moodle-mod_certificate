@@ -1,7 +1,7 @@
 ==============
 :::::NOTE:::::
 ==============
-Please not that this is only a fork and not the official module which is
+Please note that this is only a fork and not the official module which is
 developed by PukunuiAustralia.
 
 This fork extends the Certificate module by adding the course specific
