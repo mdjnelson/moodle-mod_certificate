@@ -1,3 +1,33 @@
+NOTE: THIS IS A FORK. IT PROVIDES SOME ADDITIONAL FEATURES. PLEASE READE BELOW.
+==============================================================================
+
+==================== ADDITIONAL FEATURES ====================
+This fork adds the Course protected images mechanism.
+
+The Course protected images mechanism allows the user to upload images
+that are visible only from the course specified during the upload.
+
+The uploading form has been extended by adding two fields:
+- Limit to one course (Checkbox)
+  Selecting this checkbox is going to place the uploaded image inside
+  the $CFG->data_root/mod/certificate/image_type/course/$COURSE->shortname
+  folder. The images are then going to be visible only form the course
+  with the same shortname.
+
+- Course Shortname (Textfield)
+  This field specifies the Course shortname to use during the upload.
+  Thus the file is going to be placed in the directory specified by
+  the input of this field. Before proceeding with the update the module
+  validates the input by checking the existence of the course.
+
+This is particularly useful for the Signature images because
+it avoids the signatures to be visible in all other courses once they
+are uploaded.
+
+This fork also adds the Italian language support.
+
+
+
 QUICK INSTALL
 =============
 

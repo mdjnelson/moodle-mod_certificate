@@ -1056,11 +1056,14 @@ function certificate_get_images($type) {
             $uploadpath = "$CFG->dataroot/mod/certificate/pix/watermarks";
             break;
     }
+
     // If valid path
     if (!empty($path)) {
         $options = array();
         $options += certificate_scan_image_dir($path);
         $options += certificate_scan_image_dir($uploadpath);
+		// add course protected files
+        $options += certificate_scan_image_protected_dir($uploadpath);
 
         // Sort images
         ksort($options);
@@ -1471,6 +1474,40 @@ function certificate_scan_image_dir($path) {
                     if ($i > 1) {
                         // Set the name
                         $options[$file] = substr($file, 0, $i);
+                    }
+                }
+            }
+            closedir($handle);
+        }
+    }
+
+    return $options;
+}
+
+/**
+ * Scans the protected directory "$path/course/$COURSE->shortname" for valid images.
+ * The images in protected directory are only visible from the course with the same shortname.
+ *
+ * @param string the path
+ * @return array
+ */
+function certificate_scan_image_protected_dir($path) {
+	global $COURSE;
+
+	$protecteddir = "/course/$COURSE->shortname/";
+	$protectedpath = $path.$protecteddir;
+    // Array to store the images
+    $options = array();
+
+    // Start to scan directory
+    if (is_dir($protectedpath)) {
+        if ($handle = opendir($protectedpath)) {
+            while (false !== ($file = readdir($handle))) {
+                if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1) ) {
+                    $i = strpos($file, '.');
+                    if ($i > 1) {
+                        // Set the name
+                        $options[$protecteddir.$file] = substr($file, 0, $i);
                     }
                 }
             }

@@ -48,9 +48,13 @@ $upload_form = new mod_certificate_upload_image_form();
 if ($upload_form->is_cancelled()) {
     redirect(new moodle_url('/admin/settings.php?section=modsettingcertificate'));
 } else if ($data = $upload_form->get_data()) {
-    // Ensure the directory for storing is created
-    $uploaddir = "mod/certificate/pix/$data->imagetype";
     $filename = $upload_form->get_new_filename('certificateimage');
+    $uploaddir = "mod/certificate/pix/$data->imagetype";
+	// put the file inside a protected directory if needed
+	if(isset($data->protected)) {
+		$uploaddir .= "/course/$data->courseshortname/";
+	}
+    // Ensure the directory for storing is created
     make_upload_directory($uploaddir);
     $destination = $CFG->dataroot . '/' . $uploaddir . '/' . $filename;
     if (!$upload_form->save_file('certificateimage', $destination, true)) {
