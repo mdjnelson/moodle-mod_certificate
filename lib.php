@@ -52,19 +52,7 @@ function certificate_add_instance($certificate) {
     $certificate->timecreated = time();
     $certificate->timemodified = $certificate->timecreated;
 
-    if ($certificateid = $DB->insert_record('certificate', $certificate)) {
-        $event = new stdClass;
-        $event->name = $certificate->name;
-        $event->description = '';
-        $event->courseid = $certificate->course;
-        $event->groupid = 0;
-        $event->userid = 0;
-        $event->eventtype = 'course';
-        $event->modulename = 'certificate';
-        $event->instance = $certificateid;
-
-        add_event($event);
-    }
+    $certificateid = $DB->insert_record('certificate', $certificate);
 
     return $certificateid;
 }
@@ -78,26 +66,10 @@ function certificate_add_instance($certificate) {
 function certificate_update_instance($certificate) {
     global $DB;
 
-    // Update the certificate
+    // Update the certificate.
     $certificate->timemodified = time();
     $certificate->id = $certificate->instance;
     $DB->update_record('certificate', $certificate);
-
-    // Update the event if it exists, else create
-    if ($event= $DB->get_record('event', array('modulename'=>'certificate', 'instance'=>$certificate->id))) {
-        $event->name = $certificate->name;
-        update_event($event);
-    } else {
-        $event = new stdClass;
-        $event->name = $certificate->name;
-        $event->description = '';
-        $event->courseid = $certificate->course;
-        $event->groupid = 0;
-        $event->userid = 0;
-        $event->modulename  = 'certificate';
-        $event->instance = $certificate->id;
-        add_event($event);
-    }
 
     return true;
 }
