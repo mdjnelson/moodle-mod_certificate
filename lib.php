@@ -1033,29 +1033,37 @@ function certificate_types() {
 function certificate_get_images($type) {
     global $CFG, $DB;
 
+    $fs = get_file_storage();
+    $context = get_system_context();
+
     switch($type) {
         case CERT_IMAGE_BORDER :
             $path = "$CFG->dirroot/mod/certificate/pix/borders";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/borders";
             break;
         case CERT_IMAGE_SEAL :
             $path = "$CFG->dirroot/mod/certificate/pix/seals";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/seals";
             break;
         case CERT_IMAGE_SIGNATURE :
             $path = "$CFG->dirroot/mod/certificate/pix/signatures";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/signatures";
             break;
         case CERT_IMAGE_WATERMARK :
             $path = "$CFG->dirroot/mod/certificate/pix/watermarks";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/watermarks";
             break;
     }
     // If valid path
     if (!empty($path)) {
         $options = array();
         $options += certificate_scan_image_dir($path);
-        $options += certificate_scan_image_dir($uploadpath);
+        $files = $fs->get_area_files($context->id, 'mod_certificate', $type, 0);
+        foreach ($files as $f) {
+            // $f is an instance of stored_file
+            $file = $f->get_filename();
+            $i = strpos($file, '.');
+            if ($i > 1) {
+                $options[$file] = substr($file, 0, $i);
+            }
+        }
+
 
         // Sort images
         ksort($options);
@@ -1385,27 +1393,29 @@ function certificate_draw_frame_letter($pdf, $certificate) {
  */
 function certificate_print_image($pdf, $certificate, $type, $x, $y, $w, $h) {
     global $CFG;
+    $fs = get_file_storage();
+    $context = get_system_context();
 
     switch($type) {
         case CERT_IMAGE_BORDER :
             $attr = 'borderstyle';
             $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->borderstyle";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->borderstyle";
+            $filename = $certificate->borderstyle;
             break;
         case CERT_IMAGE_SEAL :
             $attr = 'printseal';
             $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->printseal";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->printseal";
+            $filename = $certificate->printseal;
             break;
         case CERT_IMAGE_SIGNATURE :
             $attr = 'printsignature';
             $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->printsignature";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->printsignature";
+            $filename = $certificate->printsignature;
             break;
         case CERT_IMAGE_WATERMARK :
             $attr = 'printwmark';
             $path = "$CFG->dirroot/mod/certificate/pix/$type/$certificate->printwmark";
-            $uploadpath = "$CFG->dataroot/mod/certificate/pix/$type/$certificate->printwmark";
+            $filename = $certificate->printwmark;
             break;
     }
     // Has to be valid
@@ -1418,8 +1428,9 @@ function certificate_print_image($pdf, $certificate, $type, $x, $y, $w, $h) {
                 if (file_exists($path)) {
                     $pdf->Image($path, $x, $y, $w, $h);
                 }
-                if (file_exists($uploadpath)) {
-                    $pdf->Image($uploadpath, $x, $y, $w, $h);
+                if ($fs->file_exists($context->id, 'mod_certificate', $type, 0,'/',$filename)) {
+                    $content = $fs->get_file($context->id, 'mod_certificate', $type, 0,'/',$filename)->get_content();
+                    $pdf->Image("@{$content}", $x, $y, $w, $h);
                 }
             break;
         }
