@@ -49,12 +49,11 @@ define('CERT_MAX_PER_PAGE', 200);
 function certificate_add_instance($certificate) {
     global $DB;
 
+    // Create the certificate.
     $certificate->timecreated = time();
     $certificate->timemodified = $certificate->timecreated;
 
-    $certificateid = $DB->insert_record('certificate', $certificate);
-
-    return $certificateid;
+    return $DB->insert_record('certificate', $certificate);
 }
 
 /**
@@ -69,9 +68,8 @@ function certificate_update_instance($certificate) {
     // Update the certificate.
     $certificate->timemodified = time();
     $certificate->id = $certificate->instance;
-    $DB->update_record('certificate', $certificate);
 
-    return true;
+    return $DB->update_record('certificate', $certificate);
 }
 
 /**
