@@ -87,7 +87,16 @@ if ($certificate->requiredtime && !has_capability('mod/certificate:manage', $con
 // Create new certificate record, or return existing record
 $certrecord = certificate_get_issue($course, $USER, $certificate, $cm);
 
-// Load the specific certificatetype
+// Create a directory that is writeable so that TCPDF can create temp images.
+// In 2.2 onwards the function make_temp_directory was introduced, use that,
+// otherwise we will use make_upload_directory.
+if ($CFG->version >= '2011120500') {
+    make_temp_directory('tcpdf');
+} else {
+    make_upload_directory('cache/tcpdf');
+}
+
+// Load the specific certificate type.
 require("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
 
 if (empty($action)) { // Not displaying PDF
