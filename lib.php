@@ -1145,13 +1145,14 @@ function certificate_get_date($certificate, $certrecord, $course, $userid = null
     }
     if ($certificate->printdate > 0) {
         if ($certificate->datefmt == 1) {
-            $certificatedate = str_replace(' 0', ' ', strftime('%B %d, %Y', $date));
+            $certificatedate = userdate($date, '%B %d, %Y');
         } else if ($certificate->datefmt == 2) {
-            $certificatedate = date('F jS, Y', $date);
+            $suffix = certificate_get_ordinal_number_suffix(userdate($date, '%d'));
+            $certificatedate = userdate($date, '%B %d' . $suffix . ', %Y');
         } else if ($certificate->datefmt == 3) {
-            $certificatedate = str_replace(' 0', '', strftime('%d %B %Y', $date));
+            $certificatedate = userdate($date, '%d %B %Y');
         } else if ($certificate->datefmt == 4) {
-            $certificatedate = strftime('%B %Y', $date);
+            $certificatedate = userdate($date, '%B %Y');
         } else if ($certificate->datefmt == 5) {
             $certificatedate = userdate($date, get_string('strftimedate', 'langconfig'));
         }
@@ -1160,6 +1161,25 @@ function certificate_get_date($certificate, $certrecord, $course, $userid = null
     }
 
     return '';
+}
+
+/**
+ * Helper function to return the suffix of the day of
+ * the month, eg 'st' if it is the 1st of the month.
+ *
+ * @param int the day of the month
+ * @return string the suffix.
+ */
+function certificate_get_ordinal_number_suffix($day) {
+    if (!in_array(($day % 100), array(11, 12, 13))) {
+        switch ($day % 10) {
+            // Handle 1st, 2nd, 3rd
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+        }
+    }
+    return 'th';
 }
 
 /**
