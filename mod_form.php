@@ -140,25 +140,25 @@ class mod_certificate_mod_form extends moodleform_mod {
         $mform->addHelpButton('orientation', 'orientation', 'certificate');
 
         $mform->addElement('select', 'borderstyle', get_string('borderstyle', 'certificate'), certificate_get_images(CERT_IMAGE_BORDER));
-        $mform->setDefault('borderstyle', 0);
+        $mform->setDefault('borderstyle', '0');
         $mform->addHelpButton('borderstyle', 'borderstyle', 'certificate');
 
         $printframe = array( 0 => get_string('no'), 1 => get_string('borderblack', 'certificate'), 2 => get_string('borderbrown', 'certificate'),
             3 => get_string('borderblue', 'certificate'), 4 => get_string('bordergreen', 'certificate'));
         $mform->addElement('select', 'bordercolor', get_string('bordercolor', 'certificate'), $printframe);
-        $mform->setDefault('bordercolor', 0);
+        $mform->setDefault('bordercolor', '0');
         $mform->addHelpButton('bordercolor', 'bordercolor', 'certificate');
 
         $mform->addElement('select', 'printwmark', get_string('printwmark', 'certificate'), certificate_get_images(CERT_IMAGE_WATERMARK));
-        $mform->setDefault('printwmark', 0);
+        $mform->setDefault('printwmark', '0');
         $mform->addHelpButton('printwmark', 'printwmark', 'certificate');
 
         $mform->addElement('select', 'printsignature', get_string('printsignature', 'certificate'), certificate_get_images(CERT_IMAGE_SIGNATURE));
-        $mform->setDefault('printsignature', 0);
+        $mform->setDefault('printsignature', '0');
         $mform->addHelpButton('printsignature', 'printsignature', 'certificate');
 
         $mform->addElement('select', 'printseal', get_string('printseal', 'certificate'), certificate_get_images(CERT_IMAGE_SEAL));
-        $mform->setDefault('printseal', 0);
+        $mform->setDefault('printseal', '0');
         $mform->addHelpButton('printseal', 'printseal', 'certificate');
 
         $this->standard_coursemodule_elements();
