@@ -105,6 +105,7 @@ You can review it here:
 
     <a href="{$a->url}">Certificate Report</a>.';
 $string['entercode'] = 'Enter certificate code to verify:';
+$string['filter'] = 'Filter';
 $string['getcertificate'] = 'Get your certificate';
 $string['grade'] = 'Grade';
 $string['gradedate'] = 'Grade Date';
@@ -181,6 +182,8 @@ $string['reviewcertificate'] = 'Review your certificate';
 $string['savecert'] = 'Save Certificates';
 $string['savecert_help'] = 'If you choose this option, then a copy of each user\'s certificate pdf file is saved in the course files moddata folder for that certificate. A link to each user\'s saved certificate will be displayed in the certificate report.';
 $string['seal'] = 'Seal';
+$string['search'] = 'Search';
+$string['searchfor'] = 'Search for';
 $string['sigline'] = 'line';
 $string['signature'] = 'Signature';
 $string['statement'] = 'has completed the course';

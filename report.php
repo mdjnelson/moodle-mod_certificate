@@ -26,11 +26,13 @@
 
 require_once('../../config.php');
 require_once('lib.php');
+require_once($CFG->dirroot.'/mod/certificate/report_filter_form.php');
 
 $id   = required_param('id', PARAM_INT); // Course module ID
 $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
+$namesearch = optional_param('namesearch', '', PARAM_TEXT);
 
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', CERT_PER_PAGE, PARAM_INT);
@@ -89,13 +91,14 @@ if (!$download) {
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
 // Ensure there are issues to display, if not display notice
-if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage)) {
-    echo $OUTPUT->header();
-    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
-    notify(get_string('nocertificatesissued', 'certificate'));
-    echo $OUTPUT->footer($course);
-    exit();
-}
+$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage, $namesearch);
+//if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage, $namesearch)) {
+//    echo $OUTPUT->header();
+//    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
+//    notify(get_string('nocertificatesissued', 'certificate'));
+//    echo $OUTPUT->footer($course);
+//    exit();
+//}
 
 if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
@@ -237,7 +240,7 @@ if ($download == "txt") {
     exit;
 }
 
-$usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm));
+$usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, 0, 0, $namesearch));
 
 // Create the table for the users
 $table = new html_table();
@@ -255,16 +258,24 @@ foreach ($users as $user) {
 // Create table to store buttons
 $tablebutton = new html_table();
 $tablebutton->attributes['class'] = 'downloadreport';
-$btndownloadods = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'ods')), get_string("downloadods"));
-$btndownloadxls = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'xls')), get_string("downloadexcel"));
-$btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'txt')), get_string("downloadtext"));
+$btndownloadods = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'ods', 'namesearch'=>$namesearch)), get_string("downloadods"));
+$btndownloadxls = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'xls', 'namesearch'=>$namesearch)), get_string("downloadexcel"));
+$btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'txt', 'namesearch'=>$namesearch)), get_string("downloadtext"));
 $tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
+
+// Create form for the filter
+$filterform = new mod_certificate_report_filter_form(null, array('id' => $cm->id));
 
 echo $OUTPUT->header();
 groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
 echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
 echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
-echo html_writer::table($table);
+$filterform->display();
+if ($users) {
+    echo html_writer::table($table);
+} else {
+    notify(get_string('nocertificatesissued', 'certificate'));
+}
 echo html_writer::tag('div', html_writer::table($tablebutton), array('style' => 'margin:auto; width:50%'));
 echo $OUTPUT->footer($course);

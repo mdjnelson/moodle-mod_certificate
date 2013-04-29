@@ -669,9 +669,9 @@ function certificate_get_issue($course, $user, $certificate, $cm) {
  * @param int $perpage total per page
  * @return stdClass the users
  */
-function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm, $page = 0, $perpage = 0) {
+function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm, $page = 0, $perpage = 0, $namesearch = null) {
     global $CFG, $DB;
-
+    
     // get all users that can manage this certificate to exclude them from the report.
     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 
@@ -738,11 +738,26 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
             $perpage = CERT_PER_PAGE;
         }
     }
-
+    
+    // Search on name.
+    if (!is_null($namesearch) && trim($namesearch) != '') {
+        $namesearchparts = explode(' ', $namesearch);
+        $conditionssql .= "AND ("; 
+        $or = '';
+        foreach ($namesearchparts as $key => $namesearchpart) {
+            $namesearchpart = "%$namesearchpart%";
+            $conditionssql .= " $or " . $DB->sql_like('firstname', ':firstnamefilter'.$key, false);
+            $conditionsparams['firstnamefilter'.$key] = $namesearchpart;
+            $or = 'OR';
+            $conditionssql .= " $or " . $DB->sql_like('lastname', ':lastnamefilter'.$key, false);
+            $conditionsparams['lastnamefilter'.$key] = $namesearchpart;
+        }
+        $conditionssql .= ")";
+    }
 
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
     $allparams = $conditionsparams + array('certificateid' => $certificateid);
-
+    
     $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated
                                    FROM {user} u
                                    INNER JOIN {certificate_issues} ci
