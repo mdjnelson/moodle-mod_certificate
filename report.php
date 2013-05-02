@@ -125,7 +125,7 @@ if ($download == "ods") {
         foreach ($users as $user) {
             $myxls->write_string($row, 0, $user->lastname);
             $myxls->write_string($row, 1, $user->firstname);
-            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
+            $studentid = (!empty($user->id)) ? $user->id : " ";
             $myxls->write_string($row, 2, $studentid);
             $ug2 = '';
             if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
@@ -174,7 +174,7 @@ if ($download == "xls") {
         foreach ($users as $user) {
             $myxls->write_string($row, 0, $user->lastname);
             $myxls->write_string($row, 1, $user->firstname);
-            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
+            $studentid = (!empty($user->id)) ? $user->id : " ";
             $myxls->write_string($row,2,$studentid);
             $ug2 = '';
             if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
@@ -205,7 +205,7 @@ if ($download == "txt") {
     header("Pragma: public");
 
     // Print names of all the fields
-    echo get_string("firstname"). "\t" .get_string("lastname") . "\t". get_string("idnumber") . "\t";
+    echo get_string("lastname"). "\t" .get_string("firstname") . "\t". get_string("idnumber") . "\t";
     echo get_string("group"). "\t";
     echo $strdate. "\t";
     echo $strgrade. "\t";
@@ -218,8 +218,8 @@ if ($download == "txt") {
         echo $user->lastname;
         echo "\t" . $user->firstname;
         $studentid = " ";
-        if (!empty($user->idnumber)) {
-            $studentid = $user->idnumber;
+        if (!empty($user->id)) {
+            $studentid = $user->idn;
         }
         echo "\t" . $studentid . "\t";
         $ug2 = '';
