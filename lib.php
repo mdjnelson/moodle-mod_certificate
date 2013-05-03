@@ -760,6 +760,108 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
 }
 
 /**
+ * Returns a list of NOT issued certificates - sorted for report.
+ *
+ * @param int $certificateid
+ * @param string $sort the sort order
+ * @param bool $groupmode are we in group mode ?
+ * @param stdClass $cm the course module
+ * @param int $page offset
+ * @param int $perpage total per page
+ * @return stdClass the users
+ */
+function certificate_get_noissues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm, $page = 0, $perpage = 0) {
+    global $CFG, $DB;
+
+    // get all users that can manage this certificate to exclude them from the report.
+    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+
+    $conditionssql = '';
+    $conditionsparams = array();
+    if ($certmanagers = array_keys(get_users_by_capability($context, 'mod/certificate:manage', 'u.id'))) {
+        list($sql, $params) = $DB->get_in_or_equal($certmanagers, SQL_PARAMS_NAMED, 'cert');
+        $conditionssql .= "AND NOT u.id $sql \n";
+        $conditionsparams += $params;
+    }
+
+
+
+    $restricttogroup = false;
+    if ($groupmode) {
+        $currentgroup = groups_get_activity_group($cm);
+        if ($currentgroup) {
+            $restricttogroup = true;
+            $groupusers = array_keys(groups_get_members($currentgroup, 'u.*'));
+            if (empty($groupusers)) {
+                return array();
+            }
+        }
+    }
+
+    $restricttogrouping = false;
+
+    // if groupmembersonly used, remove users who are not in any group
+    if (!empty($CFG->enablegroupings) and $cm->groupmembersonly) {
+        if ($groupingusers = groups_get_grouping_members($cm->groupingid, 'u.id', 'u.id')) {
+            $restricttogrouping = true;
+        } else {
+            return array();
+        }
+    }
+
+    if ($restricttogroup || $restricttogrouping) {
+        if ($restricttogroup) {
+            $allowedusers = $groupusers;
+        } else if ($restricttogroup && $restricttogrouping) {
+            $allowedusers = array_intersect($groupusers, $groupingusers);
+        } else  {
+            $allowedusers = $groupingusers;
+        }
+
+        list($sql, $params) = $DB->get_in_or_equal($allowedusers, SQL_PARAMS_NAMED, 'grp');
+        $conditionssql .= "AND u.id $sql \n";
+        $conditionsparams += $params;
+    }
+
+
+    $page = (int) $page;
+    $perpage = (int) $perpage;
+
+    // Setup pagination - when both $page and $perpage = 0, get all results
+    if ($page || $perpage) {
+        if ($page < 0) {
+            $page = 0;
+        }
+
+        if ($perpage > CERT_MAX_PER_PAGE) {
+            $perpage = CERT_MAX_PER_PAGE;
+        } else if ($perpage < 1) {
+            $perpage = CERT_PER_PAGE;
+        }
+    }
+
+
+    // Get all the users that have no certificates issued
+    $allparams = $conditionsparams + array('certificateid' => $certificateid);
+
+    $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated
+                                   FROM {user} u
+                                   LEFT JOIN {certificate_issues} ci
+                                   ON u.id = ci.userid
+                                   WHERE u.deleted = 0
+                                   AND ( (ci.certificateid IS NULL ) )
+                                   $conditionssql                           
+                                   ORDER BY {$sort}",
+                                   $allparams,
+                                   $page * $perpage,
+                                   $perpage);
+
+
+    return $users;
+}
+
+
+/**
  * Returns a list of previously issued certificates--used for reissue.
  *
  * @param int $certificateid
