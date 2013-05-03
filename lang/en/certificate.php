@@ -202,3 +202,4 @@ $string['viewcertificateviews'] = 'View {$a} issued certificates';
 $string['viewed'] = 'You received this certificate on:';
 $string['viewtranscript'] = 'View Certificates';
 $string['watermark'] = 'Watermark';
+$string['viewnocertificate'] = 'View {$a} not-issued certificates';
