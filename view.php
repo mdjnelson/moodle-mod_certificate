@@ -113,6 +113,14 @@ if (empty($action)) { // Not displaying PDF
             array('href' => $CFG->wwwroot . '/mod/certificate/report.php?id=' . $cm->id));
         echo html_writer::tag('div', $url, array('class' => 'reportlink'));
     }
+    
+// link to report2 to list students with no certificate    
+	if (has_capability('mod/certificate:manage', $context)) {
+        $numusers = count(certificate_get_noissues($certificate->id, 'ci.timecreated ASC', $groupmode, $cm));
+        $url = html_writer::tag('a', get_string('viewnocertificate', 'certificate', $numusers),
+            array('href' => $CFG->wwwroot . '/mod/certificate/report2.php?id=' . $cm->id));
+        echo html_writer::tag('div', $url, array('class' => 'reportlink'));
+    }
 
     if (!empty($certificate->intro)) {
         echo $OUTPUT->box(format_module_intro('certificate', $certificate, $cm->id), 'generalbox', 'intro');
