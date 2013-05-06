@@ -33,6 +33,7 @@ $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
 $namesearch = optional_param('namesearch', '', PARAM_TEXT);
+$reset = optional_param('resetbutton', false, PARAM_BOOL);
 
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', CERT_PER_PAGE, PARAM_INT);
@@ -45,6 +46,11 @@ if ($action) {
     $url->param('action', $action);
 }
 $PAGE->set_url($url);
+
+// if the reset button is pressed, reload the page with an empty searchform
+if($reset) {
+    redirect($url);
+}
 
 if (!$cm = get_coursemodule_from_id('certificate', $id)) {
     print_error('Course Module ID was incorrect');

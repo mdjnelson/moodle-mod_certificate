@@ -39,16 +39,20 @@ class mod_certificate_report_filter_form extends moodleform {
         $mform = $this->_form;
 
         // Add header
-        $mform->addElement('header', '', get_string('filter', 'certificate'), '');
+        $mform->addElement('header', '', get_string('search', 'certificate'), '');
         
         // Add text field: search for
-        $mform->addElement('text', 'namesearch', get_string('searchfor', 'certificate'));
+        $mform->addElement('text', 'namesearch', get_string('searchbyname', 'certificate'));
         
         // Add the id of the course
         $mform->addElement('hidden', 'id', $this->_customdata['id']);
 
         // buttons
-        $this->add_action_buttons(false, get_string('search', 'certificate'));
+        $buttonarray=array();
+        $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('search', 'certificate'));
+        $buttonarray[] = $mform->createElement('submit', 'resetbutton', get_string('reset', 'certificate'));
+        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->closeHeaderBefore('buttonar');
     }
 
     /**

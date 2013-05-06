@@ -105,7 +105,6 @@ You can review it here:
 
     <a href="{$a->url}">Certificate Report</a>.';
 $string['entercode'] = 'Enter certificate code to verify:';
-$string['filter'] = 'Filter';
 $string['getcertificate'] = 'Get your certificate';
 $string['grade'] = 'Grade';
 $string['gradedate'] = 'Grade Date';
@@ -178,12 +177,13 @@ $string['reportcert'] = 'Report Certificates';
 $string['reportcert_help'] = 'If you choose yes here, then this certificate\'s date received, code number, and the course name will be shown on the user certificate reports.  If you choose to print a grade on this certificate, then that grade will also be shown on the certificate report.';
 $string['requiredtimenotmet'] = 'You must spend at least a minimum of {$a->requiredtime} minutes in the course before you can access this certificate';
 $string['requiredtimenotvalid'] = 'The required time must be a valid number greater than 0';
+$string['reset'] = "Reset";
 $string['reviewcertificate'] = 'Review your certificate';
 $string['savecert'] = 'Save Certificates';
 $string['savecert_help'] = 'If you choose this option, then a copy of each user\'s certificate pdf file is saved in the course files moddata folder for that certificate. A link to each user\'s saved certificate will be displayed in the certificate report.';
 $string['seal'] = 'Seal';
 $string['search'] = 'Search';
-$string['searchfor'] = 'Search for';
+$string['searchbyname'] = 'Search by name';
 $string['sigline'] = 'line';
 $string['signature'] = 'Signature';
 $string['statement'] = 'has completed the course';
