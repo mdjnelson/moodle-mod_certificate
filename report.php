@@ -98,13 +98,6 @@ add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certif
 
 // Ensure there are issues to display, if not display notice
 $users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage, $namesearch);
-//if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage, $namesearch)) {
-//    echo $OUTPUT->header();
-//    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
-//    notify(get_string('nocertificatesissued', 'certificate'));
-//    echo $OUTPUT->footer($course);
-//    exit();
-//}
 
 if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
