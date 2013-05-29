@@ -35,6 +35,16 @@ $action = optional_param('action', '', PARAM_ALPHA);
 $page = optional_param('page', 0, PARAM_INT);
 $perpage = optional_param('perpage', CERT_PER_PAGE, PARAM_INT);
 
+// Ensure the perpage variable does not exceed the max allowed if
+// the user has not specified they wish to view all certificates.
+if (CERT_PER_PAGE !== 0) {
+    if (($perpage > CERT_MAX_PER_PAGE) || ($perpage <= 0)) {
+        $perpage = CERT_MAX_PER_PAGE;
+    }
+} else {
+    $perpage = '9999999';
+}
+
 $url = new moodle_url('/mod/certificate/report.php', array('id'=>$id, 'page' => $page, 'perpage' => $perpage));
 if ($download) {
     $url->param('download', $download);
