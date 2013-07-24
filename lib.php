@@ -37,7 +37,9 @@ define('CERT_IMAGE_SIGNATURE', 'signatures');
 /** The seal image folder */
 define('CERT_IMAGE_SEAL', 'seals');
 
+/** Set CERT_PER_PAGE to 0 if you wish to display all certificates on the report page */
 define('CERT_PER_PAGE', 30);
+
 define('CERT_MAX_PER_PAGE', 200);
 
 /**
@@ -726,20 +728,6 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
     $page = (int) $page;
     $perpage = (int) $perpage;
 
-    // Setup pagination - when both $page and $perpage = 0, get all results
-    if ($page || $perpage) {
-        if ($page < 0) {
-            $page = 0;
-        }
-
-        if ($perpage > CERT_MAX_PER_PAGE) {
-            $perpage = CERT_MAX_PER_PAGE;
-        } else if ($perpage < 1) {
-            $perpage = CERT_PER_PAGE;
-        }
-    }
-
-
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
     $allparams = $conditionsparams + array('certificateid' => $certificateid);
 
@@ -950,6 +938,26 @@ function certificate_get_date_options() {
     $dateoptions['2'] = get_string('completiondate', 'certificate');
 
     return $dateoptions;
+}
+
+/**
+ * Fetch all grade categories from the specified course.
+ *
+ * @param int $courseid the course id
+ * @return array
+ */
+function certificate_get_grade_categories($courseid) {
+    $grade_category_options = array();
+
+    if ($grade_categories = grade_category::fetch_all(array('courseid' => $courseid))) {
+        foreach ($grade_categories as $grade_category) {
+            if (!$grade_category->is_course_category()) {
+                $grade_category_options[-$grade_category->id] = get_string('category') . ' : ' . $grade_category->get_name();
+            }
+        }
+    }
+
+    return $grade_category_options;
 }
 
 /**
@@ -1237,6 +1245,27 @@ function certificate_get_grade($certificate, $course, $userid = null) {
 
                 return $grade;
             }
+        }
+    } else if ($certificate->printgrade < 0) { // Must be a category id.
+        if ($category_item = grade_item::fetch(array('itemtype' => 'category', 'iteminstance' => -$certificate->printgrade))) {
+            $category_item->gradetype = GRADE_TYPE_VALUE;
+
+            $grade = new grade_grade(array('itemid' => $category_item->id, 'userid' => $userid));
+
+            $category_grade = new stdClass;
+            $category_grade->points = grade_format_gradevalue($grade->finalgrade, $category_item, true, GRADE_DISPLAY_TYPE_REAL, $decimals = 2);
+            $category_grade->percentage = grade_format_gradevalue($grade->finalgrade, $category_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE, $decimals = 2);
+            $category_grade->letter = grade_format_gradevalue($grade->finalgrade, $category_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
+
+            if ($certificate->gradefmt == 1) {
+                $formattedgrade = $category_grade->percentage;
+            } else if ($certificate->gradefmt == 2) {
+                $formattedgrade = $category_grade->points;
+            } else if ($certificate->gradefmt == 3) {
+                $formattedgrade = $category_grade->letter;
+            }
+
+            return $formattedgrade;
         }
     }
 

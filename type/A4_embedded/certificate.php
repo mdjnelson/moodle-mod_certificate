@@ -28,7 +28,7 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.'); // It must be included from view.php
 }
 
-$pdf = new TCPDF($certificate->orientation, 'mm', 'A4', true, 'UTF-8', false);
+$pdf = new PDF($certificate->orientation, 'mm', 'A4', true, 'UTF-8', false);
 
 $pdf->SetTitle($certificate->name);
 $pdf->setPrintHeader(false);
@@ -56,7 +56,7 @@ if ($certificate->orientation == 'L') {
     $brdrw = 297;
     $brdrh = 210;
     $codey = 175;
-} else { //Portrait
+} else { // Portrait
     $x = 10;
     $y = 40;
     $sealx = 150;

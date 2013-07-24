@@ -88,10 +88,10 @@ if ($certificate->requiredtime && !has_capability('mod/certificate:manage', $con
 $certrecord = certificate_get_issue($course, $USER, $certificate, $cm);
 
 // Create a directory that is writeable so that TCPDF can create temp images.
-// In 2.2 onwards the function make_temp_directory was introduced, use that,
+// In 2.2 onwards the function make_cache_directory was introduced, use that,
 // otherwise we will use make_upload_directory.
 if ($CFG->version >= '2011120500') {
-    make_temp_directory('tcpdf');
+    make_cache_directory('tcpdf');
 } else {
     make_upload_directory('cache/tcpdf');
 }
