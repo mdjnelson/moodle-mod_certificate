@@ -102,7 +102,7 @@ function certificate_delete_instance($id) {
     }
 
     // Delete any files associated with the certificate
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     $fs = get_file_storage();
     $fs->delete_area_files($context->id);
 
@@ -278,7 +278,7 @@ function certificate_cron () {
 function certificate_get_teachers($certificate, $user, $course, $cm) {
     global $USER, $DB;
 
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     $potteachers = get_users_by_capability($context, 'mod/certificate:manage',
         '', '', '', '', '', '', false, false);
     if (empty($potteachers)) {
@@ -675,7 +675,7 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
 
     $conditionssql = '';
     $conditionsparams = array();
