@@ -87,10 +87,8 @@ if ($certificate->requiredtime && !has_capability('mod/certificate:manage', $con
 // Create new certificate record, or return existing record
 $certrecord = certificate_get_issue($course, $USER, $certificate, $cm);
 
-// Create a directory that is writeable so that TCPDF can create temp images.
-// In 2.2 onwards the function make_cache_directory was introduced, use that,
-// otherwise we will use make_upload_directory.
-if ($CFG->version >= '2011120500') {
+// The function make_cache_directory was introduced in Moodle 2.2, check it exists before using.
+if (function_exists('make_cache_directory')) {
     make_cache_directory('tcpdf');
 } else {
     make_upload_directory('cache/tcpdf');

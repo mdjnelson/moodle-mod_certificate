@@ -856,7 +856,7 @@ function certificate_get_course_time($courseid) {
  * @return array
  */
 function certificate_get_mods() {
-    global $COURSE, $CFG, $DB;
+    global $COURSE, $DB;
 
     $strtopic = get_string("topic");
     $strweek = get_string("week");
@@ -867,11 +867,8 @@ function certificate_get_mods() {
     $mods = $modinfo->get_cms();
 
     $modules = array();
-    // Check what version we are running - really we should have separate branch for 2.4, but
-    // having a branch called master and one called MOODLE_24_STABLE may be confusing. This
-    // module will also be replaced in the future so hack will do. Here we get the course
-    // sections and sort the modules as they appear in the course.
-    if ($CFG->version >= '2012112900') {
+    // The function get_section_info_all was introduced in Moodle 2.3, check it exists before using.
+    if (method_exists($modinfo, 'get_section_info_all')) {
         $sections = $modinfo->get_section_info_all();
     } else {
         $sections = get_all_sections($COURSE->id);
