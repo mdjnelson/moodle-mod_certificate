@@ -36,7 +36,7 @@ function certificate_generate_date($certificate, $course) {
     debugging('certificate_generate_date is deprecated, please use certificate_get_date instead which will
                return a date in a human readable format.', DEBUG_DEVELOPER);
 
-    global $DB;
+    global $DB, $USER;
 
     // Set certificate date to current time, can be overwritten later
     $date = time();
@@ -47,13 +47,13 @@ function certificate_generate_date($certificate, $course) {
                 FROM {course_completions} c
                 WHERE c.userid = :userid
                 AND c.course = :courseid";
-        if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $userid, 'courseid' => $course->id))) {
+        if ($timecompleted = $DB->get_record_sql($sql, array('userid' => $USER->id, 'courseid' => $course->id))) {
             if (!empty($timecompleted->timecompleted)) {
                 $date = $timecompleted->timecompleted;
             }
         }
     } else if ($certificate->printdate > 2) {
-        if ($modinfo = certificate_get_mod_grade($course, $certificate->printdate, $userid)) {
+        if ($modinfo = certificate_get_mod_grade($course, $certificate->printdate, $USER->id)) {
             $date = $modinfo->dategraded;
         }
     }
