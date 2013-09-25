@@ -1316,11 +1316,12 @@ function certificate_get_code($certificate, $certrecord) {
  * @param char $style ''=normal, B=bold, I=italic, U=underline
  * @param int $size font size in points
  * @param string $text the text to print
+ * @param int $width horizontal dimension of text block
  */
-function certificate_print_text($pdf, $x, $y, $align, $font='freeserif', $style, $size=10, $text) {
+function certificate_print_text($pdf, $x, $y, $align, $font='freeserif', $style, $size = 10, $text, $width = 0) {
     $pdf->setFont($font, $style, $size);
     $pdf->SetXY($x, $y);
-    $pdf->writeHTMLCell(0, 0, '', '', $text, 0, 0, 0, true, $align);
+    $pdf->writeHTMLCell($width, 0, '', '', $text, 0, 0, 0, true, $align);
 }
 
 /**
