@@ -146,7 +146,6 @@ $string['openwindow'] = 'Click the button below to open your certificate in a ne
 $string['or'] = 'Or';
 $string['orientation'] = 'Orientation';
 $string['orientation_help'] = 'Choose whether you want your certificate orientation to be portrait or landscape.';
-$string['pi'] = 'Personal Identifier';
 $string['pluginadministration'] = 'Certificate administration';
 $string['pluginname'] = 'Certificate';
 $string['portrait'] = 'Portrait';

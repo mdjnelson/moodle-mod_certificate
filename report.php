@@ -81,7 +81,7 @@ $strcertificate  = get_string('modulename', 'certificate');
 $strreport = get_string('report', 'certificate');
 
 // User information headings.
-$ustr = array(get_string('awardedto', 'certificate'), get_string('pi', 'certificate'));
+$ustr = array(get_string('awardedto', 'certificate'), get_string('idnumber'));
 
 // Get users extra field from the settings in /admin/settings.php?section=userpolicies under Show user identity.
 if ($extrauserfields = get_extra_user_fields($context, array('idnumber'))) {
