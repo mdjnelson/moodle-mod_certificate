@@ -867,12 +867,7 @@ function certificate_get_mods() {
     $mods = $modinfo->get_cms();
 
     $modules = array();
-    // The function get_section_info_all was introduced in Moodle 2.3, check it exists before using.
-    if (method_exists($modinfo, 'get_section_info_all')) {
-        $sections = $modinfo->get_section_info_all();
-    } else {
-        $sections = get_all_sections($COURSE->id);
-    }
+    $sections = $modinfo->get_section_info_all();
     for ($i = 0; $i <= count($sections) - 1; $i++) {
         // should always be true
         if (isset($sections[$i])) {
