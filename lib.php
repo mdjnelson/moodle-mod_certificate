@@ -890,7 +890,6 @@ function certificate_get_mods() {
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                    $mod->courseid = $COURSE->id;
                     $instance = $DB->get_record($mod->modname, array('id' => $mod->instance));
                     if ($grade_items = grade_get_grade_items_for_activity($mod)) {
                         $mod_item = grade_get_grades($COURSE->id, 'mod', $mod->modname, $mod->instance);
