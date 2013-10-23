@@ -87,12 +87,7 @@ if ($certificate->requiredtime && !has_capability('mod/certificate:manage', $con
 // Create new certificate record, or return existing record
 $certrecord = certificate_get_issue($course, $USER, $certificate, $cm);
 
-// The function make_cache_directory was introduced in Moodle 2.2, check it exists before using.
-if (function_exists('make_cache_directory')) {
-    make_cache_directory('tcpdf');
-} else {
-    make_upload_directory('cache/tcpdf');
-}
+make_cache_directory('tcpdf');
 
 // Load the specific certificate type.
 require("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
