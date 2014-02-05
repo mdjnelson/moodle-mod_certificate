@@ -24,10 +24,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or late
  */
 
-$module->version   = 2013021200; // The current module version (Date: YYYYMMDDXX)
-$module->requires  = 2010112400; // Requires this Moodle version
+$module->version   = 2013102300; // The current module version (Date: YYYYMMDDXX)
+$module->requires  = 2012120300; // Requires this Moodle version
 $module->cron      = 0; // Period for cron to check this module (secs)
 $module->component = 'mod_certificate';
 
 $module->maturity  = MATURITY_STABLE;
-$module->release   = "Stable (2012121302)"; // User-friendly version number
+$module->release   = "Stable"; // User-friendly version number

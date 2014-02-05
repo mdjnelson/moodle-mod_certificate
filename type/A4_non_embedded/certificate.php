@@ -31,6 +31,7 @@ if (!defined('MOODLE_INTERNAL')) {
 $pdf = new PDF($certificate->orientation, 'mm', 'A4', true, 'UTF-8', false);
 
 $pdf->SetTitle($certificate->name);
+$pdf->SetProtection(array('modify'));
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetAutoPageBreak(false, 0);
@@ -103,7 +104,7 @@ if ($certificate->printhours) {
 certificate_print_text($pdf, $x, $codey, 'C', 'Times', '', 10, certificate_get_code($certificate, $certrecord));
 $i = 0;
 if ($certificate->printteacher) {
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort = 'u.lastname ASC', '', '', '', '', false)) {
         foreach ($teachers as $teacher) {
             $i++;

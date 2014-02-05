@@ -102,7 +102,7 @@ function certificate_delete_instance($id) {
     }
 
     // Delete any files associated with the certificate
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     $fs = get_file_storage();
     $fs->delete_area_files($context->id);
 
@@ -278,7 +278,7 @@ function certificate_cron () {
 function certificate_get_teachers($certificate, $user, $course, $cm) {
     global $USER, $DB;
 
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
     $potteachers = get_users_by_capability($context, 'mod/certificate:manage',
         '', '', '', '', '', '', false, false);
     if (empty($potteachers)) {
@@ -675,7 +675,7 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
     global $CFG, $DB;
 
     // get all users that can manage this certificate to exclude them from the report.
-    $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+    $context = context_module::instance($cm->id);
 
     $conditionssql = '';
     $conditionsparams = array();
@@ -856,7 +856,7 @@ function certificate_get_course_time($courseid) {
  * @return array
  */
 function certificate_get_mods() {
-    global $COURSE, $CFG, $DB;
+    global $COURSE, $DB;
 
     $strtopic = get_string("topic");
     $strweek = get_string("week");
@@ -867,15 +867,7 @@ function certificate_get_mods() {
     $mods = $modinfo->get_cms();
 
     $modules = array();
-    // Check what version we are running - really we should have separate branch for 2.4, but
-    // having a branch called master and one called MOODLE_24_STABLE may be confusing. This
-    // module will also be replaced in the future so hack will do. Here we get the course
-    // sections and sort the modules as they appear in the course.
-    if ($CFG->version >= '2012112900') {
-        $sections = $modinfo->get_section_info_all();
-    } else {
-        $sections = get_all_sections($COURSE->id);
-    }
+    $sections = $modinfo->get_section_info_all();
     for ($i = 0; $i <= count($sections) - 1; $i++) {
         // should always be true
         if (isset($sections[$i])) {
@@ -898,7 +890,6 @@ function certificate_get_mods() {
                         continue;
                     }
                     $mod = $mods[$sectionmod];
-                    $mod->courseid = $COURSE->id;
                     $instance = $DB->get_record($mod->modname, array('id' => $mod->instance));
                     if ($grade_items = grade_get_grade_items_for_activity($mod)) {
                         $mod_item = grade_get_grades($COURSE->id, 'mod', $mod->modname, $mod->instance);
@@ -1322,11 +1313,12 @@ function certificate_get_code($certificate, $certrecord) {
  * @param char $style ''=normal, B=bold, I=italic, U=underline
  * @param int $size font size in points
  * @param string $text the text to print
+ * @param int $width horizontal dimension of text block
  */
-function certificate_print_text($pdf, $x, $y, $align, $font='freeserif', $style, $size=10, $text) {
+function certificate_print_text($pdf, $x, $y, $align, $font='freeserif', $style, $size = 10, $text, $width = 0) {
     $pdf->setFont($font, $style, $size);
     $pdf->SetXY($x, $y);
-    $pdf->writeHTMLCell(0, 0, '', '', $text, 0, 0, 0, true, $align);
+    $pdf->writeHTMLCell($width, 0, '', '', $text, 0, 0, 0, true, $align);
 }
 
 /**

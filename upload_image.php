@@ -30,7 +30,7 @@ require_once($CFG->dirroot.'/mod/certificate/upload_image_form.php');
 
 require_login();
 
-$context = get_system_context();
+$context = context_system::instance();
 require_capability('moodle/site:config', $context);
 
 $struploadimage = get_string('uploadimage', 'certificate');

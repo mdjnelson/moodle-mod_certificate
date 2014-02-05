@@ -66,9 +66,7 @@ if (!$certificates = get_all_instances_in_course('certificate', $course)) {
     exit();
 }
 
-if ($usesections = course_format_uses_sections($course->format)) {
-    $sections = get_all_sections($course->id);
-}
+$usesections = course_format_uses_sections($course->format);
 
 $table = new html_table();
 
@@ -88,23 +86,27 @@ foreach ($certificates as $certificate) {
         $link = html_writer::tag('a', $certificate->name, array('class' => 'dimmed',
             'href' => $CFG->wwwroot . '/mod/certificate/view.php?id=' . $certificate->coursemodule));
     }
-    if ($certificate->section !== $currentsection) {
+
+    $strsection = '';
+    if ($certificate->section != $currentsection) {
         if ($certificate->section) {
-            $printsection = $certificate->section;
+            $strsection = get_section_name($course, $certificate->section);
         }
-        if ($currentsection !== "") {
+        if ($currentsection !== '') {
             $table->data[] = 'hr';
         }
         $currentsection = $certificate->section;
     }
+
     // Get the latest certificate issue
     if ($certrecord = $DB->get_record('certificate_issues', array('userid' => $USER->id, 'certificateid' => $certificate->id))) {
         $issued = userdate($certrecord->timecreated);
     } else {
         $issued = get_string('notreceived', 'certificate');
     }
-    if (($course->format == 'weeks') || ($course->format == 'topics')) {
-        $table->data[] = array ($certificate->section, $link, $issued);
+
+    if ($usesections) {
+        $table->data[] = array ($strsection, $link, $issued);
     } else {
         $table->data[] = array ($link, $issued);
     }
