@@ -378,6 +378,7 @@ function certificate_email_others($course, $certificate, $certrecord, $cm) {
                 $other = trim($other);
                 if (validate_email($other)) {
                     $destination = new stdClass;
+                    $destination->id = 1;
                     $destination->email = $other;
                     $info = new stdClass;
                     $info->student = fullname($USER);
