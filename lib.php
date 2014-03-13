@@ -1498,19 +1498,14 @@ function certificate_scan_image_dir($path) {
 
     // Start to scan directory
     if (is_dir($path)) {
-        if ($handle = opendir($path)) {
-            while (false !== ($file = readdir($handle))) {
-                if (strpos($file, '.png', 1) || strpos($file, '.jpg', 1) ) {
-                    $i = strpos($file, '.');
-                    if ($i > 1) {
-                        // Set the name
-                        $options[$file] = substr($file, 0, $i);
-                    }
-                }
+        $iterator = new DirectoryIterator($path);
+        foreach ($iterator as $fileinfo) {
+            $filename = $fileinfo->getFilename();
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            if ($fileinfo->isFile() && in_array($extension, array('png', 'jpg', 'jpeg'))) {
+                $options[$filename] = pathinfo($filename, PATHINFO_FILENAME);
             }
-            closedir($handle);
         }
     }
-
     return $options;
 }
