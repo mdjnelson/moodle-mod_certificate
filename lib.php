@@ -1183,9 +1183,10 @@ function certificate_get_ordinal_number_suffix($day) {
  * @param stdClass $certificate
  * @param stdClass $course
  * @param int $userid
+ * @param bool $valueonly if true return only the points, %age, or letter with no prefix
  * @return string the grade result
  */
-function certificate_get_grade($certificate, $course, $userid = null) {
+function certificate_get_grade($certificate, $course, $userid = null, $valueonly = false) {
     global $USER;
 
     if (empty($userid)) {
@@ -1195,8 +1196,11 @@ function certificate_get_grade($certificate, $course, $userid = null) {
     if ($certificate->printgrade > 0) {
         if ($certificate->printgrade == 1) {
             if ($course_item = grade_item::fetch_course_item($course->id)) {
-                // String used
-                $strcoursegrade = get_string('coursegrade', 'certificate');
+                // Check we want to add a prefix to the grade.
+                $strprefix = '';
+                if (!$valueonly) {
+                    $strprefix = get_string('coursegrade', 'certificate') . ': ';
+                }
 
                 $grade = new grade_grade(array('itemid' => $course_item->id, 'userid' => $userid));
                 $course_item->gradetype = GRADE_TYPE_VALUE;
@@ -1206,25 +1210,28 @@ function certificate_get_grade($certificate, $course, $userid = null) {
                 $coursegrade->letter = grade_format_gradevalue($grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_LETTER, $decimals = 0);
 
                 if ($certificate->gradefmt == 1) {
-                    $grade = $strcoursegrade . ':  ' . $coursegrade->percentage;
+                    $grade = $strprefix . $coursegrade->percentage;
                 } else if ($certificate->gradefmt == 2) {
-                    $grade = $strcoursegrade . ':  ' . $coursegrade->points;
+                    $grade = $strprefix . $coursegrade->points;
                 } else if ($certificate->gradefmt == 3) {
-                    $grade = $strcoursegrade . ':  ' . $coursegrade->letter;
+                    $grade = $strprefix . $coursegrade->letter;
                 }
 
                 return $grade;
             }
         } else { // Print the mod grade
             if ($modinfo = certificate_get_mod_grade($course, $certificate->printgrade, $userid)) {
-                // String used
-                $strgrade = get_string('grade', 'certificate');
+                // Check we want to add a prefix to the grade.
+                $strprefix = '';
+                if (!$valueonly) {
+                    $strprefix = $modinfo->name . ' ' . get_string('grade', 'certificate') . ': ';
+                }
                 if ($certificate->gradefmt == 1) {
-                    $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modinfo->percentage;
+                    $grade = $strprefix . $modinfo->percentage;
                 } else if ($certificate->gradefmt == 2) {
-                    $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modinfo->points;
+                    $grade = $strprefix . $modinfo->points;
                 } else if ($certificate->gradefmt == 3) {
-                    $grade = $modinfo->name . ' ' . $strgrade . ': ' . $modinfo->letter;
+                    $grade = $strprefix . $modinfo->letter;
                 }
 
                 return $grade;
