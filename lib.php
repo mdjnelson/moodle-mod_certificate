@@ -1074,7 +1074,8 @@ function certificate_get_mod_grade($course, $moduleid, $userid) {
     $cm = $DB->get_record('course_modules', array('id' => $moduleid));
     $module = $DB->get_record('modules', array('id' => $cm->module));
 
-    if ($grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $userid)) {
+    $grade_item = grade_get_grades($course->id, 'mod', $module->name, $cm->instance, $userid);
+    if (!empty($grade_item)) {
         $item = new grade_item();
         $itemproperties = reset($grade_item->items);
         foreach ($itemproperties as $key => $value) {
