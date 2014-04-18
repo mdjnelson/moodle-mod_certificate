@@ -102,7 +102,7 @@ add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certif
 if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage)) {
     echo $OUTPUT->header();
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
-    notify(get_string('nocertificatesissued', 'certificate'));
+    echo $OUTPUT->notification(get_string('nocertificatesissued', 'certificate'));
     echo $OUTPUT->footer($course);
     exit();
 }
