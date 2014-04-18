@@ -729,7 +729,9 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
     // Get all the users that have certificates issued, should only be one issue per user for a certificate
     $allparams = $conditionsparams + array('certificateid' => $certificateid);
 
-    $users = $DB->get_records_sql("SELECT u.*, ci.code, ci.timecreated
+    $namefields = get_all_user_name_fields(true, 'u');
+    $picturefields = user_picture::fields('u');
+    $users = $DB->get_records_sql("SELECT u.id, $namefields, $picturefields, ci.code, ci.timecreated
                                      FROM {user} u
                                INNER JOIN {certificate_issues} ci
                                        ON u.id = ci.userid
