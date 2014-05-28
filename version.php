@@ -25,7 +25,7 @@
  */
 
 $module->version   = 2013102301; // The current module version (Date: YYYYMMDDXX)
-$module->requires  = 2012120300; // Requires this Moodle version
+$module->requires  = 2013051400; // Requires this Moodle version
 $module->cron      = 0; // Period for cron to check this module (secs)
 $module->component = 'mod_certificate';
 
