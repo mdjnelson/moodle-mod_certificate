@@ -46,6 +46,8 @@ class mod_certificate_upload_image_form extends moodleform {
         );
 
         $mform->addElement('select', 'imagetype', get_string('imagetype', 'certificate'), $imagetypes);
+        $mform->addElement('checkbox', 'protected', get_string('protected', 'certificate'));
+        $mform->addElement('text', 'courseshortname', get_string('courseshortname', 'certificate'));
 
         $mform->addElement('filepicker', 'certificateimage', '');
         $mform->addRule('certificateimage', null, 'required', null, 'client');
@@ -79,6 +81,20 @@ class mod_certificate_upload_image_form extends moodleform {
             $errors['certificateimage'] = get_string('nofileselected', 'certificate');
         }
 
-        return $errors;
+		// check course shortname data
+		if(isset($data['protected'])) {
+			// check if shortname is set and not empty
+			if(!isset($data['courseshortname']) or empty($data['courseshortname'])) {
+				$errors['courseshortname'] = get_string('missingcourseshortname', 'certificate');
+			} else { // check if shortname is a valid one
+				global $DB;
+				$course = $DB->get_record('course', array('shortname'=>$data['courseshortname']));
+				if($course == false){
+					$errors['courseshortname'] = get_string('novalidcourseshortname', 'certificate');
+				}
+			}
+		}
+
+		return $errors;
     }
 }
