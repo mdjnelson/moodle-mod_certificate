@@ -731,7 +731,7 @@ function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $gro
 
     $namefields = get_all_user_name_fields(true, 'u');
     $picturefields = user_picture::fields('u');
-    $users = $DB->get_records_sql("SELECT u.id, $namefields, $picturefields, ci.code, ci.timecreated
+    $users = $DB->get_records_sql("SELECT u.id, u.idnumber, $namefields, $picturefields, ci.code, ci.timecreated
                                      FROM {user} u
                                INNER JOIN {certificate_issues} ci
                                        ON u.id = ci.userid
