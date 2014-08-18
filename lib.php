@@ -598,25 +598,24 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
 /**
  * Produces a list of links to the issued certificates.  Used for report.
  *
- * @param stdClass $certificate
+ * @param int $certificateid
  * @param int $userid
- * @param int $contextid
+ * @param \context_module $context
  * @return string return the user files
  */
-function certificate_print_user_files($certificate, $userid, $contextid) {
+function certificate_print_user_files($certificateid, $userid, $context) {
     global $CFG, $DB, $OUTPUT;
 
     $output = '';
-
-    $certrecord = $DB->get_record('certificate_issues', array('userid' => $userid, 'certificateid' => $certificate->id));
+    $certrecord = $DB->get_record('certificate_issues', array('userid' => $userid, 'certificateid' => $certificateid));
     $fs = get_file_storage();
 
     $component = 'mod_certificate';
     $filearea = 'issue';
-    $files = $fs->get_area_files($contextid, $component, $filearea, $certrecord->id);
+    $files = $fs->get_area_files($context->id, $component, $filearea, $certrecord->id);
     foreach ($files as $file) {
         $filename = $file->get_filename();
-        $link = file_encode_url($CFG->wwwroot.'/pluginfile.php', '/'.$contextid.'/mod_certificate/issue/'.$certrecord->id.'/'.$filename);
+        $link = file_encode_url($CFG->wwwroot.'/pluginfile.php', '/'.$context->id.'/mod_certificate/issue/'.$certrecord->id.'/'.$filename);
 
         $output = '<img src="'.$OUTPUT->pix_url(file_mimetype_icon($file->get_mimetype())).'" height="16" width="16" alt="'.$file->get_mimetype().'" />&nbsp;'.
                   '<a href="'.$link.'" >'.s($filename).'</a>';
