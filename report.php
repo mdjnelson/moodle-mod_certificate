@@ -257,7 +257,7 @@ $table->head  = array($strto, $strdate, $strgrade, $strcode);
 $table->align = array("left", "left", "center", "center");
 foreach ($users as $user) {
     $name = $OUTPUT->user_picture($user) . fullname($user);
-    $date = userdate($user->timecreated) . certificate_print_user_files($certificate->id, $user->id, $context);
+    $date = userdate($user->timecreated) . certificate_print_user_files($certificate, $user->id, $context->id);
     $code = $user->code;
     $table->data[] = array ($name, $date, certificate_get_grade($certificate, $course, $user->id), $code);
 }
