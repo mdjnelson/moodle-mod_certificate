@@ -48,7 +48,15 @@ $context = context_module::instance($cm->id);
 require_capability('mod/certificate:view', $context);
 
 // log update
-add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
+// Replacing depreciated function for new event API 18-07-2014
+// add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
+$event = \mod_certificate\event\course_module_viewed::create(array(
+	'objectid' =>$cm->id,
+	'context' => $PAGE->context,
+));
+$event->add_record_snapshot('course', $PAGE->course);
+$event->trigger();
+
 $completion=new completion_info($course);
 $completion->set_module_viewed($cm);
 
@@ -124,7 +132,14 @@ if (empty($action)) { // Not displaying PDF
     echo html_writer::tag('p', $str, array('style' => 'text-align:center'));
     $linkname = get_string('getcertificate', 'certificate');
     // Add to log, only if we are reissuing
-    add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
+    // Rewriting add_to_log to new event API 18-07-2014
+    //add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
+    $event = \mod_certificate\event\course_module_viewed::create(array(
+	'objectid' => $cm->id,
+	'context' => $PAGE->context,
+    ));
+    $event->add_record_snapshot('course', $PAGE->course);
+    $event->trigger();
 
     $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
     $button = new single_button($link, $linkname);
