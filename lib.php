@@ -209,7 +209,7 @@ function certificate_user_complete($course, $user, $mod, $certificate) {
         echo get_string('issued', 'certificate') . ": ";
         echo userdate($issue->timecreated);
         $cm = get_coursemodule_from_instance('certificate', $certificate->id, $course->id);
-        certificate_print_user_files($certificate->id, $user->id, context_module::instance($cm->id));
+        certificate_print_user_files($certificate, $user->id, context_module::instance($cm->id)->id);
         echo '<br />';
         echo $OUTPUT->box_end();
     } else {
