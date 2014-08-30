@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of the Certificate module for Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,7 +26,7 @@
 require_once('../../config.php');
 require_once('lib.php');
 
-$id   = required_param('id', PARAM_INT); // Course module ID
+$id   = required_param('id', PARAM_INT); // Course module ID.
 $sort = optional_param('sort', '', PARAM_RAW);
 $download = optional_param('download', '', PARAM_ALPHA);
 $action = optional_param('action', '', PARAM_ALPHA);
@@ -45,7 +44,7 @@ if (CERT_PER_PAGE !== 0) {
     $perpage = '9999999';
 }
 
-$url = new moodle_url('/mod/certificate/report.php', array('id'=>$id, 'page' => $page, 'perpage' => $perpage));
+$url = new moodle_url('/mod/certificate/report.php', array('id' => $id, 'page' => $page, 'perpage' => $perpage));
 if ($download) {
     $url->param('download', $download);
 }
@@ -58,47 +57,63 @@ if (!$cm = get_coursemodule_from_id('certificate', $id)) {
     print_error('Course Module ID was incorrect');
 }
 
-if (!$course = $DB->get_record('course', array('id'=> $cm->course))) {
+if (!$course = $DB->get_record('course', array('id' => $cm->course))) {
     print_error('Course is misconfigured');
 }
 
-if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance))) {
+if (!$certificate = $DB->get_record('certificate', array('id' => $cm->instance))) {
     print_error('Certificate ID was incorrect');
 }
 
-// Requires a course login
+// Requires a course login.
 require_course_login($course->id, false, $cm);
 
-// Check capabilities
+// Check capabilities.
 $context = context_module::instance($cm->id);
 require_capability('mod/certificate:manage', $context);
 
-// Declare some variables
+
+// Declare some variables.
+// TODO: Following 2 variables are not used, delete them (after asking Mark).
 $strcertificates = get_string('modulenameplural', 'certificate');
 $strcertificate  = get_string('modulename', 'certificate');
-$strto = get_string('awardedto', 'certificate');
-$strdate = get_string('receiveddate', 'certificate');
-$strgrade = get_string('grade','certificate');
-$strcode = get_string('code', 'certificate');
-$strreport= get_string('report', 'certificate');
+
+$strreport = get_string('report', 'certificate');
+
+// User information headings.
+$ustr = array(get_string('awardedto', 'certificate'), get_string('idnumber'));
+
+// Get users extra field from the settings in /admin/settings.php?section=userpolicies under Show user identity.
+if ($extrauserfields = get_extra_user_fields($context, array('idnumber'))) {
+    foreach ($extrauserfields as $euf) {
+        $ustr[] = get_user_field_name($euf);
+    }
+}
+
+// Certificate headings.
+$cstr = array(get_string('receiveddate', 'certificate'));
+if ($certificate->printgrade) {
+    $cstr[] = get_string('grade', 'certificate');
+}
+$cstr[] = get_string('code', 'certificate');
 
 if (!$download) {
     $PAGE->navbar->add($strreport);
     $PAGE->set_title(format_string($certificate->name).": $strreport");
     $PAGE->set_heading($course->fullname);
-    // Check to see if groups are being used in this choice
+    // Check to see if groups are being used in this choice.
     if ($groupmode = groups_get_activity_groupmode($cm)) {
         groups_get_activity_group($cm, true);
     }
 } else {
     $groupmode = groups_get_activity_groupmode($cm);
-    // Get all results when $page and $perpage are 0
+    // Get all results when $page and $perpage are 0.
     $page = $perpage = 0;
 }
 
 add_to_log($course->id, 'certificate', 'view', "report.php?id=$cm->id", '$certificate->id', $cm->id);
 
-// Ensure there are issues to display, if not display notice
+// Ensure there are issues to display, if not display notice.
 if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm, $page, $perpage)) {
     echo $OUTPUT->header();
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
@@ -110,98 +125,30 @@ if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $gro
 if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
 
-    // Calculate file name
+    // Calculate file name.
     $filename = clean_filename("$course->shortname " . rtrim($certificate->name, '.') . '.ods');
-    // Creating a workbook
+
+    // Creating a workbook.
     $workbook = new MoodleODSWorkbook("-");
-    // Send HTTP headers
-    $workbook->send($filename);
-    // Creating the first worksheet
-    $myxls = $workbook->add_worksheet($strreport);
 
-    // Print names of all the fields
-    $myxls->write_string(0, 0, get_string("lastname"));
-    $myxls->write_string(0, 1, get_string("firstname"));
-    $myxls->write_string(0, 2, get_string("idnumber"));
-    $myxls->write_string(0, 3, get_string("group"));
-    $myxls->write_string(0, 4, $strdate);
-    $myxls->write_string(0, 5, $strgrade);
-    $myxls->write_string(0, 6, $strcode);
-
-    // Generate the data for the body of the spreadsheet
-    $i = 0;
-    $row = 1;
-    if ($users) {
-        foreach ($users as $user) {
-            $myxls->write_string($row, 0, $user->lastname);
-            $myxls->write_string($row, 1, $user->firstname);
-            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
-            $myxls->write_string($row, 2, $studentid);
-            $ug2 = '';
-            if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
-                foreach ($usergrps as $ug) {
-                    $ug2 = $ug2. $ug->name;
-                }
-            }
-            $myxls->write_string($row, 3, $ug2);
-            $myxls->write_string($row, 4, userdate($user->timecreated));
-            $myxls->write_string($row, 5, certificate_get_grade($certificate, $course, $user->id));
-            $myxls->write_string($row, 6, $user->code);
-            $row++;
-        }
-        $pos = 6;
-    }
-    // Close the workbook
-    $workbook->close();
+    // Create spreadsheet.
+    certificate_report_make_spreadsheet(
+            $course, $certificate, $users, $context, $extrauserfields, $filename, $workbook, $strreport, $ustr, $cstr);
     exit;
 }
 
 if ($download == "xls") {
     require_once("$CFG->libdir/excellib.class.php");
 
-    // Calculate file name
+    // Calculate file name.
     $filename = clean_filename("$course->shortname " . rtrim($certificate->name, '.') . '.xls');
-    // Creating a workbook
+
+    // Creating a workbook.
     $workbook = new MoodleExcelWorkbook("-");
-    // Send HTTP headers
-    $workbook->send($filename);
-    // Creating the first worksheet
-    $myxls = $workbook->add_worksheet($strreport);
 
-    // Print names of all the fields
-    $myxls->write_string(0, 0, get_string("lastname"));
-    $myxls->write_string(0, 1, get_string("firstname"));
-    $myxls->write_string(0, 2, get_string("idnumber"));
-    $myxls->write_string(0, 3, get_string("group"));
-    $myxls->write_string(0, 4, $strdate);
-    $myxls->write_string(0, 5, $strgrade);
-    $myxls->write_string(0, 6, $strcode);
-
-    // Generate the data for the body of the spreadsheet
-    $i = 0;
-    $row = 1;
-    if ($users) {
-        foreach ($users as $user) {
-            $myxls->write_string($row, 0, $user->lastname);
-            $myxls->write_string($row, 1, $user->firstname);
-            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
-            $myxls->write_string($row,2,$studentid);
-            $ug2 = '';
-            if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
-                foreach ($usergrps as $ug) {
-                    $ug2 = $ug2 . $ug->name;
-                }
-            }
-            $myxls->write_string($row, 3, $ug2);
-            $myxls->write_string($row, 4, userdate($user->timecreated));
-            $myxls->write_string($row, 5, certificate_get_grade($certificate, $course, $user->id));
-            $myxls->write_string($row, 6, $user->code);
-            $row++;
-        }
-        $pos = 6;
-    }
-    // Close the workbook
-    $workbook->close();
+    // Create spreadsheet.
+    certificate_report_make_spreadsheet(
+            $course, $certificate, $users, $context, $extrauserfields, $filename, $workbook, $strreport, $ustr, $cstr);
     exit;
 }
 
@@ -214,67 +161,90 @@ if ($download == "txt") {
     header("Cache-Control: must-revalidate,post-check=0,pre-check=0");
     header("Pragma: public");
 
-    // Print names of all the fields
-    echo get_string("lastname"). "\t" .get_string("firstname") . "\t". get_string("idnumber") . "\t";
-    echo get_string("group"). "\t";
-    echo $strdate. "\t";
-    echo $strgrade. "\t";
-    echo $strcode. "\n";
+    // Print names of all the fields.
+    $username = array(get_string("lastname"), get_string("firstname"));
+    $ustr = array_merge($username, array_splice($ustr, 1));
+    foreach ($ustr as $us) {
+        echo $us . "\t";
+    }
+    echo get_string("group") . "\t";
 
-    // Generate the data for the body of the spreadsheet
-    $i=0;
-    $row=1;
-    if ($users) foreach ($users as $user) {
-        echo $user->lastname;
-        echo "\t" . $user->firstname;
-        $studentid = " ";
-        if (!empty($user->idnumber)) {
-            $studentid = $user->idnumber;
-        }
-        echo "\t" . $studentid . "\t";
-        $ug2 = '';
-        if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
-            foreach ($usergrps as $ug) {
-                $ug2 = $ug2. $ug->name;
+    $index = 1;
+    $lastcolumn = count($cstr);
+    foreach ($cstr as $cs) {
+        echo $cs;
+        echo ($index++ === $lastcolumn) ? "\n" : "\t";
+    }
+
+    // Generate the data for the body of the spreadsheet.
+    $row = 1;
+    if ($users) {
+        foreach ($users as $user) {
+            list($udata, $cdata) = certificate_report_get_user_data($course, $certificate, $context, $user, $extrauserfields, true);
+            foreach ($udata as $ud) {
+                echo $ud . "\t";
             }
+            $ug2 = '';
+            if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
+                foreach ($usergrps as $ug) {
+                    $ug2 = $ug2 . $ug->name;
+                }
+            }
+            echo $ug2 . "\t";
+
+            $index = 1;
+            $lastcolumn = count($cstr);
+            foreach ($cdata as $cd) {
+                echo $cd;
+                echo ($index++ === $lastcolumn) ? "\n" : "\t";
+            }
+            $row++;
         }
-        echo $ug2 . "\t";
-        echo userdate($user->timecreated) . "\t";
-        echo certificate_get_grade($certificate, $course, $user->id) . "\t";
-        echo $user->code . "\n";
-        $row++;
     }
     exit;
 }
 
 $usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(), $groupmode, $cm));
 
-// Create the table for the users
-$table = new html_table();
-$table->width = "95%";
-$table->tablealign = "center";
-$table->head  = array($strto, $strdate, $strgrade, $strcode);
-$table->align = array("left", "left", "center", "center");
-foreach ($users as $user) {
-    $name = $OUTPUT->user_picture($user) . fullname($user);
-    $date = userdate($user->timecreated) . certificate_print_user_files($certificate, $user->id, $context->id);
-    $code = $user->code;
-    $table->data[] = array ($name, $date, certificate_get_grade($certificate, $course, $user->id), $code);
-}
-
-// Create table to store buttons
-$tablebutton = new html_table();
-$tablebutton->attributes['class'] = 'downloadreport';
-$btndownloadods = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'ods')), get_string("downloadods"));
-$btndownloadxls = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'xls')), get_string("downloadexcel"));
-$btndownloadtxt = $OUTPUT->single_button(new moodle_url("report.php", array('id'=>$cm->id, 'download'=>'txt')), get_string("downloadtext"));
-$tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
-
 echo $OUTPUT->header();
 groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/report.php?id='.$id);
 echo $OUTPUT->heading(get_string('modulenameplural', 'certificate'));
 echo $OUTPUT->paging_bar($usercount, $page, $perpage, $url);
 echo '<br />';
-echo html_writer::table($table);
+
+// Set up the table and table options.
+require_once($CFG->libdir.'/tablelib.php');
+$table = new flexible_table('mod-certificate-report');
+$table->set_attribute('id', 'certificates');
+
+// Set base url.
+$table->define_baseurl(new moodle_url($CFG->wwwroot.'/mod/certificate/report.php', array('id' => $cm->id)));
+
+// Add additional headers.
+$cols = array_merge($ustr, $cstr);
+$table->define_columns($cols);
+
+// Set columns for heading.
+$table->define_headers($cols);
+
+// Set up the table.
+$table->setup();
+
+foreach ($users as $user) {
+    list($udata, $cdata) = certificate_report_get_user_data($course, $certificate, $context, $user, $extrauserfields);
+    $table->add_data(array_merge($udata, $cdata));
+}
+
+// Create table to store buttons.
+$tablebutton = new html_table();
+$tablebutton->attributes['class'] = 'downloadreport';
+$btndownloadods = $OUTPUT->single_button(new moodle_url(
+        "report.php", array('id' => $cm->id, 'download' => 'ods')), get_string("downloadods"));
+$btndownloadxls = $OUTPUT->single_button(new moodle_url(
+        "report.php", array('id' => $cm->id, 'download' => 'xls')), get_string("downloadexcel"));
+$btndownloadtxt = $OUTPUT->single_button(new moodle_url(
+        "report.php", array('id' => $cm->id, 'download' => 'txt')), get_string("downloadtext"));
+$tablebutton->data[] = array($btndownloadods, $btndownloadxls, $btndownloadtxt);
+
 echo html_writer::tag('div', html_writer::table($tablebutton), array('style' => 'margin:auto; width:50%'));
 echo $OUTPUT->footer($course);
