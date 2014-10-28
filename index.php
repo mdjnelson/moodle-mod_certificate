@@ -35,7 +35,7 @@ if (!$course = $DB->get_record('course', array('id'=> $id))) {
 }
 
 // Requires a login
-require_course_login($course);
+require_login($course);
 
 // Declare variables
 $currentsection = "";

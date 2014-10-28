@@ -43,7 +43,7 @@ if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance)))
     print_error('course module is incorrect');
 }
 
-require_login($course->id, false, $cm);
+require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/certificate:view', $context);
 
