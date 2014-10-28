@@ -30,5 +30,3 @@ require_once($CFG->dirroot.'/mod/certificate/adminsetting.class.php');
 
 $settings->add(new mod_certificate_admin_setting_upload('certificate/uploadimage',
     get_string('uploadimage', 'certificate'), get_string('uploadimagedesc', 'certificate'), ''));
-
-?>
