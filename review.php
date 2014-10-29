@@ -45,7 +45,7 @@ if (!$certificate = $DB->get_record('certificate', array('id'=> $cm->instance)))
 }
 
 // Requires a course login
-require_course_login($course->id, true, $cm);
+require_login($course, true, $cm);
 
 // Check the capabilities
 $context = context_module::instance($cm->id);
