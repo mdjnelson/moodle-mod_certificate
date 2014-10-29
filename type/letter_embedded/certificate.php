@@ -77,6 +77,10 @@ if ($certificate->orientation == 'L') {
     $codey = 660;
 }
 
+// Get font families.
+$fontsans = get_config('certificate', 'fontsans');
+$fontserif = get_config('certificate', 'fontserif');
+
 // Add images and lines
 certificate_print_image($pdf, $certificate, CERT_IMAGE_BORDER, $brdrx, $brdry, $brdrw, $brdrh);
 certificate_draw_frame_letter($pdf, $certificate);
@@ -89,26 +93,26 @@ certificate_print_image($pdf, $certificate, CERT_IMAGE_SIGNATURE, $sigx, $sigy, 
 
 // Add text
 $pdf->SetTextColor(0, 0, 120);
-certificate_print_text($pdf, $x, $y, 'C', 'freesans', '', 30, get_string('title', 'certificate'));
+certificate_print_text($pdf, $x, $y, 'C', $fontsans, '', 30, get_string('title', 'certificate'));
 $pdf->SetTextColor(0, 0, 0);
-certificate_print_text($pdf, $x, $y + 55, 'C', 'freeserif', '', 20, get_string('certify', 'certificate'));
-certificate_print_text($pdf, $x, $y + 105, 'C', 'freeserif', '', 30, fullname($USER));
-certificate_print_text($pdf, $x, $y + 155, 'C', 'freeserif', '', 20, get_string('statement', 'certificate'));
-certificate_print_text($pdf, $x, $y + 205, 'C', 'freeserif', '', 20, $course->fullname);
-certificate_print_text($pdf, $x, $y + 255, 'C', 'freeserif', '', 14, certificate_get_date($certificate, $certrecord, $course));
-certificate_print_text($pdf, $x, $y + 283, 'C', 'freeserif', '', 10, certificate_get_grade($certificate, $course));
-certificate_print_text($pdf, $x, $y + 311, 'C', 'freeserif', '', 10, certificate_get_outcome($certificate, $course));
+certificate_print_text($pdf, $x, $y + 55, 'C', $fontserif, '', 20, get_string('certify', 'certificate'));
+certificate_print_text($pdf, $x, $y + 105, 'C', $fontserif, '', 30, fullname($USER));
+certificate_print_text($pdf, $x, $y + 155, 'C', $fontserif, '', 20, get_string('statement', 'certificate'));
+certificate_print_text($pdf, $x, $y + 205, 'C', $fontserif, '', 20, $course->fullname);
+certificate_print_text($pdf, $x, $y + 255, 'C', $fontserif, '', 14, certificate_get_date($certificate, $certrecord, $course));
+certificate_print_text($pdf, $x, $y + 283, 'C', $fontserif, '', 10, certificate_get_grade($certificate, $course));
+certificate_print_text($pdf, $x, $y + 311, 'C', $fontserif, '', 10, certificate_get_outcome($certificate, $course));
 if ($certificate->printhours) {
-    certificate_print_text($pdf, $x, $y + 339, 'C', 'freeserif', '', 10, get_string('credithours', 'certificate') . ': ' . $certificate->printhours);
+    certificate_print_text($pdf, $x, $y + 339, 'C', $fontserif, '', 10, get_string('credithours', 'certificate') . ': ' . $certificate->printhours);
 }
-certificate_print_text($pdf, $x, $codey, 'C', 'freeserif', '', 10, certificate_get_code($certificate, $certrecord));
+certificate_print_text($pdf, $x, $codey, 'C', $fontserif, '', 10, certificate_get_code($certificate, $certrecord));
 $i = 0;
 if ($certificate->printteacher) {
     $context = context_module::instance($cm->id);
     if ($teachers = get_users_by_capability($context, 'mod/certificate:printteacher', '', $sort = 'u.lastname ASC', '', '', '', '', false)) {
         foreach ($teachers as $teacher) {
             $i++;
-            certificate_print_text($pdf, $sigx, $sigy + ($i * 12), 'L', 'freeserif', '', 12, fullname($teacher));
+            certificate_print_text($pdf, $sigx, $sigy + ($i * 12), 'L', $fontserif, '', 12, fullname($teacher));
         }
     }
 }
