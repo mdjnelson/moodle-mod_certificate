@@ -105,6 +105,10 @@ You can review it here:
 
     <a href="{$a->url}">Certificate Report</a>.';
 $string['entercode'] = 'Enter certificate code to verify:';
+$string['fontsans'] = 'Sans-serif font family';
+$string['fontsans_desc'] = 'Sans-serif font family for certificates with embedded fonts';
+$string['fontserif'] = 'Serif font family';
+$string['fontserif_desc'] = 'Serif font family for certificates with embedded fonts';
 $string['getcertificate'] = 'Get your certificate';
 $string['grade'] = 'Grade';
 $string['gradedate'] = 'Grade Date';
