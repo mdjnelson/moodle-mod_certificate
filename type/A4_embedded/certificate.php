@@ -18,15 +18,12 @@
 /**
  * A4_embedded certificate type
  *
- * @package    mod
- * @subpackage certificate
+ * @package    mod_certificate
  * @copyright  Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.'); // It must be included from view.php
-}
+defined('MOODLE_INTERNAL') || die();
 
 $pdf = new PDF($certificate->orientation, 'mm', 'A4', true, 'UTF-8', false);
 
