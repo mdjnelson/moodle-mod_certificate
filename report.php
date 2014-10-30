@@ -108,7 +108,7 @@ if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
 
     // Calculate file name
-    $filename = clean_filename("$course->shortname " . rtrim($certificate->name, '.') . '.ods');
+    $filename = certificate_get_certificate_filename($certificate, $cm, $course) . '.ods';
     // Creating a workbook
     $workbook = new MoodleODSWorkbook("-");
     // Send HTTP headers
@@ -157,7 +157,7 @@ if ($download == "xls") {
     require_once("$CFG->libdir/excellib.class.php");
 
     // Calculate file name
-    $filename = clean_filename("$course->shortname " . rtrim($certificate->name, '.') . '.xls');
+    $filename = certificate_get_certificate_filename($certificate, $cm, $course) . '.xls';
     // Creating a workbook
     $workbook = new MoodleExcelWorkbook("-");
     // Send HTTP headers
@@ -203,7 +203,7 @@ if ($download == "xls") {
 }
 
 if ($download == "txt") {
-    $filename = clean_filename("$course->shortname " . rtrim($certificate->name, '.') . '.txt');
+    $filename = certificate_get_certificate_filename($certificate, $cm, $course) . '.txt';
 
     header("Content-Type: application/download\n");
     header("Content-Disposition: attachment; filename=\"$filename\"");
