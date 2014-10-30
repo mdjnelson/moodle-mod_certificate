@@ -18,14 +18,13 @@
 /**
  * This page reviews a certificate
  *
- * @package    mod
- * @subpackage certificate
+ * @package    mod_certificate
  * @copyright  Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
-require_once('lib.php');
+require_once('locallib.php');
 require_once("$CFG->libdir/pdflib.php");
 
 // Retrieve any variables that are passed

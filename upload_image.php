@@ -18,14 +18,13 @@
 /**
  * Handles uploading files
  *
- * @package    mod
- * @subpackage certificate
+ * @package    mod_certificate
  * @copyright  Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require('../../config.php');
-require_once($CFG->dirroot.'/mod/certificate/lib.php');
+require_once($CFG->dirroot.'/mod/certificate/locallib.php');
 require_once($CFG->dirroot.'/mod/certificate/upload_image_form.php');
 
 require_login();
