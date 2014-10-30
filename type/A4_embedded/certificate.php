@@ -95,7 +95,7 @@ $pdf->SetTextColor(0, 0, 0);
 certificate_print_text($pdf, $x, $y + 20, 'C', $fontserif, '', 20, get_string('certify', 'certificate'));
 certificate_print_text($pdf, $x, $y + 36, 'C', $fontsans, '', 30, fullname($USER));
 certificate_print_text($pdf, $x, $y + 55, 'C', $fontsans, '', 20, get_string('statement', 'certificate'));
-certificate_print_text($pdf, $x, $y + 72, 'C', $fontsans, '', 20, $course->fullname);
+certificate_print_text($pdf, $x, $y + 72, 'C', $fontsans, '', 20, format_string($course->fullname));
 certificate_print_text($pdf, $x, $y + 92, 'C', $fontsans, '', 14,  certificate_get_date($certificate, $certrecord, $course));
 certificate_print_text($pdf, $x, $y + 102, 'C', $fontserif, '', 10, certificate_get_grade($certificate, $course));
 certificate_print_text($pdf, $x, $y + 112, 'C', $fontserif, '', 10, certificate_get_outcome($certificate, $course));
