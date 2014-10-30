@@ -212,9 +212,11 @@ function certificate_email_teachers_html($info) {
  * @param stdClass $certificate
  * @param stdClass $certrecord
  * @param stdClass $context
+ * @param string $filecontents the PDF file contents
+ * @param string $filename
  * @return bool Returns true if mail was sent OK and false if there was an error.
  */
-function certificate_email_student($course, $certificate, $certrecord, $context) {
+function certificate_email_student($course, $certificate, $certrecord, $context, $filecontents, $filename) {
     global $USER;
 
     // Get teachers
@@ -247,36 +249,22 @@ function certificate_email_student($course, $certificate, $certrecord, $context)
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
 
-    // Remove full-stop at the end if it exists, to avoid "..pdf" being created and being filtered by clean_filename
-    $certname = rtrim($certificate->name, '.');
-    $filename = clean_filename("$certname.pdf");
-
-    // Get hashed pathname
-    $fs = get_file_storage();
-
-    $component = 'mod_certificate';
-    $filearea = 'issue';
-    $filepath = '/';
-    $files = $fs->get_area_files($context->id, $component, $filearea, $certrecord->id);
-    foreach ($files as $f) {
-        $filepathname = $f->get_contenthash();
+    $tempdir = make_temp_directory('certificate/attachment');
+    if (!$tempdir) {
+        return false;
     }
-    $attachment = 'filedir/'.certificate_path_from_hash($filepathname).'/'.$filepathname;
-    $attachname = $filename;
 
-    return email_to_user($USER, $from, $subject, $message, $messagehtml, $attachment, $attachname);
-}
+    $tempfile = $tempdir.'/'.md5(sesskey().microtime().$USER->id.'.pdf');
+    $fp = fopen($tempfile, 'w+');
+    fputs($fp, $filecontents);
+    fclose($fp);
 
-/**
- * Retrieve certificate path from hash
- *
- * @param array $contenthash
- * @return string the path
- */
-function certificate_path_from_hash($contenthash) {
-    $l1 = $contenthash[0].$contenthash[1];
-    $l2 = $contenthash[2].$contenthash[3];
-    return "$l1/$l2";
+    $prevabort = ignore_user_abort(true);
+    $result = email_to_user($USER, $from, $subject, $message, $messagehtml, $tempfile, $filename);
+    @unlink($tempfile);
+    ignore_user_abort($prevabort);
+
+    return $result;
 }
 
 /**
