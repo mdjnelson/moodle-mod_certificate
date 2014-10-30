@@ -18,8 +18,7 @@
 /**
  * Handles uploading files
  *
- * @package    mod
- * @subpackage certificate
+ * @package    mod_certificate
  * @copyright  Mark Nelson <markn@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,7 +28,7 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/mod/certificate/lib.php');
+require_once($CFG->dirroot.'/mod/certificate/locallib.php');
 
 class mod_certificate_upload_image_form extends moodleform {
 
