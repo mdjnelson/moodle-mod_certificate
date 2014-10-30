@@ -212,9 +212,11 @@ function certificate_email_teachers_html($info) {
  * @param stdClass $certificate
  * @param stdClass $certrecord
  * @param stdClass $context
+ * @param string $filecontents the PDF file contents
+ * @param string $filename
  * @return bool Returns true if mail was sent OK and false if there was an error.
  */
-function certificate_email_student($course, $certificate, $certrecord, $context) {
+function certificate_email_student($course, $certificate, $certrecord, $context, $filecontents, $filename) {
     global $USER;
 
     // Get teachers
@@ -247,36 +249,22 @@ function certificate_email_student($course, $certificate, $certrecord, $context)
     // Make the HTML version more XHTML happy  (&amp;)
     $messagehtml = text_to_html(get_string('emailstudenttext', 'certificate', $info));
 
-    // Remove full-stop at the end if it exists, to avoid "..pdf" being created and being filtered by clean_filename
-    $certname = rtrim($certificate->name, '.');
-    $filename = clean_filename("$certname.pdf");
-
-    // Get hashed pathname
-    $fs = get_file_storage();
-
-    $component = 'mod_certificate';
-    $filearea = 'issue';
-    $filepath = '/';
-    $files = $fs->get_area_files($context->id, $component, $filearea, $certrecord->id);
-    foreach ($files as $f) {
-        $filepathname = $f->get_contenthash();
+    $tempdir = make_temp_directory('certificate/attachment');
+    if (!$tempdir) {
+        return false;
     }
-    $attachment = 'filedir/'.certificate_path_from_hash($filepathname).'/'.$filepathname;
-    $attachname = $filename;
 
-    return email_to_user($USER, $from, $subject, $message, $messagehtml, $attachment, $attachname);
-}
+    $tempfile = $tempdir.'/'.md5(sesskey().microtime().$USER->id.'.pdf');
+    $fp = fopen($tempfile, 'w+');
+    fputs($fp, $filecontents);
+    fclose($fp);
 
-/**
- * Retrieve certificate path from hash
- *
- * @param array $contenthash
- * @return string the path
- */
-function certificate_path_from_hash($contenthash) {
-    $l1 = $contenthash[0].$contenthash[1];
-    $l2 = $contenthash[2].$contenthash[3];
-    return "$l1/$l2";
+    $prevabort = ignore_user_abort(true);
+    $result = email_to_user($USER, $from, $subject, $message, $messagehtml, $tempfile, $filename);
+    @unlink($tempfile);
+    ignore_user_abort($prevabort);
+
+    return $result;
 }
 
 /**
@@ -315,12 +303,9 @@ function certificate_save_pdf($pdf, $certrecordid, $filename, $contextid) {
         'mimetype'  => 'application/pdf',    // any filename
         'userid'    => $USER->id);
 
-    // If the file exists, delete it and recreate it. This is to ensure that the
-    // latest certificate is saved on the server. For example, the student's grade
-    // may have been updated. This is a quick dirty hack.
-    if ($fs->file_exists($contextid, $component, $filearea, $certrecordid, $filepath, $filename)) {
-        $fs->delete_area_files($contextid, $component, $filearea, $certrecordid);
-    }
+    // We do not know the previous file name, better delete everything here,
+    // luckily there is supposed to be always only one certificate here.
+    $fs->delete_area_files($contextid, $component, $filearea, $certrecordid);
 
     $fs->create_file_from_string($fileinfo, $pdf);
 
@@ -1228,4 +1213,37 @@ function certificate_scan_image_dir($path) {
         }
     }
     return $options;
+}
+
+/**
+ * Get normalised certificate file name without file extension.
+ *
+ * @param stdClass $certificate
+ * @param stdClass $cm
+ * @param stdClass $course
+ * @return string file name without extension
+ */
+function certificate_get_certificate_filename($certificate, $cm, $course) {
+    $coursecontext = context_course::instance($course->id);
+    $coursename = format_string($course->shortname, true, array('context' => $coursecontext));
+
+    $context = context_module::instance($cm->id);
+    $name = format_string($certificate->name, true, array('context' => $context));
+
+    $filename = $coursename . '_' . $name;
+    $filename = core_text::entities_to_utf8($filename);
+    $filename = strip_tags($filename);
+    $filename = rtrim($filename, '.');
+
+    // Ampersand is not a valid filename char, let's replace it with something else.
+    $filename = str_replace('&', '_', $filename);
+
+    $filename = clean_filename($filename);
+
+    if (empty($filename)) {
+        // This is weird, but we need some file name.
+        $filename = 'certificate';
+    }
+
+    return $filename;
 }
