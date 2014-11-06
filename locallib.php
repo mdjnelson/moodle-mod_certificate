@@ -530,30 +530,54 @@ function certificate_print_attempts($course, $certificate, $attempts) {
  * @return int the total time spent in seconds
  */
 function certificate_get_course_time($courseid) {
-    global $CFG, $USER;
+    global $CFG, $DB, $USER;
 
-    set_time_limit(0);
+    $logmanager = get_log_manager();
+    $readers = $logmanager->get_readers();
+    $enabled = get_config('tool_log', 'enabled_stores');
+    $enabled = explode(',', $enabled);
+    // It shouldn't be possible for get_readers to provide non-enabled readers, but just in case.
+    if (!isset($readers[$enabled[0]])) {
+        return 0;
+    }
+    // Defaulting to the default/primary logstore.
+    $reader = $readers[$enabled[0]];
+
+    if ($reader instanceof logstore_legacy\log\store) {
+        $logtable = 'log';
+        $timefield = 'time';
+        $coursefield = 'course';
+    } else {
+        $logtable = $reader->get_internal_log_table_name();
+        $coursefield = 'courseid';
+        $timefield = 'timecreated';
+    }
+
+    $sql = "SELECT id, $timefield
+            FROM {{$logtable}}
+            WHERE userid = :userid AND $coursefield = :courseid
+            ORDER BY $timefield ASC";
+    $params = array('userid' => $USER->id, 'courseid' => $courseid);
 
     $totaltime = 0;
-    $sql = "l.course = :courseid AND l.userid = :userid";
-    if ($logs = get_logs($sql, array('courseid' => $courseid, 'userid' => $USER->id), 'l.time ASC', '', '', $totalcount)) {
+    if ($logs = $DB->get_recordset_sql($sql, $params)) {
         foreach ($logs as $log) {
             if (!isset($login)) {
                 // For the first time $login is not set so the first log is also the first login
-                $login = $log->time;
-                $lasthit = $log->time;
+                $login = $log->$timefield;
+                $lasthit = $log->$timefield;
                 $totaltime = 0;
             }
-            $delay = $log->time - $lasthit;
+            $delay = $log->$timefield - $lasthit;
             if ($delay > ($CFG->sessiontimeout * 60)) {
                 // The difference between the last log and the current log is more than
                 // the timeout Register session value so that we have found a session!
-                $login = $log->time;
+                $login = $log->$timefield;
             } else {
                 $totaltime += $delay;
             }
             // Now the actual log became the previous log for the next cycle
-            $lasthit = $log->time;
+            $lasthit = $log->$timefield;
         }
 
         return $totaltime;
