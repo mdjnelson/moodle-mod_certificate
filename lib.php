@@ -112,10 +112,22 @@ function certificate_reset_userdata($data) {
         $sql = "SELECT cert.id
                   FROM {certificate} cert
                  WHERE cert.course = :courseid";
-        $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", array('courseid' => $data->courseid));
-        $status[] = array('component' => $componentstr, 'item' => get_string('certificateremoved', 'certificate'), 'error' => false);
-    }
+        $params = array('courseid' => $data->courseid);
+        $certificates = $DB->get_records_sql($sql, $params);
+        $fs = get_file_storage();
+        if ($certificates) {
+            foreach ($certificates as $certid => $unused) {
+                if (!$cm = get_coursemodule_from_instance('certificate', $certid)) {
+                    continue;
+                }
+                $context = context_module::instance($cm->id);
+                $fs->delete_area_files($context->id, 'mod_certificate', 'issue');
+            }
+        }
 
+        $DB->delete_records_select('certificate_issues', "certificateid IN ($sql)", $params);
+        $status[] = array('component' => $componentstr, 'item' => get_string('removecert', 'certificate'), 'error' => false);
+    }
     // Updating dates - shift may be negative too
     if ($data->timeshift) {
         shift_course_mod_dates('certificate', array('timeopen', 'timeclose'), $data->timeshift, $data->courseid);
