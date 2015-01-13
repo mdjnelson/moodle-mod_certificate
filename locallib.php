@@ -534,29 +534,35 @@ function certificate_get_course_time($courseid) {
 
     $logmanager = get_log_manager();
     $readers = $logmanager->get_readers();
-    $enabled = get_config('tool_log', 'enabled_stores');
-    $enabled = explode(',', $enabled);
-    // It shouldn't be possible for get_readers to provide non-enabled readers, but just in case.
-    if (!isset($readers[$enabled[0]])) {
-        return 0;
-    }
-    // Defaulting to the default/primary logstore.
-    $reader = $readers[$enabled[0]];
+    $enabledreaders = get_config('tool_log', 'enabled_stores');
+    $enabledreaders = explode(',', $enabledreaders);
 
-    if ($reader instanceof logstore_legacy\log\store) {
-        $logtable = 'log';
-        $timefield = 'time';
-        $coursefield = 'course';
-    } else {
-        $logtable = $reader->get_internal_log_table_name();
-        $coursefield = 'courseid';
-        $timefield = 'timecreated';
+    // Go through all the readers until we find one that we can use.
+    foreach ($enabledreaders as $enabledreader) {
+        $reader = $readers[$enabledreader];
+        if ($reader instanceof \logstore_legacy\log\store) {
+            $logtable = 'log';
+            $coursefield = 'course';
+            $timefield = 'time';
+            break;
+        } else if ($reader instanceof \core\log\sql_internal_reader) {
+            $logtable = $reader->get_internal_log_table_name();
+            $coursefield = 'courseid';
+            $timefield = 'timecreated';
+            break;
+        }
+    }
+
+    // If we didn't find a reader then return 0.
+    if (!isset($logtable)) {
+        return 0;
     }
 
     $sql = "SELECT id, $timefield
-            FROM {{$logtable}}
-            WHERE userid = :userid AND $coursefield = :courseid
-            ORDER BY $timefield ASC";
+              FROM {{$logtable}}
+             WHERE userid = :userid
+               AND $coursefield = :courseid
+          ORDER BY $timefield ASC";
     $params = array('userid' => $USER->id, 'courseid' => $courseid);
 
     $totaltime = 0;
