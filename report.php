@@ -104,6 +104,9 @@ if (!$users = certificate_get_issues($certificate->id, $DB->sql_fullname(), $gro
     exit();
 }
 
+// Get extra fields to show the user.
+$extrafields = get_extra_user_fields($context);
+
 if ($download == "ods") {
     require_once("$CFG->libdir/odslib.class.php");
 
@@ -119,11 +122,15 @@ if ($download == "ods") {
     // Print names of all the fields
     $myxls->write_string(0, 0, get_string("lastname"));
     $myxls->write_string(0, 1, get_string("firstname"));
-    $myxls->write_string(0, 2, get_string("idnumber"));
-    $myxls->write_string(0, 3, get_string("group"));
-    $myxls->write_string(0, 4, $strdate);
-    $myxls->write_string(0, 5, $strgrade);
-    $myxls->write_string(0, 6, $strcode);
+    $nextposition = 2;
+    foreach ($extrafields as $field) {
+        $myxls->write_string(0, $nextposition, get_user_field_name($field));
+        $nextposition++;
+    }
+    $myxls->write_string(0, $nextposition, get_string("group"));
+    $myxls->write_string(0, $nextposition + 1, $strdate);
+    $myxls->write_string(0, $nextposition + 2, $strgrade);
+    $myxls->write_string(0, $nextposition + 3, $strcode);
 
     // Generate the data for the body of the spreadsheet
     $i = 0;
@@ -132,18 +139,21 @@ if ($download == "ods") {
         foreach ($users as $user) {
             $myxls->write_string($row, 0, $user->lastname);
             $myxls->write_string($row, 1, $user->firstname);
-            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
-            $myxls->write_string($row, 2, $studentid);
+            $nextposition = 2;
+            foreach ($extrafields as $field) {
+                $myxls->write_string($row, $nextposition, $user->$field);
+                $nextposition++;
+            }
             $ug2 = '';
             if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
                 foreach ($usergrps as $ug) {
                     $ug2 = $ug2. $ug->name;
                 }
             }
-            $myxls->write_string($row, 3, $ug2);
-            $myxls->write_string($row, 4, userdate($user->timecreated));
-            $myxls->write_string($row, 5, certificate_get_grade($certificate, $course, $user->id));
-            $myxls->write_string($row, 6, $user->code);
+            $myxls->write_string($row, $nextposition, $ug2);
+            $myxls->write_string($row, $nextposition + 1, userdate($user->timecreated));
+            $myxls->write_string($row, $nextposition + 2, certificate_get_grade($certificate, $course, $user->id));
+            $myxls->write_string($row, $nextposition + 3, $user->code);
             $row++;
         }
         $pos = 6;
@@ -168,11 +178,15 @@ if ($download == "xls") {
     // Print names of all the fields
     $myxls->write_string(0, 0, get_string("lastname"));
     $myxls->write_string(0, 1, get_string("firstname"));
-    $myxls->write_string(0, 2, get_string("idnumber"));
-    $myxls->write_string(0, 3, get_string("group"));
-    $myxls->write_string(0, 4, $strdate);
-    $myxls->write_string(0, 5, $strgrade);
-    $myxls->write_string(0, 6, $strcode);
+    $nextposition = 2;
+    foreach ($extrafields as $field) {
+        $myxls->write_string(0, $nextposition, get_user_field_name($field));
+        $nextposition++;
+    }
+    $myxls->write_string(0, $nextposition, get_string("group"));
+    $myxls->write_string(0, $nextposition + 1, $strdate);
+    $myxls->write_string(0, $nextposition + 2, $strgrade);
+    $myxls->write_string(0, $nextposition + 3, $strcode);
 
     // Generate the data for the body of the spreadsheet
     $i = 0;
@@ -181,18 +195,21 @@ if ($download == "xls") {
         foreach ($users as $user) {
             $myxls->write_string($row, 0, $user->lastname);
             $myxls->write_string($row, 1, $user->firstname);
-            $studentid = (!empty($user->idnumber)) ? $user->idnumber : " ";
-            $myxls->write_string($row,2,$studentid);
+            $nextposition = 2;
+            foreach ($extrafields as $field) {
+                $myxls->write_string($row, $nextposition, $user->$field);
+                $nextposition++;
+            }
             $ug2 = '';
             if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
                 foreach ($usergrps as $ug) {
                     $ug2 = $ug2 . $ug->name;
                 }
             }
-            $myxls->write_string($row, 3, $ug2);
-            $myxls->write_string($row, 4, userdate($user->timecreated));
-            $myxls->write_string($row, 5, certificate_get_grade($certificate, $course, $user->id));
-            $myxls->write_string($row, 6, $user->code);
+            $myxls->write_string($row, $nextposition, $ug2);
+            $myxls->write_string($row, $nextposition + 1, userdate($user->timecreated));
+            $myxls->write_string($row, $nextposition + 2, certificate_get_grade($certificate, $course, $user->id));
+            $myxls->write_string($row, $nextposition + 3, $user->code);
             $row++;
         }
         $pos = 6;
@@ -212,7 +229,10 @@ if ($download == "txt") {
     header("Pragma: public");
 
     // Print names of all the fields
-    echo get_string("lastname"). "\t" .get_string("firstname") . "\t". get_string("idnumber") . "\t";
+    echo get_string("lastname"). "\t" .get_string("firstname") . "\t";
+    foreach ($extrafields as $field) {
+        echo get_user_field_name($field) . "\t";
+    }
     echo get_string("group"). "\t";
     echo $strdate. "\t";
     echo $strgrade. "\t";
@@ -223,12 +243,10 @@ if ($download == "txt") {
     $row=1;
     if ($users) foreach ($users as $user) {
         echo $user->lastname;
-        echo "\t" . $user->firstname;
-        $studentid = " ";
-        if (!empty($user->idnumber)) {
-            $studentid = $user->idnumber;
+        echo "\t" . $user->firstname . "\t";
+        foreach ($extrafields as $field) {
+            echo $user->$field . "\t";
         }
-        echo "\t" . $studentid . "\t";
         $ug2 = '';
         if ($usergrps = groups_get_all_groups($course->id, $user->id)) {
             foreach ($usergrps as $ug) {
@@ -250,13 +268,25 @@ $usercount = count(certificate_get_issues($certificate->id, $DB->sql_fullname(),
 $table = new html_table();
 $table->width = "95%";
 $table->tablealign = "center";
-$table->head  = array($strto, $strdate, $strgrade, $strcode);
-$table->align = array("left", "left", "center", "center");
+$table->head = array($strto);
+$table->align = array('left');
+foreach ($extrafields as $field) {
+    $table->head[] = get_user_field_name($field);
+    $table->align[] = 'left';
+}
+$table->head = array_merge($table->head, array($strdate, $strgrade, $strcode));
+$table->align = array_merge($table->align, array('left', 'center', 'center'));
 foreach ($users as $user) {
     $name = $OUTPUT->user_picture($user) . fullname($user);
     $date = userdate($user->timecreated) . certificate_print_user_files($certificate, $user->id, $context->id);
     $code = $user->code;
-    $table->data[] = array ($name, $date, certificate_get_grade($certificate, $course, $user->id), $code);
+    $data = array();
+    $data[] = $name;
+    foreach ($extrafields as $field) {
+        $data[] = $user->$field;
+    }
+    $data = array_merge($data, array($date, certificate_get_grade($certificate, $course, $user->id), $code));
+    $table->data[] = $data;
 }
 
 // Create table to store buttons
