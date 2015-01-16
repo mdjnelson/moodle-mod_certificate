@@ -97,8 +97,8 @@ require("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certif
 if (empty($action)) { // Not displaying PDF
     echo $OUTPUT->header();
 
-    /// find out current groups mode
-    groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/certificate/view.php?id=' . $cm->id);
+    $viewurl = new moodle_url('/mod/certificate/view.php', array('id' => $cm->id));
+    groups_print_activity_menu($cm, $viewurl);
     $currentgroup = groups_get_activity_group($cm);
     $groupmode = groups_get_activity_groupmode($cm);
 
