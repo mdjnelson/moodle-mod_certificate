@@ -18,7 +18,7 @@
 /**
  * Definition of log events
  *
- * @package    mod_lesson
+ * @package    mod_certificate
  * @copyright  2010 Petr Skoda (http://skodak.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
