@@ -392,18 +392,18 @@ function certificate_get_issue($course, $user, $certificate, $cm) {
 function certificate_get_issues($certificateid, $sort="ci.timecreated ASC", $groupmode, $cm, $page = 0, $perpage = 0) {
     global $DB, $USER;
 
-    // get all users that can manage this certificate to exclude them from the report.
     $context = context_module::instance($cm->id);
-
     $conditionssql = '';
     $conditionsparams = array();
-    if ($certmanagers = array_keys(get_users_by_capability($context, 'mod/certificate:manage', 'u.id'))) {
-        list($sql, $params) = $DB->get_in_or_equal($certmanagers, SQL_PARAMS_NAMED, 'cert');
-        $conditionssql .= "AND NOT u.id $sql \n";
-        $conditionsparams += $params;
-    }
 
-    if ($groupmode && $groupmode == SEPARATEGROUPS) {
+    // Get all users that can manage this certificate to exclude them from the report.
+    $certmanagers = array_keys(get_users_by_capability($context, 'mod/certificate:manage', 'u.id'));
+    $certmanagers = array_merge($certmanagers, array_keys(get_admins()));
+    list($sql, $params) = $DB->get_in_or_equal($certmanagers, SQL_PARAMS_NAMED, 'cert');
+    $conditionssql .= "AND NOT u.id $sql \n";
+    $conditionsparams += $params;
+
+    if ($groupmode) {
         $canaccessallgroups = has_capability('moodle/site:accessallgroups', $context);
         $currentgroup = groups_get_activity_group($cm);
 
