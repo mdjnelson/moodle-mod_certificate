@@ -69,6 +69,9 @@ class restore_certificate_activity_structure_step extends restore_activity_struc
 
         $data->certificateid = $this->get_new_parentid('certificate');
         $data->timecreated = $this->apply_date_offset($data->timecreated);
+        if ($data->userid > 0) {
+            $data->userid = $this->get_mappingid('user', $data->userid);
+        }
 
         $newitemid = $DB->insert_record('certificate_issues', $data);
         $this->set_mapping('certificate_issue', $oldid, $newitemid);
