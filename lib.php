@@ -280,17 +280,18 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
 
     require_once($CFG->libdir.'/filelib.php');
 
+    $certrecord = (int)array_shift($args);
+
+    if (!$certrecord = $DB->get_record('certificate_issues', array('id' => $certrecord))) {
+        return false;
+    }
+
+    $canmanagecertificate = has_capability('mod/certificate:manage', $context);
+    if ($USER->id != $certrecord->userid and !$canmanagecertificate) {
+        return false;
+    }
+
     if ($filearea === 'issue') {
-        $certrecord = (int)array_shift($args);
-
-        if (!$certrecord = $DB->get_record('certificate_issues', array('id' => $certrecord))) {
-            return false;
-        }
-
-        if ($USER->id != $certrecord->userid and !has_capability('mod/certificate:manage', $context)) {
-            return false;
-        }
-
         $relativepath = implode('/', $args);
         $fullpath = "/{$context->id}/mod_certificate/issue/$certrecord->id/$relativepath";
 
@@ -299,6 +300,25 @@ function certificate_pluginfile($course, $cm, $context, $filearea, $args, $force
             return false;
         }
         send_stored_file($file, 0, 0, true); // download MUST be forced - security!
+    } else if ($filearea === 'onthefly') {
+        require_once($CFG->dirroot.'/mod/certificate/locallib.php');
+        require_once("$CFG->libdir/pdflib.php");
+
+        if (!$certificate = $DB->get_record('certificate', array('id' => $certrecord->certificateid))) {
+            return false;
+        }
+
+        if ($certificate->requiredtime && !$canmanagecertificate) {
+            if (certificate_get_course_time($course->id) < ($certificate->requiredtime * 60)) {
+                return false;
+            }
+        }
+
+        // Load the specific certificate type. It will fill the $pdf var.
+        require("$CFG->dirroot/mod/certificate/type/$certificate->certificatetype/certificate.php");
+        $filename = certificate_get_certificate_filename($certificate, $cm, $course) . '.pdf';
+        $filecontents = $pdf->Output('', 'S');
+        send_file($filecontents, $filename, 0, 0, true, true, 'application/pdf');
     }
 }
 
