@@ -32,7 +32,7 @@ $functions = array(
                             no courses are provided then all the certificate instances the user has access to will be returned.',
         'type'          => 'read',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
     ),
 
     'mod_certificate_view_certificate' => array(
@@ -41,7 +41,7 @@ $functions = array(
         'description'   => 'Trigger the course module viewed event and update the module completion status.',
         'type'          => 'write',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
     ),
 
     'mod_certificate_issue_certificate' => array(
@@ -50,7 +50,7 @@ $functions = array(
         'description'   => 'Create new certificate record, or return existing record for the current user.',
         'type'          => 'write',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
     ),
 
     'mod_certificate_get_issued_certificates' => array(
@@ -59,6 +59,6 @@ $functions = array(
         'description'   => 'Get the list of issued certificates for the current user.',
         'type'          => 'read',
         'capabilities'  => 'mod/certificate:view',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'local_mobile'),
     ),
 );
