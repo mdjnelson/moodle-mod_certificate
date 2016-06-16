@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$pdf = new PDF($certificate->orientation, 'pt', 'Letter', true, 'UTF-8', false);
+$pdf = new PDF($certificate->orientation, 'pt', 'LETTER', true, 'UTF-8', false);
 
 $pdf->SetTitle($certificate->name);
 $pdf->SetProtection(array('modify'));
