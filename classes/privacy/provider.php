@@ -166,7 +166,6 @@ class provider implements
         $records = $DB->get_records_sql($sql, $params);
         if ($records) {
             foreach ($records as $r) {
-                $DB->delete_records('certificate', ['id' => $r->certificateid]);
                 $DB->delete_records('certificate_issues', ['certificateid' => $r->certificateid]);
             }
         }
