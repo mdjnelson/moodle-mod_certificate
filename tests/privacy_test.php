@@ -153,7 +153,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
         writer::reset();
         provider::delete_data_for_all_users_in_context($context);
         $area[] = $issue->id;
-        $module = $DB->get_record('certificate', ['id' => $issue->certificateid]);
+        $module = $DB->get_record('certificate_issues', ['id' => $issue->certificateid]);
 
         $this->assertEmpty(writer::with_context($context)->get_data($area));
         $this->assertEmpty($fs->get_area_files($context->id,
