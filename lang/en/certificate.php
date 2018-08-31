@@ -213,3 +213,4 @@ $string['privacy:metadata:mod_certificate:userid'] = 'User info';
 $string['privacy:metadata:mod_certificate:certificateid'] = 'Certificate info';
 $string['privacy:metadata:mod_certificate:code'] = 'Code info';
 $string['privacy:metadata:mod_certificate:timecreated'] = 'Time created info';
+$string['privacy:metadata:core_files'] = 'Files linked to issued certificates are stored using the core_files system';
