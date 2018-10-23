@@ -98,7 +98,7 @@ class mod_certificate_external extends external_api {
                 if (has_capability('mod/certificate:view', $context)) {
                     list($module['intro'], $module['introformat']) =
                         external_format_text($certificate->intro, $certificate->introformat, $context->id,
-                                                'mod_certificate', 'intro', $certificate->id);
+                                                'mod_certificate', 'intro');
 
                     // Check certificate requeriments for current user.
                     $viewablefields[] = 'requiredtime';
