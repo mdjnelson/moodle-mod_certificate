@@ -84,6 +84,48 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     }
 
     /**
+     * Test for provider::get_users_in_context().
+     */
+    public function test_get_users_in_context() {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+
+        // The cert activity the user will have an issue from.
+        $cert1 = $this->getDataGenerator()->create_module('certificate', ['course' => $course->id]);
+        $cert2 = $this->getDataGenerator()->create_module('certificate', ['course' => $course->id]);
+
+        // Call get_users_in_context() when the certificate hasn't any user.
+        $cm = get_coursemodule_from_instance('certificate', $cert1->id);
+        $cm2 = get_coursemodule_from_instance('certificate', $cert1->id);
+        $cmcontext = context_module::instance($cm->id);
+        $userlist = new \core_privacy\local\request\userlist($cmcontext, 'certificate');
+        provider::get_users_in_context($userlist);
+
+        // Check no user has been returned.
+        $this->assertCount(0, $userlist->get_userids());
+
+        // Create some users who will be issued a certificate.
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+
+        certificate_get_issue($course, $user1, $cert1, $cm);
+        certificate_get_issue($course, $user2, $cert1, $cm);
+        certificate_get_issue($course, $user3, $cert2, $cm2);
+
+        // Call get_users_in_context() again.
+        provider::get_users_in_context($userlist);
+
+        // Check this time there are 2 users.
+        $this->assertCount(2, $userlist->get_userids());
+        $this->assertContains($user1->id, $userlist->get_userids());
+        $this->assertContains($user2->id, $userlist->get_userids());
+        $this->assertNotContains($user3->id, $userlist->get_userids());
+    }
+
+
+    /**
      * Test get context for userid.
      */
     public function test_get_contexts_for_userid() {
@@ -159,5 +201,64 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
         $this->assertEmpty($fs->get_area_files($context->id,
                 'mod_certificate', 'issue', $issue->id));
         $this->assertEmpty($module);
+    }
+
+
+    /**
+     * Test for provider::delete_data_for_users().
+     */
+    public function test_delete_data_for_users() {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        // Create course, certificate and users who will be issued a certificate.
+        $course = $this->getDataGenerator()->create_course();
+        $cert1 = $this->getDataGenerator()->create_module('certificate', ['course' => $course->id]);
+        $cert2 = $this->getDataGenerator()->create_module('certificate', ['course' => $course->id]);
+
+        $cm1 = get_coursemodule_from_instance('certificate', $cert1->id);
+        $cm2 = get_coursemodule_from_instance('certificate', $cert2->id);
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        $user3 = $this->getDataGenerator()->create_user();
+        certificate_get_issue($course, $user1, $cert1, $cm1);
+        certificate_get_issue($course, $user2, $cert1, $cm1);
+        certificate_get_issue($course, $user3, $cert1, $cm1);
+        certificate_get_issue($course, $user1, $cert2, $cm2);
+        certificate_get_issue($course, $user2, $cert2, $cm2);
+
+        // Before deletion we should have 3 + 2 issued certificates.
+        $count = $DB->count_records('certificate_issues', ['certificateid' => $cert1->id]);
+        $this->assertEquals(3, $count);
+        $count = $DB->count_records('certificate_issues', ['certificateid' => $cert2->id]);
+        $this->assertEquals(2, $count);
+
+        $context1 = context_module::instance($cm1->id);
+        $approveduserlist = new \core_privacy\local\request\approved_userlist($context1, 'mod_certificate',
+                [$user1->id, $user2->id]);
+        provider::delete_data_for_users($approveduserlist);
+
+        // After deletion, the certificate of the 2 students provided above should have been deleted
+        // from the activity. So there should only remain 1 certificate which is for $user3.
+        $certissues1 = $DB->get_records('certificate_issues', ['certificateid' => $cert1->id]);
+        $this->assertCount(1, $certissues1);
+        $lastissue = reset($certissues1);
+        $this->assertEquals($user3->id, $lastissue->userid);
+
+        // Confirm that the certificates issues in the other activity are intact.
+        $certissues1 = $DB->get_records('certificate_issues', ['certificateid' => $cert2->id]);
+        $this->assertCount(2, $certissues1);
+    }
+
+    /**
+     * Test for provider::get_users_in_context() with invalid context type.
+     */
+    public function test_get_users_in_context_invalid_context_type() {
+        $systemcontext = context_system::instance();
+        $userlist = new \core_privacy\local\request\userlist($systemcontext, 'mod_certificate');
+        \mod_certificate\privacy\provider::get_users_in_context($userlist);
+        $this->assertCount(0, $userlist->get_userids());
     }
 }
