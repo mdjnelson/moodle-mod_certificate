@@ -30,6 +30,8 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\transform;
 use core_privacy\local\request\writer;
+use core_privacy\local\request\approved_userlist;
+use core_privacy\local\request\userlist;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -89,6 +91,33 @@ class provider implements
         $contextlist->add_from_sql($sql, $params);
 
         return $contextlist;
+    }
+
+    /**
+     * Get the list of users who have data within a context.
+     *
+     * @param userlist $userlist The userlist containing the list of users who have data in this context/plugin combination.
+     */
+    public static function get_users_in_context(userlist $userlist) {
+        $context = $userlist->get_context();
+        if (!$context instanceof \context_module) {
+            return;
+        }
+        // Fetch all users who have a custom certificate.
+        $sql = "SELECT ci.userid
+                  FROM {course_modules} cm
+                  JOIN {modules} m
+                    ON m.id = cm.module AND m.name = :modname
+                  JOIN {certificate} cer
+                    ON cer.id = cm.instance
+                  JOIN {certificate_issues} ci
+                    ON ci.certificateid = cer.id
+                 WHERE cm.id = :cmid";
+        $params = [
+                'cmid'      => $context->instanceid,
+                'modname'   => 'certificate',
+        ];
+        $userlist->add_from_sql('userid', $sql, $params);
     }
 
     /**
@@ -207,5 +236,28 @@ class provider implements
                 }
             }
         }
+    }
+
+    /**
+     * Delete multiple users within a single context.
+     *
+     * @param approved_userlist $userlist The approved context and user information to delete information for.
+     */
+    public static function delete_data_for_users(approved_userlist $userlist) {
+        global $DB;
+        $context = $userlist->get_context();
+        if (!$context instanceof \context_module) {
+            return;
+        }
+        $cm = get_coursemodule_from_id('certificate', $context->instanceid);
+        if (!$cm) {
+            // Only certificate module will be handled.
+            return;
+        }
+        $userids = $userlist->get_userids();
+        list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        $select = "certificateid = :certificateid AND userid $usersql";
+        $params = ['certificateid' => $cm->instance] + $userparams;
+        $DB->delete_records_select('certificate_issues', $select, $params);
     }
 }
