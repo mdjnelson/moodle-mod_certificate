@@ -1278,3 +1278,66 @@ function certificate_get_certificate_filename($certificate, $cm, $course) {
 
     return $filename;
 }
+
+
+/**
+ * so conta os certificados
+ *
+ * @param $certificateid
+ * @param string $sort
+ * @param $groupmode
+ * @param $cm
+ * @param int $page
+ * @param int $perpage
+ */
+function count_certificate_get_issues($certificateid, $groupmode, $cm) {
+    global $DB, $USER;
+
+    $context = context_module::instance($cm->id);
+    $conditionssql = '';
+    $conditionsparams = array();
+
+    // Get all users that can manage this certificate to exclude them from the report.
+    $certmanagers = array_keys(get_users_by_capability($context, 'mod/certificate:manage', 'u.id'));
+    $certmanagers = array_merge($certmanagers, array_keys(get_admins()));
+    list($sql, $params) = $DB->get_in_or_equal($certmanagers, SQL_PARAMS_NAMED, 'cert');
+    $conditionssql .= "AND NOT u.id $sql \n";
+    $conditionsparams += $params;
+
+    if ($groupmode) {
+        $canaccessallgroups = has_capability('moodle/site:accessallgroups', $context);
+        $currentgroup = groups_get_activity_group($cm);
+
+        // If we are viewing all participants and the user does not have access to all groups then return nothing.
+        if (!$currentgroup && !$canaccessallgroups) {
+            return array();
+        }
+
+        if ($currentgroup) {
+            if (!$canaccessallgroups) {
+                // Guest users do not belong to any groups.
+                if (isguestuser()) {
+                    return array();
+                }
+
+                // Check that the user belongs to the group we are viewing.
+                $usersgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid);
+                if ($usersgroups) {
+                    if (!isset($usersgroups[$currentgroup])) {
+                        return array();
+                    }
+                } else { // They belong to no group, so return an empty array.
+                    return array();
+                }
+            }
+
+            $groupusers = array_keys(groups_get_members($currentgroup, 'u.*'));
+            if (empty($groupusers)) {
+                return array();
+            }
+
+            list($sql, $params) = $DB->get_in_or_equal($groupusers, SQL_PARAMS_NAMED, 'grp');
+            $conditionssql .= "AND u.id $sql ";
+            $conditionsparams += $params;
+        }
+    }
