@@ -49,7 +49,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
      *
      * @return void
      */
-    public static function setUpBeforeClass() {
+    public static function setUpBeforeClass(): void {
         global $CFG;
         require_once($CFG->dirroot . '/mod/certificate/locallib.php');
     }
@@ -57,7 +57,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
     /**
      * Test setUp.
      */
-    public function setUp() {
+    public function setUp(): void {
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_certificate');
