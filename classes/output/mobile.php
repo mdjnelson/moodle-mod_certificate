@@ -48,6 +48,7 @@ class mobile {
         global $OUTPUT, $USER, $DB;
 
         $args = (object) $args;
+        $versionname = $args->appversioncode >= 3950 ? 'latest' : 'ionic3';
         $cm = get_coursemodule_from_id('certificate', $args->cmid);
 
         // Capabilities check.
@@ -102,7 +103,7 @@ class mobile {
             'templates' => array(
                 array(
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_certificate/mobile_view_page', $data),
+                    'html' => $OUTPUT->render_from_template("mod_certificate/mobile_view_page_$versionname", $data),
                 ),
             ),
             'javascript' => '',
@@ -121,6 +122,7 @@ class mobile {
         global $OUTPUT, $USER, $DB;
 
         $args = (object) $args;
+        $versionname = $args->appversioncode >= 3950 ? 'latest' : 'ionic3';
         $cm = get_coursemodule_from_id('certificate', $args->cmid);
 
         // Capabilities check.
@@ -151,7 +153,7 @@ class mobile {
             'templates' => array(
                 array(
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_certificate/mobile_view_issues', $data),
+                    'html' => $OUTPUT->render_from_template("mod_certificate/mobile_view_issues_$versionname", $data),
                 ),
             ),
             'javascript' => '',
