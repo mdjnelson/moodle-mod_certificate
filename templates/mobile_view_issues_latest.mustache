@@ -3,7 +3,7 @@
     <ion-list>
         <ion-item>
             <ion-label>
-                <p class="item-heading">{{ <%timecreated%> | coreToLocaleString }}</p>
+                <p class="item-heading">{{ <%timecreated%> * 1000 | coreFormatDate }}</p>
                 <p><%grade%></p>
             </ion-label>
         </ion-item>
