@@ -97,7 +97,7 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
 
         // Call get_users_in_context() when the certificate hasn't any user.
         $cm = get_coursemodule_from_instance('certificate', $cert1->id);
-        $cm2 = get_coursemodule_from_instance('certificate', $cert1->id);
+        $cm2 = get_coursemodule_from_instance('certificate', $cert2->id);
         $cmcontext = context_module::instance($cm->id);
         $userlist = new \core_privacy\local\request\userlist($cmcontext, 'certificate');
         provider::get_users_in_context($userlist);
@@ -119,9 +119,10 @@ class mod_certificate_privacy_provider_testcase extends \core_privacy\tests\prov
 
         // Check this time there are 2 users.
         $this->assertCount(2, $userlist->get_userids());
-        $this->assertContains($user1->id, $userlist->get_userids());
-        $this->assertContains($user2->id, $userlist->get_userids());
-        $this->assertNotContains($user3->id, $userlist->get_userids());
+        $users = $userlist->get_userids();
+        $this->assertContains((int) $user1->id, $users);
+        $this->assertContains((int) $user2->id, $users);
+        $this->assertNotContains((int) $user3->id, $users);
     }
 
 
