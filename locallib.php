@@ -47,20 +47,19 @@ define('CERT_MAX_PER_PAGE', 200);
 
 
 /**
- * Returns a list of teachers by group
- * for sending email alerts to teachers
+ * Returns a list of teachers can would be listed on the certificate.
  *
  * @param stdClass $certificate
  * @param stdClass $user
  * @param stdClass $course
  * @param stdClass $cm
- * @return array the teacher array
+ * @return array the teacher array organised by group
  */
 function certificate_get_teachers($certificate, $user, $course, $cm) {
     global $USER;
 
     $context = context_module::instance($cm->id);
-    $potteachers = get_users_by_capability($context, 'mod/certificate:manage',
+    $potteachers = get_users_by_capability($context, 'mod/certificate:printteacher',
         '', '', '', '', '', '', false, false);
     if (empty($potteachers)) {
         return array();
