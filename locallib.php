@@ -60,7 +60,7 @@ function certificate_get_teachers($certificate, $user, $course, $cm) {
     global $USER;
 
     $context = context_module::instance($cm->id);
-    $potteachers = get_users_by_capability($context, 'mod/certificate:manage',
+    $potteachers = get_users_by_capability($context, 'mod/certificate:email',
         '', '', '', '', '', '', false, false);
     if (empty($potteachers)) {
         return array();
